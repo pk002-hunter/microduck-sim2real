@@ -3,52 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MicroDuck GCS | NVIDIA SimReady Physics & Teleoperation Console</title>
+  <title>Mosey · Microduck | Physical AI Bipedal Companion & Ground Control Station</title>
   
-  <!-- Offline bundled libraries -->
+  <!-- Bundled local Three.js & Chart.js -->
   <script src="/static/three.min.js"></script>
   <script src="/static/chart.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     :root {
-      --bg: #07090e;
-      --panel: #0d1118;
-      --panel-border: #1b2332;
-      --panel-header: #121824;
+      --bg: #090c14;
+      --card-glass: rgba(15, 23, 42, 0.72);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-glow: rgba(0, 229, 255, 0.25);
       --accent-cyan: #00e5ff;
-      --accent-amber: #ffb300;
-      --accent-green: #00ff88;
-      --accent-crimson: #ff3366;
-      --accent-nvidia: #76b900;
-      --text-bright: #f0f6fc;
-      --text-muted: #8b949e;
-      --font-mono: 'Consolas', 'JetBrains Mono', 'Fira Code', monospace;
-      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --accent-yellow: #ffcc00;
+      --accent-orange: #ff7700;
+      --accent-green: #10b981;
+      --accent-purple: #a855f7;
+      --accent-crimson: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', monospace;
     }
 
     body {
       background: var(--bg);
-      color: var(--text-bright);
-      font-family: var(--font-ui);
+      color: var(--text-main);
+      font-family: var(--font-display);
       height: 100vh;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       user-select: none;
     }
 
-    /* ── Top Header / Mission Control Bar ────────────────────────────── */
-    header {
-      background: var(--panel);
-      border-bottom: 1px solid var(--panel-border);
-      padding: 10px 20px;
+    /* ── Top Floating Glassmorphic Navbar ────────────────────────────── */
+    .navbar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      height: 60px;
+      background: var(--card-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 0 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 54px;
-      flex-shrink: 0;
+      z-index: 50;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .brand {
@@ -57,892 +66,819 @@
       gap: 12px;
     }
 
-    .brand-icon {
-      font-size: 1.6rem;
-      filter: drop-shadow(0 0 8px rgba(255, 179, 0, 0.4));
+    .brand-avatar {
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle at 30% 30%, #ffe600, #ff8800);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 16px rgba(255, 204, 0, 0.4);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
     }
 
     .brand-title {
       font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--text-bright);
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand-title span {
-      color: var(--accent-cyan);
+      background: linear-gradient(135deg, #00e5ff, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .nvidia-tag {
-      background: rgba(118, 185, 0, 0.15);
-      border: 1px solid var(--accent-nvidia);
-      color: var(--accent-nvidia);
+    .brand-tag {
       font-size: 0.65rem;
-      padding: 2px 6px;
-      border-radius: 3px;
       font-family: var(--font-mono);
-      font-weight: 700;
-      margin-left: 6px;
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: var(--accent-cyan);
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 600;
     }
 
     .brand-sub {
       font-size: 0.72rem;
       color: var(--text-muted);
+    }
+
+    /* Live Status Capsule */
+    .status-capsule {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 6px 16px;
+      font-size: 0.75rem;
       font-family: var(--font-mono);
     }
 
-    .sys-badges {
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+
+    .capsule-item { display: flex; align-items: center; gap: 6px; }
+    .capsule-lbl { color: var(--text-muted); }
+    .capsule-val { color: var(--text-main); font-weight: 600; }
+    .capsule-val.cyan { color: var(--accent-cyan); }
+    .capsule-val.amber { color: var(--accent-yellow); }
+
+    /* Nav Action Pills */
+    .nav-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .badge {
-      background: #161e2e;
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      padding: 4px 10px;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
+    .pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 6px var(--accent-green);
+    .pill-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.15);
     }
 
-    .badge-label { color: var(--text-muted); }
-    .badge-val { font-weight: 700; color: var(--accent-cyan); }
-    .badge-val.mode-walk { color: var(--accent-green); }
-    .badge-val.mode-fall { color: var(--accent-crimson); animation: blink 0.8s infinite; }
-    .badge-val.mode-rec { color: var(--accent-amber); animation: blink 1.2s infinite; }
-
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    /* ── Main Workspace ──────────────────────────────────────────────── */
-    .workspace {
-      display: flex;
-      flex: 1;
-      height: calc(100vh - 54px - 85px);
-      position: relative;
+    .pill-btn.primary {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(168, 85, 247, 0.2));
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent-cyan);
     }
 
-    /* Left 3D Viewport */
-    .viewport-container {
-      flex: 1;
-      position: relative;
-      background: radial-gradient(circle at center, #101622 0%, #07090e 100%);
-      overflow: hidden;
+    .pill-btn.primary:hover {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.3), rgba(168, 85, 247, 0.3));
     }
 
-    #viewport {
+    /* ── Fullscreen 3D Scene Viewport ────────────────────────────────── */
+    #viewport-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      cursor: grab;
+    }
+
+    #viewport-container:active { cursor: grabbing; }
+
+    #webglCanvas {
       width: 100%;
       height: 100%;
       display: block;
     }
 
-    /* Camera Presets */
-    .cam-controls {
+    /* ── Floating Glass HUD Cards ────────────────────────────────────── */
+    .hud-card {
       position: absolute;
-      top: 14px;
-      left: 14px;
+      background: var(--card-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 20px;
+      z-index: 20;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .hud-card:hover {
+      border-color: var(--card-border-glow);
+    }
+
+    /* Left Floating Card: Attitude & Gait Horizon */
+    .card-left {
+      bottom: 24px;
+      left: 24px;
+      width: 290px;
       display: flex;
-      gap: 6px;
-      pointer-events: auto;
-      z-index: 10;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .hud-btn {
-      background: rgba(13, 17, 24, 0.85);
-      border: 1px solid var(--panel-border);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 0.72rem;
+    .card-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .card-hdr span.icon { font-size: 1rem; }
+
+    .horizon-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #horizonCanvas {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      flex-shrink: 0;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
+    }
+
+    .horizon-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       font-family: var(--font-mono);
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-      transition: all 0.15s;
+      font-size: 0.72rem;
     }
 
-    .hud-btn:hover, .hud-btn.active {
-      color: var(--accent-cyan);
-      border-color: var(--accent-cyan);
-      background: rgba(0, 229, 255, 0.1);
+    .horizon-row { display: flex; justify-content: space-between; gap: 12px; }
+    .horizon-row .lbl { color: var(--text-muted); }
+    .horizon-row .val { color: var(--text-main); font-weight: 600; }
+
+    /* Right Floating Card: 14-DoF Actuator Telemetry */
+    .card-right {
+      top: 92px;
+      right: 24px;
+      width: 320px;
+      max-height: calc(100vh - 120px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    /* Keyboard Teleoperation HUD */
-    .key-hud {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(13, 17, 24, 0.90);
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 10px 14px;
+    .actuator-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      backdrop-filter: blur(6px);
-      pointer-events: none;
-      z-index: 10;
+      overflow-y: auto;
+      max-height: 220px;
+      padding-right: 4px;
     }
 
-    .key-hud-title {
-      font-size: 0.65rem;
+    .actuator-item {
+      display: grid;
+      grid-template-columns: 100px 45px 1fr;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
       font-family: var(--font-mono);
-      color: var(--accent-nvidia);
-      font-weight: 700;
-      letter-spacing: 0.8px;
     }
 
-    .key-row {
+    .actuator-name { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .actuator-val { color: var(--text-main); text-align: right; }
+    .actuator-bar-bg {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .actuator-bar-fill {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 3px;
+      transition: width 0.08s ease-out;
+    }
+
+    /* Phase-Plane Canvas */
+    #phaseCanvas {
+      width: 100%;
+      height: 90px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      display: block;
+    }
+
+    /* Bottom Center Controls Pill */
+    .controls-pill {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 10px 18px;
       display: flex;
-      gap: 5px;
-      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      z-index: 30;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
-    .keycap {
-      background: #161e2e;
-      border: 1px solid #283548;
-      border-radius: 4px;
+    .wasd-keys {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .key-badge {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
       padding: 4px 8px;
       font-size: 0.72rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-muted);
-      min-width: 26px;
-      text-align: center;
-      transition: all 0.08s;
-      box-shadow: 0 2px 0 #0a0d14;
-    }
-
-    .keycap.active {
-      background: rgba(0, 229, 255, 0.25);
-      border-color: var(--accent-cyan);
-      color: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
-      transform: translateY(2px);
-    }
-
-    .keycap.wide { padding: 4px 12px; }
-
-    /* Attitude Gyro (Artificial Horizon) */
-    .gyro-card {
-      position: absolute;
-      bottom: 16px;
-      left: 16px;
-      background: rgba(13, 17, 24, 0.90);
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(6px);
-      pointer-events: auto;
-      z-index: 10;
-    }
-
-    .gyro-title {
-      font-size: 0.68rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-    }
-
-    #gyroCanvas {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 1px solid #253347;
-      background: #090d14;
-    }
-
-    .gyro-readout {
-      font-size: 0.7rem;
-      font-family: var(--font-mono);
-      color: var(--text-bright);
-    }
-
-    /* Foot Contacts & GRF */
-    .grf-card {
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
-      background: rgba(13, 17, 24, 0.90);
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      display: flex;
-      gap: 16px;
-      backdrop-filter: blur(6px);
-      pointer-events: auto;
-      z-index: 10;
-    }
-
-    .foot-sole {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .sole-box {
-      width: 24px;
-      height: 48px;
-      border: 2px solid var(--panel-border);
-      border-radius: 6px;
-      background: #090d14;
       transition: all 0.1s;
     }
 
-    .sole-box.contact {
-      border-color: var(--accent-green);
-      background: rgba(0, 255, 136, 0.25);
-      box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
-    }
-
-    .foot-lbl { font-size: 0.65rem; font-family: var(--font-mono); color: var(--text-muted); }
-    .foot-force { font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--text-bright); }
-
-    /* Right Telemetry Column */
-    .telemetry-col {
-      width: 370px;
-      background: var(--panel);
-      border-left: 1px solid var(--panel-border);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    .panel-sec {
-      border-bottom: 1px solid var(--panel-border);
-      padding: 12px 16px;
-    }
-
-    .panel-hdr {
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .panel-hdr span.highlight {
-      color: var(--accent-cyan);
-    }
-
-    /* Joint Matrix Table */
-    .joint-matrix {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-
-    .joint-row {
-      display: grid;
-      grid-template-columns: 105px 48px 1fr 40px;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.72rem;
-      font-family: var(--font-mono);
-    }
-
-    .joint-name { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .joint-val { color: var(--text-bright); text-align: right; }
-    .joint-bar-bg { background: #161e2e; height: 6px; border-radius: 3px; overflow: hidden; position: relative; }
-    .joint-bar-fill { background: var(--accent-cyan); height: 100%; width: 50%; border-radius: 3px; transition: width 0.08s; }
-    .joint-tau { color: var(--text-muted); text-align: right; font-size: 0.68rem; }
-
-    /* Phase Orbit Canvas */
-    #orbitCanvas {
-      width: 100%;
-      height: 110px;
-      background: #090d14;
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      display: block;
-    }
-
-    /* Metrics Grid */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .metric-cell {
-      background: #111722;
-      border: 1px solid var(--panel-border);
-      border-radius: 4px;
-      padding: 8px 10px;
-    }
-
-    .metric-lbl { font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); }
-    .metric-val { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); font-family: var(--font-mono); margin-top: 2px; }
-
-    /* ── Bottom Command Console ────────────────────────────────────── */
-    footer {
-      background: var(--panel-header);
-      border-top: 1px solid var(--panel-border);
-      height: 85px;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-shrink: 0;
-    }
-
-    .cmd-group {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .cmd-slider-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      width: 130px;
-    }
-
-    .cmd-slider-wrap label {
-      font-size: 0.68rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-    }
-
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      background: #1d2738;
-      height: 5px;
-      border-radius: 3px;
-      outline: none;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
+    .key-badge.pressed {
       background: var(--accent-cyan);
-      cursor: pointer;
+      color: #020617;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+      transform: scale(0.95);
     }
 
-    .action-btn-group {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-act {
-      background: #162030;
-      border: 1px solid #26354d;
-      color: var(--text-bright);
-      padding: 10px 14px;
-      border-radius: 5px;
+    .btn-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
       font-size: 0.78rem;
       font-weight: 600;
-      font-family: var(--font-mono);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.15s;
     }
 
-    .btn-act:hover {
-      background: #202d44;
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
       border-color: var(--accent-cyan);
       transform: translateY(-1px);
     }
 
-    .btn-act.btn-push {
-      border-color: var(--accent-amber);
-      color: var(--accent-amber);
+    .btn-action.fall {
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
     }
 
-    .btn-act.btn-push:hover {
-      background: rgba(255, 179, 0, 0.15);
+    .btn-action.fall:hover {
+      background: rgba(239, 68, 68, 0.15);
     }
 
-    .btn-act.btn-fall {
-      border-color: var(--accent-crimson);
-      color: var(--accent-crimson);
-    }
-
-    .btn-act.btn-fall:hover {
-      background: rgba(255, 51, 102, 0.15);
-    }
-
-    .btn-act.btn-ball {
-      border-color: var(--accent-nvidia);
-      color: var(--accent-nvidia);
-    }
-
-    .btn-act.btn-ball:hover {
-      background: rgba(118, 185, 0, 0.15);
+    /* Ambient Glow Behind Robot */
+    .hero-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, rgba(168, 85, 247, 0.04) 50%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Top Mission Control Bar ───────────────────────────────────── -->
-  <header>
+  <!-- Ambient Glow -->
+  <div class="hero-glow"></div>
+
+  <!-- ── Top Glassmorphic Navbar ───────────────────────────────────── -->
+  <nav class="navbar">
     <div class="brand">
-      <div class="brand-icon">🦆</div>
-      <div>
-        <div class="brand-title">MICRODUCK <span>GCS</span> <span class="nvidia-tag">NVIDIA SIMREADY</span></div>
-        <div class="brand-sub">Physics-Enabled Teleoperation & VelStand Evaluation</div>
+      <div class="brand-avatar">🦆</div>
+      <div class="brand-text">
+        <div class="brand-title">Mosey · Microduck <span>Physical AI</span> <span class="brand-tag">NVIDIA SIMREADY</span></div>
+        <div class="brand-sub">Autonomous Bipedal Locomotion & Dynamic VelStand Recovery</div>
       </div>
     </div>
 
-    <div class="sys-badges">
-      <div class="badge">
-        <div class="badge-dot"></div>
-        <span class="badge-label">ODOM:</span>
-        <span class="badge-val" id="badgeOdom">X: 0.0m | Y: 0.0m</span>
+    <!-- Live Status Capsule -->
+    <div class="status-capsule">
+      <div class="status-dot"></div>
+      <div class="capsule-item">
+        <span class="capsule-lbl">POLICY:</span>
+        <span class="capsule-val cyan">velstand.onnx</span>
       </div>
-      <div class="badge">
-        <span class="badge-label">POLICY:</span>
-        <span class="badge-val">velstand.onnx</span>
+      <div class="capsule-item">
+        <span class="capsule-lbl">RATE:</span>
+        <span class="capsule-val">50.0 Hz</span>
       </div>
-      <div class="badge">
-        <span class="badge-label">INFERENCE:</span>
-        <span class="badge-val" id="badgeLatency">0.05 ms</span>
+      <div class="capsule-item">
+        <span class="capsule-lbl">ODOM:</span>
+        <span class="capsule-val amber" id="navOdom">0.0m, 0.0m</span>
       </div>
-      <div class="badge">
-        <span class="badge-label">BATTERY:</span>
-        <span class="badge-val" id="badgeBattery">7.92 V</span>
-      </div>
-      <div class="badge">
-        <span class="badge-label">STATE:</span>
-        <span class="badge-val mode-walk" id="badgeState">WALK</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- ── Main Workspace ────────────────────────────────────────────── -->
-  <div class="workspace">
-    
-    <!-- 3D Viewport Container -->
-    <div class="viewport-container">
-      <canvas id="viewport"></canvas>
-
-      <!-- Camera Presets -->
-      <div class="cam-controls">
-        <button class="hud-btn active" onclick="setCamPreset('follow')">Follow Cam</button>
-        <button class="hud-btn" onclick="setCamPreset('iso')">Isometric Arena</button>
-        <button class="hud-btn" onclick="setCamPreset('front')">Front View</button>
-        <button class="hud-btn" onclick="setCamPreset('zmp')">Top-Down ZMP</button>
-      </div>
-
-      <!-- Keyboard Teleoperation HUD -->
-      <div class="key-hud">
-        <div class="key-hud-title">KEYBOARD TELEOPERATION</div>
-        <div class="key-row">
-          <div class="keycap" id="key_q">Q</div>
-          <div class="keycap" id="key_w">W</div>
-          <div class="keycap" id="key_e">E</div>
-        </div>
-        <div class="key-row">
-          <div class="keycap" id="key_a">A</div>
-          <div class="keycap" id="key_s">S</div>
-          <div class="keycap" id="key_d">D</div>
-        </div>
-        <div class="key-row">
-          <div class="keycap wide" id="key_space">SPACE (PUSH)</div>
-          <div class="keycap" id="key_f">F (FALL)</div>
-          <div class="keycap" id="key_r">R</div>
-        </div>
-      </div>
-
-      <!-- Attitude Artificial Horizon -->
-      <div class="gyro-card">
-        <div class="gyro-title">IMU ATTITUDE (HORIZON)</div>
-        <canvas id="gyroCanvas" width="100" height="100"></canvas>
-        <div class="gyro-readout" id="gyroReadout">P: 0.0° | R: 0.0°</div>
-      </div>
-
-      <!-- Ground Reaction Forces (GRF) -->
-      <div class="grf-card">
-        <div class="foot-sole">
-          <div class="foot-lbl">LEFT SOLE</div>
-          <div class="sole-box" id="soleLeft"></div>
-          <div class="foot-force" id="forceLeft">4.2 N</div>
-        </div>
-        <div class="foot-sole">
-          <div class="foot-lbl">RIGHT SOLE</div>
-          <div class="sole-box" id="soleRight"></div>
-          <div class="foot-force" id="forceRight">0.0 N</div>
-        </div>
+      <div class="capsule-item">
+        <span class="capsule-lbl">LATENCY:</span>
+        <span class="capsule-val" id="navLatency">0.05 ms</span>
       </div>
     </div>
 
-    <!-- Right Telemetry Sidebar -->
-    <div class="telemetry-col">
-      
-      <!-- 14-DoF Actuator Matrix -->
-      <div class="panel-sec">
-        <div class="panel-hdr">
-          <span>14-DoF Dynamixel XL-330 Matrix</span>
-          <span class="highlight">ENCODERS</span>
-        </div>
-        <div class="joint-matrix" id="jointMatrix"></div>
-      </div>
-
-      <!-- Phase Plane Limit Cycle -->
-      <div class="panel-sec">
-        <div class="panel-hdr">
-          <span>Phase-Plane Orbit (q vs q̇)</span>
-          <span class="highlight">KNEE LIMIT CYCLE</span>
-        </div>
-        <canvas id="orbitCanvas" width="340" height="110"></canvas>
-      </div>
-
-      <!-- System Health Metrics -->
-      <div class="panel-sec" style="border-bottom:none;">
-        <div class="panel-hdr">
-          <span>NVIDIA SimReady Kinematics</span>
-          <span class="highlight">PHYSX / BAM</span>
-        </div>
-        <div class="metrics-grid">
-          <div class="metric-cell">
-            <div class="metric-lbl">BALL VELOCITY</div>
-            <div class="metric-val" id="valBallVel">0.00 m/s</div>
-          </div>
-          <div class="metric-cell">
-            <div class="metric-lbl">BUS POWER</div>
-            <div class="metric-val" id="valPower">6.7 W</div>
-          </div>
-          <div class="metric-cell">
-            <div class="metric-lbl">COM LATERAL DRIFT</div>
-            <div class="metric-val" id="valComX">0.00 mm</div>
-          </div>
-          <div class="metric-cell">
-            <div class="metric-lbl">BACKLASH ANGLE</div>
-            <div class="metric-val">±2.0°</div>
-          </div>
-        </div>
-      </div>
-
+    <!-- Navigation Actions -->
+    <div class="nav-actions">
+      <button class="pill-btn primary" onclick="resetBallPosition()">
+        <span>⚽</span> Spawn Physics Ball
+      </button>
+      <button class="pill-btn" onclick="toggleCameraView()">
+        <span>🎥</span> Switch Camera
+      </button>
+      <button class="pill-btn" onclick="window.open('http://192.168.1.15:8001/dashboard', '_blank')">
+        <span>📡</span> Home Server Link
+      </button>
     </div>
+  </nav>
 
+  <!-- ── Fullscreen Three.js WebGL Viewport ────────────────────────── -->
+  <div id="viewport-container">
+    <canvas id="webglCanvas"></canvas>
   </div>
 
-  <!-- ── Bottom Command Console ────────────────────────────────────── -->
-  <footer>
-    <div class="cmd-group">
-      <div class="cmd-slider-wrap">
-        <label><span>VELOCITY Vx</span><span id="lblVx">0.20 m/s</span></label>
-        <input type="range" id="sliderVx" min="-0.2" max="0.5" step="0.05" value="0.20" oninput="updateVelocityCommand()" />
-      </div>
-      <div class="cmd-slider-wrap">
-        <label><span>YAW RATE Wz</span><span id="lblWz">0.00 rad/s</span></label>
-        <input type="range" id="sliderWz" min="-1.0" max="1.0" step="0.1" value="0.0" oninput="updateVelocityCommand()" />
+  <!-- ── Left Floating Card: Attitude Horizon & Physics Dynamics ──── -->
+  <div class="hud-card card-left">
+    <div class="card-hdr">
+      <span>IMU Attitude & Flight Dynamics</span>
+      <span class="icon">🧭</span>
+    </div>
+    <div class="horizon-wrap">
+      <canvas id="horizonCanvas" width="80" height="80"></canvas>
+      <div class="horizon-stats">
+        <div class="horizon-row">
+          <span class="lbl">Pitch Angle:</span>
+          <span class="val" id="valPitch">0.0°</span>
+        </div>
+        <div class="horizon-row">
+          <span class="lbl">Roll Angle:</span>
+          <span class="val" id="valRoll">0.0°</span>
+        </div>
+        <div class="horizon-row">
+          <span class="lbl">Ball Speed:</span>
+          <span class="val" id="valBallSpeed" style="color:var(--accent-yellow)">0.00 m/s</span>
+        </div>
+        <div class="horizon-row">
+          <span class="lbl">Battery Bus:</span>
+          <span class="val" id="valBattery" style="color:var(--accent-green)">7.92 V</span>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="action-btn-group">
-      <button class="btn-act btn-ball" onclick="resetBallPosition()">
-        <span>⚽</span> RESET SIMREADY BALL
-      </button>
-      <button class="btn-act btn-push" onclick="triggerLateralPush()">
-        <span>⚡</span> PUSH (14 N) [SPACE]
-      </button>
-      <button class="btn-act btn-fall" onclick="triggerHardFall()">
-        <span>⚠️</span> TRIP / FALL [F]
-      </button>
-      <button class="btn-act" onclick="triggerReset()">
-        <span>🔄</span> RESET [R]
-      </button>
+  <!-- ── Right Floating Card: 14-DoF Actuator Matrix & Phase Plane ─── -->
+  <div class="hud-card card-right">
+    <div class="card-hdr">
+      <span>14-DoF Dynamixel XL-330 Motors</span>
+      <span class="icon">⚡</span>
     </div>
-  </footer>
+    
+    <!-- 14 Actuators List -->
+    <div class="actuator-list" id="actuatorList"></div>
 
-  <!-- ── 3D Scene, NVIDIA SimReady Assets & Teleoperation ───────────── -->
+    <!-- Phase-Plane Limit Cycle -->
+    <div class="card-hdr" style="margin-top:4px;">
+      <span>Knee Phase-Plane Orbit (q vs q̇)</span>
+      <span class="icon">📈</span>
+    </div>
+    <canvas id="phaseCanvas" width="280" height="90"></canvas>
+  </div>
+
+  <!-- ── Bottom Center Controls Pill (Keyboard Guide & Actions) ─────── -->
+  <div class="controls-pill">
+    <div class="wasd-keys">
+      <div class="key-badge" id="k_w">W</div>
+      <div class="key-badge" id="k_a">A</div>
+      <div class="key-badge" id="k_s">S</div>
+      <div class="key-badge" id="k_d">D</div>
+    </div>
+    
+    <div style="width:1px; height:24px; background:var(--card-border); margin:0 4px;"></div>
+
+    <button class="btn-action" onclick="triggerLateralPush()">
+      <span>⚡</span> Push (Space)
+    </button>
+    
+    <button class="btn-action fall" onclick="triggerHardFall()">
+      <span>⚠️</span> Trip & Stand (F)
+    </button>
+
+    <button class="btn-action" onclick="triggerReset()">
+      <span>🔄</span> Reset (R)
+    </button>
+  </div>
+
+  <!-- ── 3D Mosey Character, NVIDIA Assets & Physics Simulation ─────── -->
   <script>
-    const container = document.querySelector('.viewport-container');
-    const canvas = document.getElementById('viewport');
+    const container = document.getElementById('viewport-container');
+    const canvas = document.getElementById('webglCanvas');
 
+    // 1. Scene & Renderer Setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x07090e, 0.18);
+    scene.fog = new THREE.FogExp2(0x090c14, 0.12);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.05, 50);
-    camera.position.set(0.75, -0.95, 0.60);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(1.2, -1.6, 0.95);
     camera.up.set(0, 0, 1);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    // 2. Cinematic Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0x00e5ff, 1.2);
-    keyLight.position.set(3, -3, 4);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 1024;
-    keyLight.shadow.mapSize.height = 1024;
-    scene.add(keyLight);
+    const spotLight = new THREE.SpotLight(0x00e5ff, 2.8, 10, Math.PI / 4, 0.35, 1);
+    spotLight.position.set(2, -2, 3.5);
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 2048;
+    spotLight.shadow.mapSize.height = 2048;
+    scene.add(spotLight);
 
-    const fillLight = new THREE.DirectionalLight(0x76b900, 0.5);
-    fillLight.position.set(-3, 3, 2);
-    scene.add(fillLight);
+    const rimLight = new THREE.DirectionalLight(0xa855f7, 1.4);
+    rimLight.position.set(-2, 2, 2);
+    scene.add(rimLight);
 
-    // Arena Floor
-    const grid = new THREE.GridHelper(16, 64, 0x00e5ff, 0x1b2332);
-    grid.rotation.x = Math.PI / 2;
-    grid.position.z = 0;
-    scene.add(grid);
+    const floorLight = new THREE.DirectionalLight(0xffcc00, 0.6);
+    floorLight.position.set(0, -3, 0.5);
+    scene.add(floorLight);
+
+    // 3. Cinematic Ground Plane with Floor Reflection
+    const floorGeo = new THREE.PlaneGeometry(30, 30);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x090c14,
+      roughness: 0.45,
+      metalness: 0.35
+    });
+    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+    floorMesh.receiveShadow = true;
+    scene.add(floorMesh);
+
+    // Glowing Neon Arena Ring
+    const ringGeo = new THREE.RingGeometry(3.5, 3.54, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.position.z = 0.001;
+    scene.add(ringMesh);
+
+    const innerGrid = new THREE.GridHelper(8, 32, 0x00e5ff, 0x1e293b);
+    innerGrid.rotation.x = Math.PI / 2;
+    innerGrid.position.z = 0.002;
+    scene.add(innerGrid);
 
     // -------------------------------------------------------------------------
-    // NVIDIA SimReady Interactive 3D Assets (Obstacles, Crates, Cones, Ball)
+    // High-Fidelity 3D Mosey Microduck Robot Character
+    // -------------------------------------------------------------------------
+    const robotRoot = new THREE.Group();
+    scene.add(robotRoot);
+
+    // Custom Shaders & Materials (Glossy Ceramic & Chameleon Paint)
+    const matGlossyYellow = new THREE.MeshStandardMaterial({
+      color: 0xffcc00,
+      roughness: 0.18,
+      metalness: 0.15,
+      emissive: 0x332200,
+      emissiveIntensity: 0.15
+    });
+
+    const matGlossyOrange = new THREE.MeshStandardMaterial({
+      color: 0xff6600,
+      roughness: 0.25,
+      metalness: 0.1
+    });
+
+    const matChassis = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.25,
+      metalness: 0.75
+    });
+
+    const matChromeJoint = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      roughness: 0.1,
+      metalness: 0.95
+    });
+
+    const matGlowCore = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+    const matEyeGlow = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+
+    // Torso Chassis (Rounded Capsule Body)
+    const torsoGroup = new THREE.Group();
+    robotRoot.add(torsoGroup);
+
+    const bodyGeo = new THREE.CylinderGeometry(0.045, 0.040, 0.09, 32);
+    const bodyMesh = new THREE.Mesh(bodyGeo, matChassis);
+    bodyMesh.rotation.x = Math.PI / 2;
+    bodyMesh.castShadow = true;
+    torsoGroup.add(bodyMesh);
+
+    // Chest Arc Reactor Ring (Glowing Core)
+    const reactorGeo = new THREE.TorusGeometry(0.018, 0.004, 16, 32);
+    const reactorMesh = new THREE.Mesh(reactorGeo, matGlowCore);
+    reactorMesh.position.set(0, 0.042, 0.01);
+    torsoGroup.add(reactorMesh);
+
+    // Duck Head Group
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.02, 0.075);
+    torsoGroup.add(headGroup);
+
+    // Rounded Duck Dome
+    const headGeo = new THREE.SphereGeometry(0.046, 32, 32);
+    const headMesh = new THREE.Mesh(headGeo, matGlossyYellow);
+    headMesh.castShadow = true;
+    headGroup.add(headMesh);
+
+    // Sculpted Duck Beak (Curved & Soft)
+    const beakGeo = new THREE.CylinderGeometry(0.012, 0.026, 0.048, 24);
+    const beakMesh = new THREE.Mesh(beakGeo, matGlossyOrange);
+    beakMesh.rotation.x = Math.PI / 2;
+    beakMesh.position.set(0, 0.048, -0.006);
+    beakMesh.scale.set(1.4, 0.7, 1);
+    headGroup.add(beakMesh);
+
+    // Expressive OLED Glowing Eyes (Dual Visor Style)
+    const eyeGeo = new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.007, 0.012, 8, 16) : new THREE.SphereGeometry(0.008, 16, 16);
+    const eyeL = new THREE.Mesh(eyeGeo, matEyeGlow);
+    eyeL.position.set(-0.022, 0.038, 0.014);
+    eyeL.rotation.z = 0.15;
+    headGroup.add(eyeL);
+
+    const eyeR = new THREE.Mesh(eyeGeo, matEyeGlow);
+    eyeR.position.set(0.022, 0.038, 0.014);
+    eyeR.rotation.z = -0.15;
+    headGroup.add(eyeR);
+
+    // Articulated Flipper Wings / Little Arms
+    function createWing(isLeft) {
+      const wingGroup = new THREE.Group();
+      const sign = isLeft ? -1 : 1;
+      wingGroup.position.set(sign * 0.052, 0, 0.02);
+
+      const wingGeo = new THREE.BoxGeometry(0.012, 0.045, 0.07);
+      const wingMesh = new THREE.Mesh(wingGeo, matGlossyYellow);
+      wingMesh.position.set(0, 0, -0.03);
+      wingMesh.rotation.x = 0.2;
+      wingMesh.rotation.y = sign * -0.25;
+      wingMesh.castShadow = true;
+      wingGroup.add(wingMesh);
+      return wingGroup;
+    }
+
+    const wingL = createWing(true);
+    const wingR = createWing(false);
+    torsoGroup.add(wingL);
+    torsoGroup.add(wingR);
+
+    // Articulated 6-DoF Legs with Hydraulic Joints
+    function createMoseyLeg(isLeft) {
+      const legRoot = new THREE.Group();
+      const sign = isLeft ? -1 : 1;
+      legRoot.position.set(sign * 0.036, 0, -0.045);
+
+      // Chrome Hip Pivot
+      const hipGeo = new THREE.SphereGeometry(0.014, 16, 16);
+      const hipMesh = new THREE.Mesh(hipGeo, matChromeJoint);
+      legRoot.add(hipMesh);
+
+      // Thigh
+      const thighGroup = new THREE.Group();
+      legRoot.add(thighGroup);
+      const thighGeo = new THREE.BoxGeometry(0.018, 0.024, 0.068);
+      const thighMesh = new THREE.Mesh(thighGeo, matChassis);
+      thighMesh.position.set(0, 0, -0.034);
+      thighMesh.castShadow = true;
+      thighGroup.add(thighMesh);
+
+      // Knee Pivot
+      const kneeGroup = new THREE.Group();
+      kneeGroup.position.set(0, 0, -0.068);
+      thighGroup.add(kneeGroup);
+      const kneeMesh = new THREE.Mesh(hipGeo, matChromeJoint);
+      kneeGroup.add(kneeMesh);
+
+      // Shin with Hydraulic Strut
+      const shinGroup = new THREE.Group();
+      kneeGroup.add(shinGroup);
+      const shinGeo = new THREE.BoxGeometry(0.016, 0.022, 0.068);
+      const shinMesh = new THREE.Mesh(shinGeo, matChassis);
+      shinMesh.position.set(0, 0, -0.034);
+      shinMesh.castShadow = true;
+      shinGroup.add(shinMesh);
+
+      // Foot Sole (Magnetic Rounded Boot)
+      const ankleGroup = new THREE.Group();
+      ankleGroup.position.set(0, 0, -0.068);
+      shinGroup.add(ankleGroup);
+
+      const bootGeo = new THREE.BoxGeometry(0.046, 0.082, 0.016);
+      const bootMesh = new THREE.Mesh(bootGeo, matGlossyOrange);
+      bootMesh.position.set(0, 0.016, -0.008);
+      bootMesh.castShadow = true;
+      ankleGroup.add(bootMesh);
+
+      // Contact Ring Light under Foot
+      const contactGeo = new THREE.RingGeometry(0.012, 0.022, 16);
+      const contactMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+      const contactMesh = new THREE.Mesh(contactGeo, contactMat);
+      contactMesh.rotation.x = Math.PI / 2;
+      contactMesh.position.set(0, 0.016, -0.016);
+      ankleGroup.add(contactMesh);
+
+      return {
+        root: legRoot,
+        thigh: thighGroup,
+        knee: kneeGroup,
+        shin: shinGroup,
+        ankle: ankleGroup,
+        foot: bootMesh,
+        contactRing: contactMesh
+      };
+    }
+
+    const legLeft = createMoseyLeg(true);
+    const legRight = createMoseyLeg(false);
+    torsoGroup.add(legLeft.root);
+    torsoGroup.add(legRight.root);
+
+    robotRoot.position.set(0, 0, 0.22);
+
+    // -------------------------------------------------------------------------
+    // NVIDIA SimReady Interactive Physics Environment (Ball, Crates, Pylons)
     // -------------------------------------------------------------------------
     
-    // 1. SimReady 70mm Physics Kick Ball (Microduck BallKick Spec)
-    const ballRadius = 0.035; // 70mm diameter
-    const ballGeo = new THREE.SphereGeometry(ballRadius, 24, 24);
-    const ballMat = new THREE.MeshStandardMaterial({ 
-      color: 0xff5500, 
-      roughness: 0.35, 
-      metalness: 0.1,
-      emissive: 0x221100
+    // 1. SimReady 70mm Physics Ball (Microduck BallKick Spec)
+    const ballRadius = 0.038;
+    const ballGeo = new THREE.SphereGeometry(ballRadius, 32, 32);
+    const ballMat = new THREE.MeshStandardMaterial({
+      color: 0xff5500,
+      roughness: 0.2,
+      metalness: 0.2,
+      emissive: 0x331100
     });
     const ballMesh = new THREE.Mesh(ballGeo, ballMat);
     ballMesh.castShadow = true;
     scene.add(ballMesh);
 
-    // Ball Physics State
-    const ballState = {
-      pos: new THREE.Vector3(0.35, 0.05, ballRadius),
+    const ballPhysics = {
+      pos: new THREE.Vector3(0.40, 0.0, ballRadius),
       vel: new THREE.Vector3(0.0, 0.0, 0.0),
-      mass: 0.015, // 15 grams (official spec)
-      friction: 0.965
+      friction: 0.97
     };
-    ballMesh.position.copy(ballState.pos);
+    ballMesh.position.copy(ballPhysics.pos);
 
     function resetBallPosition() {
-      ballState.pos.set(robotRoot.position.x + 0.30, robotRoot.position.y, ballRadius);
-      ballState.vel.set(0, 0, 0);
-      ballMesh.position.copy(ballState.pos);
+      ballPhysics.pos.set(robotRoot.position.x + 0.35, robotRoot.position.y, ballRadius);
+      ballPhysics.vel.set(0, 0, 0);
+      ballMesh.position.copy(ballPhysics.pos);
     }
 
-    // 2. SimReady Industrial Cargo Crates (Wooden Pallets with Metal Brackets)
-    const crateMat = new THREE.MeshStandardMaterial({ color: 0x8a623a, roughness: 0.7, metalness: 0.2 });
-    const crateMetalMat = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.3, metalness: 0.8 });
-
-    function createSimReadyCrate(x, y, size) {
-      const crateGroup = new THREE.Group();
-      crateGroup.position.set(x, y, size / 2);
-
-      const boxGeo = new THREE.BoxGeometry(size, size, size);
-      const boxMesh = new THREE.Mesh(boxGeo, crateMat);
-      boxMesh.castShadow = true;
-      crateGroup.add(boxMesh);
-
-      // Steel framing corners
-      const frameGeo = new THREE.BoxGeometry(size * 1.02, size * 1.02, size * 0.15);
-      const frameMesh = new THREE.Mesh(frameGeo, crateMetalMat);
-      crateGroup.add(frameMesh);
-
-      scene.add(crateGroup);
-      return { pos: new THREE.Vector2(x, y), size: size };
+    // 2. SimReady Industrial Pallets & Crates
+    const crateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.6 });
+    function createCrate(x, y, s) {
+      const g = new THREE.BoxGeometry(s, s, s);
+      const m = new THREE.Mesh(g, crateMat);
+      m.position.set(x, y, s / 2);
+      m.castShadow = true;
+      scene.add(m);
+      return { pos: new THREE.Vector2(x, y), size: s };
     }
-
-    const crates = [
-      createSimReadyCrate(0.8, 0.6, 0.16),
-      createSimReadyCrate(1.2, -0.5, 0.22),
-      createSimReadyCrate(-0.6, 0.7, 0.18)
+    const worldCrates = [
+      createCrate(1.1, 0.8, 0.22),
+      createCrate(1.4, -0.6, 0.28),
+      createCrate(-0.8, 0.9, 0.20)
     ];
 
-    // 3. SimReady Traffic Slalom Safety Cones
-    const coneOrangeMat = new THREE.MeshStandardMaterial({ color: 0xff4400, roughness: 0.4 });
-    const coneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.2 });
+    // 3. SimReady Slalom Cones
+    const coneMat = new THREE.MeshStandardMaterial({ color: 0xff7700, roughness: 0.3 });
+    function createCone(x, y) {
+      const g = new THREE.ConeGeometry(0.045, 0.16, 24);
+      const m = new THREE.Mesh(g, coneMat);
+      m.rotation.x = Math.PI / 2;
+      m.position.set(x, y, 0.08);
+      m.castShadow = true;
+      scene.add(m);
+    }
+    createCone(0.6, 0.1);
+    createCone(1.0, -0.15);
 
-    function createSimReadyCone(x, y) {
-      const coneGroup = new THREE.Group();
-      coneGroup.position.set(x, y, 0);
+    // -------------------------------------------------------------------------
+    // Smooth Camera Controller & Mouse Parallax
+    // -------------------------------------------------------------------------
+    let camState = 0;
+    const camOffsets = [
+      new THREE.Vector3(1.1, -1.5, 0.95), // Default Cinematic
+      new THREE.Vector3(0.0, -1.8, 0.40), // Direct Eye-Level
+      new THREE.Vector3(1.8, -1.8, 1.60)  // Wide Arena Orbit
+    ];
 
-      // Square base
-      const baseGeo = new THREE.BoxGeometry(0.12, 0.12, 0.015);
-      const baseMesh = new THREE.Mesh(baseGeo, coneOrangeMat);
-      baseMesh.position.z = 0.0075;
-      baseMesh.castShadow = true;
-      coneGroup.add(baseMesh);
-
-      // Cone
-      const coneGeo = new THREE.ConeGeometry(0.045, 0.16, 16);
-      const coneMesh = new THREE.Mesh(coneGeo, coneOrangeMat);
-      coneMesh.rotation.x = Math.PI / 2;
-      coneMesh.position.z = 0.08;
-      coneMesh.castShadow = true;
-      coneGroup.add(coneMesh);
-
-      scene.add(coneGroup);
+    function toggleCameraView() {
+      camState = (camState + 1) % camOffsets.length;
     }
 
-    createSimReadyCone(0.5, 0.0);
-    createSimReadyCone(0.9, 0.15);
-    createSimReadyCone(1.3, -0.15);
-
-    // 4. SimReady Training Ramp / Incline (12 deg)
-    const rampGeo = new THREE.BoxGeometry(0.5, 0.8, 0.03);
-    const rampMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 });
-    const rampMesh = new THREE.Mesh(rampGeo, rampMat);
-    rampMesh.position.set(-0.7, -0.4, 0.06);
-    rampMesh.rotation.y = -0.21; // ~12 degrees
-    rampMesh.receiveShadow = true;
-    scene.add(rampMesh);
+    // Mouse tracking for interactive head-tilt
+    const mouseNorm = new THREE.Vector2();
+    window.addEventListener('mousemove', (e) => {
+      mouseNorm.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseNorm.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
 
     // -------------------------------------------------------------------------
-    // Microduck 3D High-Fidelity Robot Anatomy
+    // Keyboard Teleoperation
     // -------------------------------------------------------------------------
-    const robotRoot = new THREE.Group();
-    scene.add(robotRoot);
-
-    const matBody = new THREE.MeshStandardMaterial({ color: 0x1e2638, roughness: 0.35, metalness: 0.6 });
-    const matJoint = new THREE.MeshStandardMaterial({ color: 0x00e5ff, roughness: 0.2, metalness: 0.8 });
-    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.3, metalness: 0.1 });
-    const matBeak = new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.4, metalness: 0.1 });
-    const matEye = new THREE.MeshBasicMaterial({ color: 0x050505 });
-    const matSole = new THREE.MeshStandardMaterial({ color: 0x111622, roughness: 0.9, metalness: 0.1 });
-
-    // Torso / Chassis
-    const torsoGeo = new THREE.BoxGeometry(0.08, 0.07, 0.09);
-    const torsoMesh = new THREE.Mesh(torsoGeo, matBody);
-    torsoMesh.castShadow = true;
-    robotRoot.add(torsoMesh);
-
-    // Duck Head Group
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.02, 0.07);
-    torsoMesh.add(headGroup);
-
-    const headGeo = new THREE.SphereGeometry(0.042, 24, 24);
-    const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
-    headMesh.castShadow = true;
-    headGroup.add(headMesh);
-
-    // Duck Bill / Beak
-    const beakGeo = new THREE.ConeGeometry(0.022, 0.048, 16);
-    const beakMesh = new THREE.Mesh(beakGeo, matBeak);
-    beakMesh.rotation.x = Math.PI / 2;
-    beakMesh.position.set(0, 0.045, -0.005);
-    headGroup.add(beakMesh);
-
-    // Eyes
-    const eyeGeo = new THREE.SphereGeometry(0.006, 12, 12);
-    const eyeL = new THREE.Mesh(eyeGeo, matEye);
-    eyeL.position.set(-0.022, 0.025, 0.015);
-    headGroup.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGeo, matEye);
-    eyeR.position.set(0.022, 0.025, 0.015);
-    headGroup.add(eyeR);
-
-    // Build Articulated Legs
-    function createLeg(isLeft) {
-      const legGroup = new THREE.Group();
-      const sign = isLeft ? -1 : 1;
-      legGroup.position.set(sign * 0.038, 0, -0.045);
-
-      const hipGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 16);
-      const hipMesh = new THREE.Mesh(hipGeo, matJoint);
-      hipMesh.rotation.z = Math.PI / 2;
-      legGroup.add(hipMesh);
-
-      const thighGroup = new THREE.Group();
-      legGroup.add(thighGroup);
-      const thighGeo = new THREE.BoxGeometry(0.018, 0.022, 0.07);
-      const thighMesh = new THREE.Mesh(thighGeo, matBody);
-      thighMesh.position.set(0, 0, -0.035);
-      thighMesh.castShadow = true;
-      thighGroup.add(thighMesh);
-
-      const kneeGroup = new THREE.Group();
-      kneeGroup.position.set(0, 0, -0.07);
-      thighGroup.add(kneeGroup);
-      const kneeMesh = new THREE.Mesh(hipGeo, matJoint);
-      kneeMesh.rotation.z = Math.PI / 2;
-      kneeGroup.add(kneeMesh);
-
-      const shinGroup = new THREE.Group();
-      kneeGroup.add(shinGroup);
-      const shinGeo = new THREE.BoxGeometry(0.016, 0.02, 0.07);
-      const shinMesh = new THREE.Mesh(shinGeo, matBody);
-      shinMesh.position.set(0, 0, -0.035);
-      shinMesh.castShadow = true;
-      shinGroup.add(shinMesh);
-
-      const ankleGroup = new THREE.Group();
-      ankleGroup.position.set(0, 0, -0.07);
-      shinGroup.add(ankleGroup);
-
-      const footGeo = new THREE.BoxGeometry(0.042, 0.08, 0.012);
-      const footMesh = new THREE.Mesh(footGeo, matSole);
-      footMesh.position.set(0, 0.015, -0.006);
-      footMesh.castShadow = true;
-      ankleGroup.add(footMesh);
-
-      return {
-        root: legGroup,
-        thigh: thighGroup,
-        knee: kneeGroup,
-        shin: shinGroup,
-        ankle: ankleGroup,
-        foot: footMesh
-      };
-    }
-
-    const legLeft = createLeg(true);
-    const legRight = createLeg(false);
-    torsoMesh.add(legLeft.root);
-    torsoMesh.add(legRight.root);
-
-    robotRoot.position.set(0, 0, 0.22);
-
-    // -------------------------------------------------------------------------
-    // Keyboard Teleoperation Engine
-    // -------------------------------------------------------------------------
-    const activeKeys = {};
-    let cmdVx = 0.20;
+    const keyMap = {};
+    let cmdVx = 0.0;
     let cmdVy = 0.0;
     let cmdWz = 0.0;
 
     window.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
-      activeKeys[k] = true;
-      highlightKeycap(k, true);
+      keyMap[k] = true;
+      updateKeyUI(k, true);
 
-      // Keyboard mappings
       let changed = false;
-      const boost = activeKeys['shift'] ? 1.6 : 1.0;
+      const boost = keyMap['shift'] ? 1.6 : 1.0;
 
       if (k === 'w' || k === 'arrowup') { cmdVx = 0.28 * boost; changed = true; }
       else if (k === 's' || k === 'arrowdown') { cmdVx = -0.20; changed = true; }
-      
-      if (k === 'a' || k === 'arrowleft') { cmdWz = 0.85; changed = true; }
-      else if (k === 'd' || k === 'arrowright') { cmdWz = -0.85; changed = true; }
+
+      if (k === 'a' || k === 'arrowleft') { cmdWz = 0.95; changed = true; }
+      else if (k === 'd' || k === 'arrowright') { cmdWz = -0.95; changed = true; }
 
       if (k === 'q') { cmdVy = 0.15; changed = true; }
       else if (k === 'e') { cmdVy = -0.15; changed = true; }
@@ -956,21 +892,21 @@
 
     window.addEventListener('keyup', (e) => {
       const k = e.key.toLowerCase();
-      activeKeys[k] = false;
-      highlightKeycap(k, false);
+      keyMap[k] = false;
+      updateKeyUI(k, false);
 
       let changed = false;
       if ((k === 'w' || k === 's' || k === 'arrowup' || k === 'arrowdown') && 
-          !activeKeys['w'] && !activeKeys['s'] && !activeKeys['arrowup'] && !activeKeys['arrowdown']) {
+          !keyMap['w'] && !keyMap['s'] && !keyMap['arrowup'] && !keyMap['arrowdown']) {
         cmdVx = 0.0;
         changed = true;
       }
       if ((k === 'a' || k === 'd' || k === 'arrowleft' || k === 'arrowright') &&
-          !activeKeys['a'] && !activeKeys['d'] && !activeKeys['arrowleft'] && !activeKeys['arrowright']) {
+          !keyMap['a'] && !keyMap['d'] && !keyMap['arrowleft'] && !keyMap['arrowright']) {
         cmdWz = 0.0;
         changed = true;
       }
-      if ((k === 'q' || k === 'e') && !activeKeys['q'] && !activeKeys['e']) {
+      if ((k === 'q' || k === 'e') && !keyMap['q'] && !keyMap['e']) {
         cmdVy = 0.0;
         changed = true;
       }
@@ -978,22 +914,15 @@
       if (changed) sendVelocityCommand();
     });
 
-    function highlightKeycap(key, isDown) {
-      let capId = 'key_' + key;
-      if (key === ' ') capId = 'key_space';
-      const el = document.getElementById(capId);
+    function updateKeyUI(k, isDown) {
+      const el = document.getElementById('k_' + k);
       if (el) {
-        if (isDown) el.classList.add('active');
-        else el.classList.remove('active');
+        if (isDown) el.classList.add('pressed');
+        else el.classList.remove('pressed');
       }
     }
 
     async function sendVelocityCommand() {
-      document.getElementById('sliderVx').value = cmdVx;
-      document.getElementById('sliderWz').value = cmdWz;
-      document.getElementById('lblVx').textContent = `${cmdVx.toFixed(2)} m/s`;
-      document.getElementById('lblWz').textContent = `${cmdWz.toFixed(2)} rad/s`;
-
       try {
         await fetch('/api/cmd_vel', {
           method: 'POST',
@@ -1004,157 +933,131 @@
     }
 
     // -------------------------------------------------------------------------
-    // Real-Time Physics Update Loop (Ball Kicking & Collisions)
+    // Real-Time Physics Update (Ball Kick Interaction)
     // -------------------------------------------------------------------------
     const clock = new THREE.Clock();
 
-    function updateSimulationPhysics(dt) {
-      // 1. Ball physics update
-      ballState.pos.x += ballState.vel.x * dt;
-      ballState.pos.y += ballState.vel.y * dt;
-      ballState.vel.x *= ballState.friction;
-      ballState.vel.y *= ballState.friction;
+    function updatePhysics(dt) {
+      // Ball integration
+      ballPhysics.pos.x += ballPhysics.vel.x * dt;
+      ballPhysics.pos.y += ballPhysics.vel.y * dt;
+      ballPhysics.vel.x *= ballPhysics.friction;
+      ballPhysics.vel.y *= ballPhysics.friction;
 
-      // Ball rotation based on velocity
-      const ballSpeed = Math.sqrt(ballState.vel.x ** 2 + ballState.vel.y ** 2);
-      document.getElementById('valBallVel').textContent = `${ballSpeed.toFixed(2)} m/s`;
+      const speed = Math.hypot(ballPhysics.vel.x, ballPhysics.vel.y);
+      document.getElementById('valBallSpeed').textContent = `${speed.toFixed(2)} m/s`;
 
-      if (ballSpeed > 0.01) {
-        ballMesh.rotation.x += ballState.vel.y * dt * 20;
-        ballMesh.rotation.y += ballState.vel.x * dt * 20;
+      if (speed > 0.01) {
+        ballMesh.rotation.x += ballPhysics.vel.y * dt * 25;
+        ballMesh.rotation.y += ballPhysics.vel.x * dt * 25;
       }
 
-      // 2. Robot foot to ball collision (BallKick Task)
-      const footLWorld = new THREE.Vector3();
-      const footRWorld = new THREE.Vector3();
-      legLeft.foot.getWorldPosition(footLWorld);
-      legRight.foot.getWorldPosition(footRWorld);
+      // Foot-to-ball collision
+      const footL = new THREE.Vector3();
+      const footR = new THREE.Vector3();
+      legLeft.foot.getWorldPosition(footL);
+      legRight.foot.getWorldPosition(footR);
 
-      [footLWorld, footRWorld].forEach(footPos => {
-        const dist = Math.hypot(ballState.pos.x - footPos.x, ballState.pos.y - footPos.y);
-        const hitThreshold = ballRadius + 0.035;
-
-        if (dist < hitThreshold) {
-          // Compute impulse direction
-          const kickDirX = (ballState.pos.x - footPos.x) / (dist + 0.001);
-          const kickDirY = (ballState.pos.y - footPos.y) / (dist + 0.001);
-          const kickPower = Math.max(0.6, Math.abs(cmdVx) * 3.5 + 0.8);
-
-          ballState.vel.x = kickDirX * kickPower;
-          ballState.vel.y = kickDirY * kickPower;
-
-          // Light up foot contact on kick
-          document.getElementById('soleLeft').classList.add('contact');
+      [footL, footR].forEach(fPos => {
+        const dist = Math.hypot(ballPhysics.pos.x - fPos.x, ballPhysics.pos.y - fPos.y);
+        if (dist < (ballRadius + 0.038)) {
+          const dx = (ballPhysics.pos.x - fPos.x) / (dist + 0.001);
+          const dy = (ballPhysics.pos.y - fPos.y) / (dist + 0.001);
+          const power = Math.max(0.8, Math.abs(cmdVx) * 3.8 + 0.9);
+          ballPhysics.vel.x = dx * power;
+          ballPhysics.vel.y = dy * power;
         }
       });
 
-      // 3. Crate collisions
-      crates.forEach(c => {
-        const distCrate = Math.hypot(ballState.pos.x - c.pos.x, ballState.pos.y - c.pos.y);
-        if (distCrate < (c.size / 2 + ballRadius)) {
-          ballState.vel.x *= -0.75;
-          ballState.vel.y *= -0.75;
+      // Arena bounds & obstacle reflection
+      worldCrates.forEach(c => {
+        const d = Math.hypot(ballPhysics.pos.x - c.pos.x, ballPhysics.pos.y - c.pos.y);
+        if (d < (c.size / 2 + ballRadius)) {
+          ballPhysics.vel.x *= -0.8;
+          ballPhysics.vel.y *= -0.8;
         }
       });
 
-      // Update mesh position
-      ballMesh.position.x = ballState.pos.x;
-      ballMesh.position.y = ballState.pos.y;
+      ballMesh.position.x = ballPhysics.pos.x;
+      ballMesh.position.y = ballPhysics.pos.y;
     }
 
     // -------------------------------------------------------------------------
-    // Artificial Horizon & Phase Plane Displays
+    // HUD Canvases: Attitude Horizon & Phase-Plane Plot
     // -------------------------------------------------------------------------
-    const gyroCanvas = document.getElementById('gyroCanvas');
-    const gyroCtx = gyroCanvas.getContext('2d');
+    const horizonCanvas = document.getElementById('horizonCanvas');
+    const horizonCtx = horizonCanvas.getContext('2d');
 
-    function drawArtificialHorizon(pitchDeg, rollDeg) {
-      gyroCtx.save();
-      gyroCtx.clearRect(0, 0, 100, 100);
-      gyroCtx.beginPath();
-      gyroCtx.arc(50, 50, 48, 0, Math.PI * 2);
-      gyroCtx.clip();
+    function drawHorizon(pitch, roll) {
+      horizonCtx.save();
+      horizonCtx.clearRect(0, 0, 80, 80);
+      horizonCtx.beginPath();
+      horizonCtx.arc(40, 40, 38, 0, Math.PI * 2);
+      horizonCtx.clip();
 
-      gyroCtx.translate(50, 50);
-      gyroCtx.rotate(-rollDeg * Math.PI / 180);
-      const pitchOffset = pitchDeg * 1.5;
+      horizonCtx.translate(40, 40);
+      horizonCtx.rotate(-roll * Math.PI / 180);
+      const pOffset = pitch * 1.2;
 
-      gyroCtx.fillStyle = '#10304a';
-      gyroCtx.fillRect(-60, -60 + pitchOffset, 120, 60);
-      gyroCtx.fillStyle = '#261b12';
-      gyroCtx.fillRect(-60, pitchOffset, 120, 60);
+      horizonCtx.fillStyle = '#0284c7';
+      horizonCtx.fillRect(-45, -45 + pOffset, 90, 45);
+      horizonCtx.fillStyle = '#78350f';
+      horizonCtx.fillRect(-45, pOffset, 90, 45);
 
-      gyroCtx.strokeStyle = '#00e5ff';
-      gyroCtx.lineWidth = 2;
-      gyroCtx.beginPath();
-      gyroCtx.moveTo(-50, pitchOffset);
-      gyroCtx.lineTo(50, pitchOffset);
-      gyroCtx.stroke();
-      gyroCtx.restore();
+      horizonCtx.strokeStyle = '#00e5ff';
+      horizonCtx.lineWidth = 2;
+      horizonCtx.beginPath();
+      horizonCtx.moveTo(-40, pOffset);
+      horizonCtx.lineTo(40, pOffset);
+      horizonCtx.stroke();
+      horizonCtx.restore();
 
-      gyroCtx.strokeStyle = '#ffb300';
-      gyroCtx.lineWidth = 2;
-      gyroCtx.beginPath();
-      gyroCtx.moveTo(40, 50); gyroCtx.lineTo(60, 50);
-      gyroCtx.moveTo(50, 42); gyroCtx.lineTo(50, 58);
-      gyroCtx.stroke();
+      horizonCtx.strokeStyle = '#ffcc00';
+      horizonCtx.lineWidth = 2;
+      horizonCtx.beginPath();
+      horizonCtx.moveTo(32, 40); horizonCtx.lineTo(48, 40);
+      horizonCtx.moveTo(40, 34); horizonCtx.lineTo(40, 46);
+      horizonCtx.stroke();
     }
 
-    const orbitCanvas = document.getElementById('orbitCanvas');
-    const orbitCtx = orbitCanvas.getContext('2d');
-    const orbitHistory = [];
+    const phaseCanvas = document.getElementById('phaseCanvas');
+    const phaseCtx = phaseCanvas.getContext('2d');
+    const phaseHistory = [];
 
-    function drawOrbitPlot(kneeAngleDeg) {
-      orbitHistory.push(kneeAngleDeg);
-      if (orbitHistory.length > 70) orbitHistory.shift();
+    function drawPhaseOrbit(q) {
+      phaseHistory.push(q);
+      if (phaseHistory.length > 60) phaseHistory.shift();
 
-      orbitCtx.fillStyle = '#090d14';
-      orbitCtx.fillRect(0, 0, orbitCanvas.width, orbitCanvas.height);
+      phaseCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      phaseCtx.fillRect(0, 0, 280, 90);
 
-      orbitCtx.strokeStyle = '#1b2332';
-      orbitCtx.lineWidth = 1;
-      orbitCtx.beginPath();
-      orbitCtx.moveTo(0, 55); orbitCtx.lineTo(340, 55);
-      orbitCtx.moveTo(170, 0); orbitCtx.lineTo(170, 110);
-      orbitCtx.stroke();
+      phaseCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      phaseCtx.lineWidth = 1;
+      phaseCtx.beginPath();
+      phaseCtx.moveTo(0, 45); phaseCtx.lineTo(280, 45);
+      phaseCtx.moveTo(140, 0); phaseCtx.lineTo(140, 90);
+      phaseCtx.stroke();
 
-      if (orbitHistory.length < 2) return;
+      if (phaseHistory.length < 2) return;
 
-      orbitCtx.strokeStyle = '#00e5ff';
-      orbitCtx.lineWidth = 2;
-      orbitCtx.beginPath();
-      for (let i = 1; i < orbitHistory.length; i++) {
-        const q0 = orbitHistory[i - 1];
-        const q1 = orbitHistory[i];
-        const qDot = (q1 - q0) * 15;
+      phaseCtx.strokeStyle = '#00e5ff';
+      phaseCtx.lineWidth = 2;
+      phaseCtx.beginPath();
+      for (let i = 1; i < phaseHistory.length; i++) {
+        const q0 = phaseHistory[i - 1];
+        const q1 = phaseHistory[i];
+        const qDot = (q1 - q0) * 14;
 
-        const x = 170 + q1 * 4;
-        const y = 55 - qDot * 0.8;
-        if (i === 1) orbitCtx.moveTo(x, y);
-        else orbitCtx.lineTo(x, y);
+        const x = 140 + q1 * 3.5;
+        const y = 45 - qDot * 0.7;
+        if (i === 1) phaseCtx.moveTo(x, y);
+        else phaseCtx.lineTo(x, y);
       }
-      orbitCtx.stroke();
-    }
-
-    // Camera preset states
-    let camMode = 'follow';
-    function setCamPreset(mode) {
-      camMode = mode;
-      document.querySelectorAll('.cam-controls .hud-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
-
-      if (mode === 'iso') {
-        camera.position.set(robotRoot.position.x + 1.2, robotRoot.position.y - 1.4, 0.9);
-      } else if (mode === 'front') {
-        camera.position.set(robotRoot.position.x, robotRoot.position.y - 1.1, 0.35);
-      } else if (mode === 'zmp') {
-        camera.position.set(robotRoot.position.x, robotRoot.position.y, 1.4);
-      }
-      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z);
+      phaseCtx.stroke();
     }
 
     // -------------------------------------------------------------------------
-    // 50 Hz Telemetry Sync Loop
+    // 50 Hz Telemetry Engine
     // -------------------------------------------------------------------------
     const ACTUATOR_KEYS = [
       "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
@@ -1162,13 +1065,12 @@
       "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle"
     ];
 
-    const jointMatrixEl = document.getElementById('jointMatrix');
-    jointMatrixEl.innerHTML = ACTUATOR_KEYS.map(k => `
-      <div class="joint-row" id="row_${k}">
-        <span class="joint-name">${k}</span>
-        <span class="joint-val" id="val_${k}">0.0°</span>
-        <div class="joint-bar-bg"><div class="joint-bar-fill" id="bar_${k}"></div></div>
-        <span class="joint-tau" id="tau_${k}">0.0N</span>
+    const actuatorListEl = document.getElementById('actuatorList');
+    actuatorListEl.innerHTML = ACTUATOR_KEYS.map(k => `
+      <div class="actuator-item">
+        <span class="actuator-name">${k}</span>
+        <span class="actuator-val" id="val_${k}">0.0°</span>
+        <div class="actuator-bar-bg"><div class="actuator-bar-fill" id="bar_${k}"></div></div>
       </div>
     `).join('');
 
@@ -1178,25 +1080,17 @@
         if (!res.ok) return;
         const data = await res.json();
 
-        // 1. Update Badges & Odometry
-        document.getElementById('badgeLatency').textContent = `${data.system.onnx_latency_ms} ms`;
-        document.getElementById('badgeBattery').textContent = `${data.power.voltage_v} V`;
+        // 1. Navbar Stats
+        document.getElementById('navLatency').textContent = `${data.system.onnx_latency_ms} ms`;
+        document.getElementById('valBattery').textContent = `${data.power.voltage_v} V`;
         if (data.world_pos) {
-          document.getElementById('badgeOdom').textContent = `X: ${data.world_pos.x.toFixed(2)}m | Y: ${data.world_pos.y.toFixed(2)}m`;
+          document.getElementById('navOdom').textContent = `${data.world_pos.x.toFixed(2)}m, ${data.world_pos.y.toFixed(2)}m`;
         }
 
-        const stateEl = document.getElementById('badgeState');
-        stateEl.textContent = data.state_mode;
-        stateEl.className = 'badge-val ' + (
-          data.state_mode === 'WALK' ? 'mode-walk' :
-          data.state_mode === 'FALLEN' ? 'mode-fall' : 'mode-rec'
-        );
-
-        // 2. Animate 3D Robot
+        // 2. Animate Mosey Microduck
         const j = data.joints_deg;
         const toRad = deg => deg * Math.PI / 180;
 
-        // Base Position & Yaw Odometry
         if (data.world_pos) {
           robotRoot.position.x = data.world_pos.x;
           robotRoot.position.y = data.world_pos.y;
@@ -1206,7 +1100,16 @@
         robotRoot.rotation.y = toRad(data.attitude.pitch);
         robotRoot.position.z = data.com.z;
 
-        // Legs Articulation
+        // Interactive mouse parallax on head
+        headGroup.rotation.z = toRad(j.head_yaw || 0) + mouseNorm.x * 0.35;
+        headGroup.rotation.x = toRad(j.neck_pitch || 0) - mouseNorm.y * 0.25;
+
+        // Wing gestures while walking
+        const stride = Math.sin(data.t * 10);
+        wingL.rotation.z = stride * 0.2;
+        wingR.rotation.z = -stride * 0.2;
+
+        // Leg articulation
         legLeft.thigh.rotation.x = toRad(j.left_hip_pitch || 0);
         legLeft.root.rotation.y = toRad(j.left_hip_roll || 0);
         legLeft.knee.rotation.x = toRad(j.left_knee || 0);
@@ -1217,55 +1120,30 @@
         legRight.knee.rotation.x = toRad(j.right_knee || 0);
         legRight.ankle.rotation.x = toRad(j.right_ankle || 0);
 
-        headGroup.rotation.x = toRad(j.neck_pitch || 0);
-        headGroup.rotation.z = toRad(j.head_yaw || 0);
+        // Foot sole glow on ground contact
+        legLeft.contactRing.material.opacity = data.contacts.left ? 0.8 : 0;
+        legRight.contactRing.material.opacity = data.contacts.right ? 0.8 : 0;
 
-        // 3. Update Joint Matrix UI
+        // 3. Actuator Matrix
         ACTUATOR_KEYS.forEach(k => {
           const deg = j[k] || 0.0;
-          const tau = data.torques_nm[k] || 0.0;
           document.getElementById(`val_${k}`).textContent = `${deg.toFixed(1)}°`;
-          document.getElementById(`tau_${k}`).textContent = `${Math.abs(tau).toFixed(2)}N`;
           const pct = Math.min(100, Math.max(0, 50 + deg));
           document.getElementById(`bar_${k}`).style.width = `${pct}%`;
         });
 
-        // 4. Update Gauges
-        drawArtificialHorizon(data.attitude.pitch, data.attitude.roll);
-        document.getElementById('gyroReadout').textContent = `P: ${data.attitude.pitch}° | R: ${data.attitude.roll}°`;
-        drawOrbitPlot(j.left_knee || 0);
+        // 4. Horizon & Phase Plane
+        document.getElementById('valPitch').textContent = `${data.attitude.pitch}°`;
+        document.getElementById('valRoll').textContent = `${data.attitude.roll}°`;
+        drawHorizon(data.attitude.pitch, data.attitude.roll);
+        drawPhaseOrbit(j.left_knee || 0);
 
-        // 5. Foot Contacts & GRF
-        const soleL = document.getElementById('soleLeft');
-        const soleR = document.getElementById('soleRight');
-        if (data.contacts.left) soleL.classList.add('contact'); else soleL.classList.remove('contact');
-        if (data.contacts.right) soleR.classList.add('contact'); else soleR.classList.remove('contact');
-        document.getElementById('forceLeft').textContent = `${data.grf.left_n} N`;
-        document.getElementById('forceRight').textContent = `${data.grf.right_n} N`;
-
-        // 6. Metrics Grid
-        document.getElementById('valPower').textContent = `${data.power.power_w} W`;
-        document.getElementById('valComX').textContent = `${(data.com.x * 1000).toFixed(1)} mm`;
-
-        // Follow Cam
-        if (camMode === 'follow') {
-          camera.position.x = robotRoot.position.x + 0.65;
-          camera.position.y = robotRoot.position.y - 0.75;
-          camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
-        }
-
-      } catch (err) {}
+      } catch(e) {}
     }
 
     // -------------------------------------------------------------------------
     // User Action Commands
     // -------------------------------------------------------------------------
-    async function updateVelocityCommand() {
-      cmdVx = parseFloat(document.getElementById('sliderVx').value);
-      cmdWz = parseFloat(document.getElementById('sliderWz').value);
-      sendVelocityCommand();
-    }
-
     async function triggerLateralPush() {
       await fetch('/api/push', {
         method: 'POST',
@@ -1284,11 +1162,24 @@
       resetBallPosition();
     }
 
-    // Render loop
+    // -------------------------------------------------------------------------
+    // Smooth Render Loop
+    // -------------------------------------------------------------------------
     function animate() {
       requestAnimationFrame(animate);
       const dt = Math.min(0.033, clock.getDelta());
-      updateSimulationPhysics(dt);
+      updatePhysics(dt);
+
+      // Camera lerp tracking
+      const targetOffset = camOffsets[camState];
+      const targetCamPos = new THREE.Vector3(
+        robotRoot.position.x + targetOffset.x,
+        robotRoot.position.y + targetOffset.y,
+        robotRoot.position.z + targetOffset.z
+      );
+      camera.position.lerp(targetCamPos, 0.06);
+      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
+
       renderer.render(scene, camera);
     }
     animate();
@@ -1296,9 +1187,9 @@
     setInterval(pollTelemetry, 100);
 
     window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 </body>
