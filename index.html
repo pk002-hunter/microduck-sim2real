@@ -800,7 +800,9 @@
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--card-border);
-      padding-bottom: 16px;
+      padding-bottom: 14px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .neural-header-title {
@@ -810,15 +812,55 @@
     }
 
     .neural-header-title h2 {
-      font-size: 1.6rem;
+      font-size: 1.55rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       color: var(--text-dark);
     }
 
     .neural-header-title p {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: var(--text-muted);
+    }
+
+    .neural-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Actor vs Critic Switcher */
+    .arch-toggle-box {
+      display: flex;
+      align-items: center;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .arch-toggle-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .arch-toggle-btn.active {
+      background: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
     }
 
     /* Policy Switcher Toggle */
@@ -828,16 +870,16 @@
       background: var(--card-subtle);
       border: 1px solid var(--card-border);
       border-radius: 30px;
-      padding: 4px;
-      gap: 4px;
+      padding: 3px;
+      gap: 3px;
     }
 
     .policy-toggle-btn {
       background: transparent;
       border: none;
-      padding: 6px 18px;
+      padding: 6px 16px;
       border-radius: 24px;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
@@ -845,6 +887,7 @@
       align-items: center;
       gap: 6px;
       transition: all 0.2s ease;
+      user-select: none;
     }
 
     .policy-toggle-btn.active.before {
@@ -859,13 +902,83 @@
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
     }
 
+    /* Sensory Stimulus Injection Dock */
+    .stimulus-dock {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stimulus-label {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: 0.5px;
+    }
+
+    .stimulus-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stimulus-btn {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .stimulus-btn:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .stimulus-btn.active {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+    }
+
+    .stimulus-status {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .stimulus-status b {
+      color: var(--accent-blue);
+      font-weight: 800;
+    }
+
     /* Neural Canvas & Metrics Layout */
     .neural-body {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 340px;
-      gap: 24px;
-      min-height: 440px;
+      gap: 20px;
+      min-height: 480px;
     }
 
     .neural-canvas-frame {
@@ -880,30 +993,181 @@
 
     .canvas-overlay-tag {
       position: absolute;
-      top: 14px;
-      left: 16px;
+      top: 12px;
+      left: 14px;
       background: #ffffff;
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-dark);
       z-index: 10;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--card-border);
     }
 
     #neuralCanvas {
       width: 100%;
-      height: 100%;
+      flex: 1;
+      min-height: 340px;
       display: block;
+    }
+
+    /* Floating Node Hover Tooltip */
+    .neural-tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      pointer-events: none;
+      z-index: 50;
+      display: none;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      max-width: 290px;
+      line-height: 1.4;
+    }
+
+    .neural-tooltip .tt-title {
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 4px;
+      font-size: 0.76rem;
+    }
+    .neural-tooltip .tt-dim {
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .neural-tooltip .tt-dim b {
+      color: #f1f5f9;
+    }
+    .neural-tooltip .tt-desc {
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+    .neural-tooltip .tt-val code {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #34d399;
+      font-size: 0.68rem;
+    }
+
+    /* Live Torque Oscilloscope Pane */
+    .oscilloscope-pane {
+      background: #ffffff;
+      border-top: 1px solid var(--card-border);
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .oscilloscope-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .oscilloscope-title {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .oscilloscope-badge {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .oscilloscope-badge.bad {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .oscilloscope-badge.good {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    #oscilloscopeCanvas {
+      width: 100%;
+      height: 105px;
+      display: block;
+      border-radius: 8px;
+      background: #0f172a;
     }
 
     /* Neural Metrics Sidebar */
     .neural-metrics-col {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+    }
+
+    .ppo-spec-card {
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .ppo-spec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 6px;
+    }
+
+    .ppo-spec-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: 0.5px;
+    }
+
+    .ppo-spec-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .ppo-spec-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+    }
+
+    .ppo-spec-item span.k {
+      color: var(--text-muted);
+    }
+
+    .ppo-spec-item span.v {
+      font-weight: 700;
+      color: var(--text-dark);
     }
 
     .metric-row-box {
@@ -1873,28 +2137,77 @@
             <p>Comparing PPO Neural Firing Dynamics: Naive Baseline vs. Our BAM-Compensated Policy</p>
           </div>
 
-          <!-- Policy Toggle Switcher -->
-          <div class="policy-toggle-box">
-            <button class="policy-toggle-btn active before" id="btnPolicy_before" onclick="setBrainMode('before')">
-              <span>⚠️</span> Baseline RL (Before)
+          <div class="neural-header-actions">
+            <!-- Actor vs Critic Network Switcher -->
+            <div class="arch-toggle-box">
+              <button class="arch-toggle-btn active" id="btnArch_actor" onclick="setArchMode('actor')">
+                <span>🧠</span> Actor Policy π(a|s)
+              </button>
+              <button class="arch-toggle-btn" id="btnArch_critic" onclick="setArchMode('critic')">
+                <span>⚖️</span> Critic Value V(s)
+              </button>
+            </div>
+
+            <!-- Policy Toggle Switcher -->
+            <div class="policy-toggle-box">
+              <button class="policy-toggle-btn active before" id="btnPolicy_before" onclick="setBrainMode('before')">
+                <span>⚠️</span> Baseline RL (Before)
+              </button>
+              <button class="policy-toggle-btn after" id="btnPolicy_after" onclick="setBrainMode('after')">
+                <span>🚀</span> Our Trained Policy (After)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sensory Stimulus Injection Toolbar -->
+        <div class="stimulus-dock">
+          <div class="stimulus-label">
+            <span>⚡ LIVE SENSORY STIMULUS:</span>
+          </div>
+          <div class="stimulus-btn-group">
+            <button class="stimulus-btn" id="btnStim_fall" onclick="injectStimulus('fall')" title="Simulate sudden IMU pitch drop > 50°">
+              <span>⚠️</span> Ground Fall Tilt (>50°)
             </button>
-            <button class="policy-toggle-btn after" id="btnPolicy_after" onclick="setBrainMode('after')">
-              <span>🚀</span> Our Trained Policy (After)
+            <button class="stimulus-btn" id="btnStim_push" onclick="injectStimulus('push')" title="Simulate lateral force impulse (16N ZMP disturbance)">
+              <span>🌪️</span> Lateral Push (16N)
             </button>
+            <button class="stimulus-btn active" id="btnStim_gait" onclick="injectStimulus('gait')" title="50Hz standard stride cadence">
+              <span>⏱️</span> 50Hz Gait Cadence
+            </button>
+            <button class="stimulus-btn" id="btnStim_impact" onclick="injectStimulus('impact')" title="Touchdown footstrike load cell spike">
+              <span>💥</span> Footstrike Impact
+            </button>
+          </div>
+          <div class="stimulus-status">
+            <span>NETWORK STATE:</span> <b id="stimulusStatusVal">50Hz Dynamic Stride Balance</b>
           </div>
         </div>
 
         <div class="neural-body">
           
-          <!-- Animated Neural Canvas -->
+          <!-- Animated Neural Canvas Frame + Oscilloscope -->
           <div class="neural-canvas-frame">
             <div class="canvas-overlay-tag" id="neuralPolicyTag">
-              MODE: BASELINE RL (UNCOMPENSATED BACKLASH)
+              ACTOR π(a|s) · MODE: BASELINE RL (UNCOMPENSATED BACKLASH)
             </div>
+            
             <canvas id="neuralCanvas"></canvas>
+            <div class="neural-tooltip" id="neuralTooltip"></div>
+
+            <!-- Live Torque Waveform Oscilloscope Pane -->
+            <div class="oscilloscope-pane">
+              <div class="oscilloscope-header">
+                <div class="oscilloscope-title">
+                  <span>📈 LIVE ACTION OSCILLOSCOPE (XL-330 KNEE TORQUE SIGNAL)</span>
+                </div>
+                <span class="oscilloscope-badge bad" id="oscBadge">Severe Chattering (28 Hz Noise Spike)</span>
+              </div>
+              <canvas id="oscilloscopeCanvas"></canvas>
+            </div>
           </div>
 
-          <!-- Live Metrics Comparison Column -->
+          <!-- Live Metrics & Specifications Column -->
           <div class="neural-metrics-col">
             
             <div class="metric-row-box">
@@ -1938,6 +2251,39 @@
               </div>
               <div class="metric-bar-bg">
                 <div class="metric-bar-fill" id="bar_eff" style="width: 58%; background: var(--accent-red);"></div>
+              </div>
+            </div>
+
+            <!-- Academic PPO Specification Card -->
+            <div class="ppo-spec-card">
+              <div class="ppo-spec-header">
+                <span class="ppo-spec-tag">📐 PPO ARCHITECTURE SPEC</span>
+              </div>
+              <div class="ppo-spec-grid">
+                <div class="ppo-spec-item">
+                  <span class="k">Algorithm</span>
+                  <span class="v">PPO + GAE (λ=0.95)</span>
+                </div>
+                <div class="ppo-spec-item">
+                  <span class="k">Actor MLP</span>
+                  <span class="v">[61 → 256 → 128 → 64 → 14]</span>
+                </div>
+                <div class="ppo-spec-item">
+                  <span class="k">Critic MLP</span>
+                  <span class="v">[61 → 256 → 128 → 64 → 1]</span>
+                </div>
+                <div class="ppo-spec-item">
+                  <span class="k">Control Frequency</span>
+                  <span class="v">50 Hz (20 ms loop)</span>
+                </div>
+                <div class="ppo-spec-item">
+                  <span class="k">BAM Backlash</span>
+                  <span class="v">±0.8° Deadband Model</span>
+                </div>
+                <div class="ppo-spec-item">
+                  <span class="k">Isaac Training</span>
+                  <span class="v">45M Environment Steps</span>
+                </div>
               </div>
             </div>
 
@@ -2246,7 +2592,13 @@
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     }
-    window.addEventListener('resize', onSimResize);
+    window.addEventListener('resize', () => {
+      onSimResize();
+      if (typeof currentTab !== 'undefined') {
+        if (currentTab === 'neural' && typeof initNeuralCanvas === 'function') initNeuralCanvas();
+        if (currentTab === 'contact' && typeof initContactCanvas === 'function') initContactCanvas();
+      }
+    });
     setTimeout(onSimResize, 50);
 
     // Lights
@@ -3476,20 +3828,47 @@
     setInterval(syncBackendTelemetry, 250);
 
     // =========================================================================
-    // TAB 2: NEURAL BRAIN & SYNAPTIC FIRING (BEFORE VS AFTER)
+    // TAB 2: NEURAL BRAIN & SYNAPTIC FIRING (ACTOR-CRITIC, OSCILLOSCOPE, 61D)
     // =========================================================================
     let brainMode = 'before'; // 'before' or 'after'
+    let archMode = 'actor';   // 'actor' or 'critic'
+    let activeStimulus = 'gait'; // 'fall', 'push', 'gait', 'impact'
+    let stimulusStartTime = Date.now();
+    
     const neuralCanvas = document.getElementById('neuralCanvas');
-    const nCtx = neuralCanvas.getContext('2d');
+    const nCtx = neuralCanvas ? neuralCanvas.getContext('2d') : null;
+    const oscCanvas = document.getElementById('oscilloscopeCanvas');
+    const oCtx = oscCanvas ? oscCanvas.getContext('2d') : null;
+    const neuralTooltip = document.getElementById('neuralTooltip');
+
     let neuralAnimFrame = null;
     let synapticPulses = [];
+    let oscBuffer = [];
+    const OSC_MAX_POINTS = 220;
+    let oscTime = 0;
+    let hoveredInputIdx = -1;
+    let cachedInputNodes = [];
+
+    // 61D Input Vector Definition for Observation Inspector
+    const inputNodeDefs = [
+      { name: 'Base Ang Velocity ω', dims: '3D (ωx, ωy, ωz)', desc: 'Roll, pitch, yaw rotation rates from MPU-6050 IMU @ 200Hz.', sampleVal: '+0.12, -0.04, +0.28 rad/s' },
+      { name: 'Projected Gravity g_proj', dims: '3D (gx, gy, gz)', desc: 'Unit gravity vector in robot frame for tilt/orientation sensing.', sampleVal: 'gx=0.02, gy=-0.14, gz=-0.98' },
+      { name: 'Velocity Commands v_cmd', dims: '3D (vx, vy, ωz)', desc: 'Surge (W/S), sway (A/D), and heading yaw rate target.', sampleVal: 'vx=0.35 m/s, vy=0.00, ωz=0.00' },
+      { name: 'Hip Joint Positions q_hip', dims: '6D (3-DoF × 2)', desc: 'Encoder angles for Left & Right Hip Yaw, Roll, and Pitch.', sampleVal: 'L_hip=[-0.04, 0.12, -0.35]' },
+      { name: 'Knee & Ankle Positions q_leg', dims: '8D (4-DoF × 2)', desc: 'Encoder angles for knee pitch and ankle roll/pitch joints.', sampleVal: 'Knee=+0.72 rad, Ankle=-0.38 rad' },
+      { name: 'Joint Velocities dq/dt', dims: '14D (14-DoF)', desc: 'Filtered angular velocities across all 14 XL-330 servos.', sampleVal: 'Peak dq/dt: 4.82 rad/s' },
+      { name: 'Previous Actions a_(t-1)', dims: '14D (14-DoF)', desc: 'Previous policy torque setpoints for temporal smoothness.', sampleVal: 'Lag: 1 control step (20 ms buffer)' },
+      { name: 'BAM Backlash State Δ_bam', dims: '8D (Gear Deadband)', desc: 'Internal gear play state estimated by Backlash Actuator Model.', sampleVal: 'Deadband error: ±0.014 rad' },
+      { name: 'IMU Linear Accel a_imu', dims: '2D (ax, ay)', desc: 'Footstrike impact and ground touchdown contact shocks.', sampleVal: 'ax=0.08g, ay=1.04g (1G Earth)' }
+    ];
 
     function setBrainMode(mode) {
       brainMode = mode;
       document.getElementById('btnPolicy_before').classList.toggle('active', mode === 'before');
       document.getElementById('btnPolicy_after').classList.toggle('active', mode === 'after');
 
-      const tag = document.getElementById('neuralPolicyTag');
+      updateNeuralHeaderTag();
+
       const valBacklash = document.getElementById('val_backlash');
       const badgeBacklash = document.getElementById('badge_backlash');
       const barBacklash = document.getElementById('bar_backlash');
@@ -3506,11 +3885,9 @@
       const badgeEff = document.getElementById('badge_eff');
       const barEff = document.getElementById('bar_eff');
 
-      if (mode === 'before') {
-        tag.textContent = 'MODE: BASELINE RL (UNCOMPENSATED BACKLASH & CHATTER)';
-        tag.style.borderColor = 'var(--accent-red)';
-        tag.style.color = 'var(--accent-red)';
+      const oscBadge = document.getElementById('oscBadge');
 
+      if (mode === 'before') {
         valBacklash.textContent = '18.6°';
         badgeBacklash.textContent = 'High Flutter';
         badgeBacklash.className = 'metric-badge bad';
@@ -3534,11 +3911,12 @@
         badgeEff.className = 'metric-badge bad';
         barEff.style.width = '58%';
         barEff.style.background = 'var(--accent-red)';
-      } else {
-        tag.textContent = 'MODE: OUR TRAINED POLICY (BAM BACKLASH COMPENSATED)';
-        tag.style.borderColor = 'var(--accent-blue)';
-        tag.style.color = 'var(--accent-blue)';
 
+        if (oscBadge) {
+          oscBadge.textContent = 'Severe Chattering (28 Hz Noise Spike)';
+          oscBadge.className = 'oscilloscope-badge bad';
+        }
+      } else {
         valBacklash.textContent = '0.8°';
         badgeBacklash.textContent = 'Compensated';
         badgeBacklash.className = 'metric-badge good';
@@ -3562,27 +3940,142 @@
         badgeEff.className = 'metric-badge good';
         barEff.style.width = '96%';
         barEff.style.background = 'var(--accent-green)';
+
+        if (oscBadge) {
+          oscBadge.textContent = 'Smooth BAM Filtered (Optimal Impedance)';
+          oscBadge.className = 'oscilloscope-badge good';
+        }
+      }
+    }
+
+    function setArchMode(mode) {
+      archMode = mode;
+      document.getElementById('btnArch_actor').classList.toggle('active', mode === 'actor');
+      document.getElementById('btnArch_critic').classList.toggle('active', mode === 'critic');
+      updateNeuralHeaderTag();
+    }
+
+    function updateNeuralHeaderTag() {
+      const tag = document.getElementById('neuralPolicyTag');
+      if (!tag) return;
+      const archStr = archMode === 'actor' ? 'ACTOR POLICY π(a|s) [61D → 14D ACTIONS]' : 'CRITIC VALUE FUNCTION V(s) [61D → 1D VALUE]';
+      if (brainMode === 'before') {
+        tag.textContent = `${archStr} · BASELINE RL (UNCOMPENSATED BACKLASH)`;
+        tag.style.borderColor = 'var(--accent-red)';
+        tag.style.color = 'var(--accent-red)';
+      } else {
+        tag.textContent = `${archStr} · BAM-COMPENSATED ROBUST POLICY`;
+        tag.style.borderColor = 'var(--accent-blue)';
+        tag.style.color = 'var(--accent-blue)';
+      }
+    }
+
+    function injectStimulus(type) {
+      activeStimulus = type;
+      stimulusStartTime = Date.now();
+      ['fall', 'push', 'gait', 'impact'].forEach(t => {
+        const btn = document.getElementById('btnStim_' + t);
+        if (btn) btn.classList.toggle('active', t === type);
+      });
+
+      const stat = document.getElementById('stimulusStatusVal');
+      if (stat) {
+        if (type === 'fall') stat.textContent = '⚠️ Severe Fall Tilt (>50° Pitch Angle) — High-Gain Correction';
+        else if (type === 'push') stat.textContent = '🌪️ 16N Lateral Push Disturbance — ZMP Rebalance';
+        else if (type === 'gait') stat.textContent = '⏱️ 50Hz Dynamic Stride Balance — Steady Limit Cycle';
+        else if (type === 'impact') stat.textContent = '💥 Footstrike Touchdown Spike — Normal Force Dissipation';
+      }
+
+      // Spawn concentrated pulse wave from inputs
+      for (let k = 0; k < 18; k++) {
+        synapticPulses.push({
+          layer: 0,
+          progress: 0.0,
+          fromIdx: Math.floor(Math.random() * 9),
+          toIdx: Math.floor(Math.random() * 12),
+          speed: 0.02 + Math.random() * 0.025,
+          isStimulusBurst: true
+        });
       }
     }
 
     function initNeuralCanvas() {
-      const rect = neuralCanvas.parentElement.getBoundingClientRect();
-      neuralCanvas.width = rect.width;
-      neuralCanvas.height = rect.height;
+      if (!neuralCanvas || !oscCanvas) return;
+      const rect = neuralCanvas.getBoundingClientRect();
+      neuralCanvas.width = rect.width || 800;
+      neuralCanvas.height = rect.height || 340;
 
-      // Spawn initial synaptic firing pulses
+      const oscRect = oscCanvas.getBoundingClientRect();
+      oscCanvas.width = oscRect.width || (neuralCanvas.width - 24);
+      oscCanvas.height = oscRect.height || 80;
+
+      // Populate initial oscilloscope buffer
+      if (oscBuffer.length === 0) {
+        for (let i = 0; i < OSC_MAX_POINTS; i++) {
+          oscBuffer.push(0);
+        }
+      }
+
+      // Initial pulses
       synapticPulses = [];
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < 32; i++) {
         synapticPulses.push({
           layer: Math.floor(Math.random() * 4),
           progress: Math.random(),
           fromIdx: Math.floor(Math.random() * 8),
           toIdx: Math.floor(Math.random() * 8),
-          speed: 0.008 + Math.random() * 0.015
+          speed: 0.01 + Math.random() * 0.02
         });
       }
 
+      setupNodeHoverInspector();
       if (!neuralAnimFrame) animateNeuralNetwork();
+    }
+
+    function setupNodeHoverInspector() {
+      if (!neuralCanvas || neuralCanvas._hasHoverSetup) return;
+      neuralCanvas._hasHoverSetup = true;
+
+      neuralCanvas.addEventListener('mousemove', (e) => {
+        const rect = neuralCanvas.getBoundingClientRect();
+        const scaleX = neuralCanvas.width / (rect.width || 1);
+        const scaleY = neuralCanvas.height / (rect.height || 1);
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
+
+        let foundIdx = -1;
+        for (let i = 0; i < cachedInputNodes.length; i++) {
+          const node = cachedInputNodes[i];
+          const dist = Math.hypot(mx - node.x, my - node.y);
+          if (dist <= 24) {
+            foundIdx = i;
+            break;
+          }
+        }
+
+        hoveredInputIdx = foundIdx;
+        if (hoveredInputIdx >= 0 && neuralTooltip) {
+          const info = inputNodeDefs[hoveredInputIdx];
+          neuralTooltip.innerHTML = `
+            <div class="tt-title">Input Group #${hoveredInputIdx + 1}: ${info.name}</div>
+            <div class="tt-dim">Dimension Span: <b>${info.dims}</b></div>
+            <div class="tt-desc">${info.desc}</div>
+            <div class="tt-val">Live State Vector: <code>${info.sampleVal}</code></div>
+          `;
+          const nodeCssX = cachedInputNodes[hoveredInputIdx].x / scaleX;
+          const nodeCssY = cachedInputNodes[hoveredInputIdx].y / scaleY;
+          neuralTooltip.style.left = Math.min(rect.width - 290, nodeCssX + 16) + 'px';
+          neuralTooltip.style.top = Math.max(12, nodeCssY - 25) + 'px';
+          neuralTooltip.style.display = 'block';
+        } else if (neuralTooltip) {
+          neuralTooltip.style.display = 'none';
+        }
+      });
+
+      neuralCanvas.addEventListener('mouseleave', () => {
+        hoveredInputIdx = -1;
+        if (neuralTooltip) neuralTooltip.style.display = 'none';
+      });
     }
 
     function animateNeuralNetwork() {
@@ -3594,16 +4087,28 @@
 
       const w = neuralCanvas.width;
       const h = neuralCanvas.height;
+      if (w === 0 || h === 0) return;
       nCtx.clearRect(0, 0, w, h);
 
-      // Define 5 Layers: Inputs (61D) -> Dense1 (256) -> Dense2 (128) -> Dense3 (64) -> Actions (14D)
+      // Define Layers: Inputs (61D) -> Dense1 (256) -> Dense2 (128) -> Dense3 (64) -> Output (14D or 1D)
+      const outputCount = archMode === 'actor' ? 7 : 1;
+      const outputName = archMode === 'actor' ? '14-DoF Torques\n(Dynamixel XL-330)' : 'Value V(s)\n(Critic Scalar)';
+      
       const layers = [
-        { name: '61D Inputs\n(IMU, Joints, Cmds)', count: 9, x: w * 0.12 },
-        { name: 'Dense 1 (256)', count: 12, x: w * 0.32 },
-        { name: 'Dense 2 (128)', count: 10, x: w * 0.52 },
-        { name: 'Dense 3 (64)', count: 8, x: w * 0.72 },
-        { name: '14-DoF Torques\n(Dynamixel)', count: 7, x: w * 0.90 }
+        { name: '61D Inputs\n(IMU, Joints, BAM)', count: 9, x: w * 0.12 },
+        { name: 'Dense 1 (256)\n(ReLU Latent)', count: 12, x: w * 0.32 },
+        { name: 'Dense 2 (128)\n(Kinematic Latent)', count: 10, x: w * 0.52 },
+        { name: 'Dense 3 (64)\n(Motor Decoders)', count: 8, x: w * 0.72 },
+        { name: outputName, count: outputCount, x: w * 0.90 }
       ];
+
+      // Cache input nodes for hover inspector
+      cachedInputNodes = [];
+      const l0 = layers[0];
+      for (let i = 0; i < l0.count; i++) {
+        const y = h * 0.20 + (i / (l0.count - 1)) * (h * 0.65);
+        cachedInputNodes.push({ x: l0.x, y: y });
+      }
 
       // Draw Synaptic Connections
       for (let l = 0; l < layers.length - 1; l++) {
@@ -3611,27 +4116,31 @@
         const l2 = layers[l + 1];
 
         for (let i = 0; i < l1.count; i++) {
-          const y1 = h * 0.20 + (i / (l1.count - 1)) * (h * 0.65);
+          const y1 = l1.count === 1 ? h * 0.525 : h * 0.20 + (i / Math.max(1, l1.count - 1)) * (h * 0.65);
           for (let j = 0; j < l2.count; j++) {
-            const y2 = h * 0.20 + (j / (l2.count - 1)) * (h * 0.65);
+            const y2 = l2.count === 1 ? h * 0.525 : h * 0.20 + (j / Math.max(1, l2.count - 1)) * (h * 0.65);
 
             nCtx.beginPath();
             nCtx.moveTo(l1.x, y1);
             nCtx.lineTo(l2.x, y2);
             if (brainMode === 'before') {
-              // Red/orange chatter noise
-              nCtx.strokeStyle = 'rgba(239, 68, 68, 0.04)';
+              // Chaotic faint red synaptic lines
+              nCtx.strokeStyle = 'rgba(239, 68, 68, 0.05)';
             } else {
-              // Smooth blue harmonic connections
-              nCtx.strokeStyle = 'rgba(37, 99, 235, 0.05)';
+              // Harmonic deep blue lines
+              nCtx.strokeStyle = 'rgba(37, 99, 235, 0.06)';
             }
             nCtx.stroke();
           }
         }
       }
 
-      // Draw Firing Pulses (Synaptic Action Potentials)
-      synapticPulses.forEach(p => {
+      // Draw & Propagate Firing Pulses (Synaptic Action Potentials)
+      const now = Date.now();
+      const stimulusElapsed = (now - stimulusStartTime) / 1000;
+      const isStimActive = stimulusElapsed < 1.8;
+
+      synapticPulses.forEach((p) => {
         p.progress += p.speed;
         if (p.progress >= 1.0) {
           p.progress = 0.0;
@@ -3642,54 +4151,172 @@
 
         const l1 = layers[p.layer];
         const l2 = layers[p.layer + 1];
-        const y1 = h * 0.20 + (p.fromIdx / (l1.count - 1)) * (h * 0.65);
-        const y2 = h * 0.20 + (p.toIdx / (l2.count - 1)) * (h * 0.65);
+        if (!l1 || !l2) return;
 
-        const curX = l1.x + (l2.x - l1.x) * p.progress;
-        const curY = y1 + (y2 - y1) * p.progress;
+        const y1 = l1.count === 1 ? h * 0.525 : h * 0.20 + (p.fromIdx / Math.max(1, l1.count - 1)) * (h * 0.65);
+        const y2 = l2.count === 1 ? h * 0.525 : h * 0.20 + (p.toIdx / Math.max(1, l2.count - 1)) * (h * 0.65);
+
+        let curX = l1.x + (l2.x - l1.x) * p.progress;
+        let curY = y1 + (y2 - y1) * p.progress;
 
         nCtx.beginPath();
-        nCtx.arc(curX, curY, brainMode === 'before' ? 3.5 : 2.5, 0, Math.PI * 2);
         if (brainMode === 'before') {
-          // Jittery stutter
-          const jitter = (Math.random() - 0.5) * 4;
-          nCtx.fillStyle = '#ef4444';
+          // Jitter and chatter in uncompensated policy
+          curX += (Math.random() - 0.5) * 3;
+          curY += (Math.random() - 0.5) * 4;
+          nCtx.arc(curX, curY, p.isStimulusBurst ? 4.5 : 3.2, 0, Math.PI * 2);
+          nCtx.fillStyle = p.isStimulusBurst ? '#f59e0b' : '#ef4444';
         } else {
-          nCtx.fillStyle = '#2563eb';
+          // Smooth harmonic wave packets
+          nCtx.arc(curX, curY, p.isStimulusBurst ? 4.0 : 2.5, 0, Math.PI * 2);
+          nCtx.fillStyle = p.isStimulusBurst ? '#fbbf24' : (p.progress > 0.5 ? '#06b6d4' : '#2563eb');
         }
         nCtx.fill();
       });
 
+      // Keep pulse pool bounded
+      if (synapticPulses.length > 48) synapticPulses.splice(0, synapticPulses.length - 48);
+
       // Draw Layer Nodes
       layers.forEach((l, lIdx) => {
         // Label
-        nCtx.fillStyle = '#64748b';
+        nCtx.fillStyle = '#475569';
         nCtx.font = '600 11px JetBrains Mono';
         nCtx.textAlign = 'center';
         const lines = l.name.split('\n');
         lines.forEach((line, li) => {
-          nCtx.fillText(line, l.x, h * 0.12 + li * 14);
+          nCtx.fillText(line, l.x, h * 0.10 + li * 13);
         });
 
         // Nodes
         for (let i = 0; i < l.count; i++) {
-          const y = h * 0.20 + (i / (l.count - 1)) * (h * 0.65);
+          const y = l.count === 1 ? h * 0.525 : h * 0.20 + (i / Math.max(1, l.count - 1)) * (h * 0.65);
+          const isHovered = (lIdx === 0 && i === hoveredInputIdx);
 
           nCtx.beginPath();
-          nCtx.arc(l.x, y, 7, 0, Math.PI * 2);
+          nCtx.arc(l.x, y, isHovered ? 10 : (l.count === 1 ? 12 : 7), 0, Math.PI * 2);
 
-          if (brainMode === 'before') {
+          if (isHovered) {
+            nCtx.fillStyle = '#f59e0b';
+            nCtx.strokeStyle = '#d97706';
+            nCtx.lineWidth = 3;
+          } else if (isStimActive && lIdx === 0) {
+            nCtx.fillStyle = '#fef08a';
+            nCtx.strokeStyle = '#eab308';
+            nCtx.lineWidth = 2.5;
+          } else if (brainMode === 'before') {
             nCtx.fillStyle = (i % 2 === 0) ? '#fee2e2' : '#ffffff';
             nCtx.strokeStyle = '#ef4444';
+            nCtx.lineWidth = 2;
           } else {
             nCtx.fillStyle = (i % 2 === 0) ? '#eff6ff' : '#ffffff';
             nCtx.strokeStyle = '#2563eb';
+            nCtx.lineWidth = 2;
           }
-          nCtx.lineWidth = 2;
           nCtx.fill();
           nCtx.stroke();
+
+          // Value inside critic scalar node
+          if (l.count === 1) {
+            nCtx.fillStyle = brainMode === 'before' ? '#ef4444' : '#2563eb';
+            nCtx.font = '700 11px JetBrains Mono';
+            nCtx.fillText(brainMode === 'before' ? 'V=-14.2' : 'V=+48.6', l.x, y + 24);
+          }
         }
       });
+
+      // Render the action oscilloscope
+      drawOscilloscope();
+    }
+
+    function drawOscilloscope() {
+      if (!oscCanvas || !oCtx) return;
+      const w = oscCanvas.width;
+      const h = oscCanvas.height;
+      if (w === 0 || h === 0) return;
+      oCtx.clearRect(0, 0, w, h);
+
+      oscTime += 0.05;
+
+      // Synthesize current torque point based on mode & stimulus
+      let baseGaitTorque = Math.sin(oscTime * 4.0) * 0.32; // 50Hz walking cadence torque
+      let torqueVal = 0;
+
+      if (activeStimulus === 'fall') {
+        const decay = Math.max(0, 1 - (Date.now() - stimulusStartTime) / 2500);
+        baseGaitTorque += Math.sin(oscTime * 12.0) * 0.55 * decay;
+      } else if (activeStimulus === 'push') {
+        const decay = Math.max(0, 1 - (Date.now() - stimulusStartTime) / 2000);
+        baseGaitTorque += Math.cos(oscTime * 8.0) * 0.45 * decay;
+      } else if (activeStimulus === 'impact') {
+        const decay = Math.max(0, 1 - (Date.now() - stimulusStartTime) / 1200);
+        baseGaitTorque += (Math.random() - 0.5) * 0.6 * decay;
+      }
+
+      if (brainMode === 'before') {
+        // High 28Hz chatter noise + gear deadband backlash hunting
+        const chatter = (Math.sin(oscTime * 28.0) * 0.28) + ((Math.random() - 0.5) * 0.25);
+        torqueVal = Math.max(-0.88, Math.min(0.88, baseGaitTorque + chatter));
+      } else {
+        // Smooth BAM compensated torque (bounded & filtered)
+        torqueVal = Math.max(-0.80, Math.min(0.80, baseGaitTorque));
+      }
+
+      oscBuffer.push(torqueVal);
+      if (oscBuffer.length > OSC_MAX_POINTS) oscBuffer.shift();
+
+      // Background grid lines
+      oCtx.strokeStyle = 'rgba(226, 232, 240, 0.8)';
+      oCtx.lineWidth = 1;
+      
+      // Center 0 N*m line
+      const midY = h * 0.5;
+      oCtx.beginPath();
+      oCtx.moveTo(0, midY);
+      oCtx.lineTo(w, midY);
+      oCtx.stroke();
+
+      // Stall limits (+/- 0.88 N*m)
+      const scaleY = (h * 0.38) / 0.88;
+      const stallUpperY = midY - (0.88 * scaleY);
+      const stallLowerY = midY + (0.88 * scaleY);
+
+      oCtx.setLineDash([4, 4]);
+      oCtx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+      oCtx.beginPath();
+      oCtx.moveTo(0, stallUpperY);
+      oCtx.lineTo(w, stallUpperY);
+      oCtx.moveTo(0, stallLowerY);
+      oCtx.lineTo(w, stallLowerY);
+      oCtx.stroke();
+      oCtx.setLineDash([]);
+
+      // Labels for stall limits
+      oCtx.fillStyle = '#64748b';
+      oCtx.font = '600 9px JetBrains Mono';
+      oCtx.textAlign = 'left';
+      oCtx.fillText('+0.88 N·m (Stall)', 8, stallUpperY - 3);
+      oCtx.fillText('-0.88 N·m (Stall)', 8, stallLowerY + 9);
+      oCtx.fillText('0.0 N·m', 8, midY - 3);
+
+      // Draw Waveform
+      oCtx.beginPath();
+      const stepX = w / (OSC_MAX_POINTS - 1);
+      for (let i = 0; i < oscBuffer.length; i++) {
+        const x = i * stepX;
+        const y = midY - (oscBuffer[i] * scaleY);
+        if (i === 0) oCtx.moveTo(x, y);
+        else oCtx.lineTo(x, y);
+      }
+
+      if (brainMode === 'before') {
+        oCtx.strokeStyle = '#ef4444';
+        oCtx.lineWidth = 1.8;
+      } else {
+        oCtx.strokeStyle = '#0284c7';
+        oCtx.lineWidth = 2.0;
+      }
+      oCtx.stroke();
     }
 
     // =========================================================================
