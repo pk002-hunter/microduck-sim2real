@@ -25,14 +25,23 @@
       --accent-blue-dark: #1d4ed8;
       --accent-pink: #ec4899;
       --accent-pink-subtle: rgba(236, 72, 153, 0.08);
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
       --text-dark: #0f172a;
-      --text-muted: #64748b;
-      --text-subtle: #94a3b8;
+      --text-muted: #334155;
+      --text-subtle: #475569;
+      --text-pink: #be185d;
+      --text-red: #b91c1c;
       --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       --font-mono: 'JetBrains Mono', 'Consolas', monospace;
     }
+
+    ::selection { background: #dbeafe; color: #1e40af; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    *:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
 
     html, body {
       width: 100vw;
@@ -44,6 +53,9 @@
       font-family: var(--font-sans);
       color: var(--text-dark);
       user-select: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
 
     body {
@@ -90,13 +102,13 @@
       align-items: center;
       gap: 8px;
       background: var(--accent-pink-subtle);
-      border: 1px solid rgba(236, 72, 153, 0.35);
+      border: 1px solid rgba(190, 24, 93, 0.25);
       padding: 4px 10px;
       border-radius: 20px;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
-      color: var(--accent-pink);
+      color: var(--text-pink);
       letter-spacing: 0.5px;
     }
 
@@ -191,14 +203,14 @@
     }
 
     .github-handle {
-      font-size: 0.74rem;
+      font-size: 0.80rem;
       font-weight: 800;
       color: var(--text-dark);
       letter-spacing: -0.2px;
     }
 
     .github-reponame {
-      font-size: 0.60rem;
+      font-size: 0.72rem;
       font-family: var(--font-mono);
       color: var(--text-muted);
     }
@@ -267,8 +279,8 @@
     }
 
     .hero-sub-meta {
-      font-size: 0.78rem;
-      line-height: 1.5;
+      font-size: 0.82rem;
+      line-height: 1.55;
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -278,7 +290,7 @@
     }
 
     .hero-step-num {
-      font-size: 0.72rem;
+      font-size: 0.76rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-subtle);
@@ -317,7 +329,7 @@
     }
 
     .meta-item {
-      font-size: 0.66rem;
+      font-size: 0.72rem;
       font-family: var(--font-mono);
       font-weight: 700;
       letter-spacing: 0.8px;
@@ -326,6 +338,7 @@
       align-items: center;
       justify-content: flex-end;
       gap: 8px;
+      font-variant-numeric: tabular-nums;
     }
 
     .meta-item.active {
@@ -340,8 +353,8 @@
     }
 
     .meta-item.active .meta-dot {
-      background: var(--accent-pink);
-      box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
+      background: var(--text-pink);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
     }
 
     /* 3D WebGL Canvas Layer */
@@ -384,7 +397,7 @@
       box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.68rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
       letter-spacing: 0.5px;
@@ -393,16 +406,17 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      font-variant-numeric: tabular-nums;
     }
 
     .pin-badge.pink {
-      color: var(--accent-pink);
-      border-color: rgba(236, 72, 153, 0.35);
+      color: var(--text-pink);
+      border-color: rgba(190, 24, 93, 0.25);
       background: #fdf2f8;
     }
 
     .pin-badge.blue {
-      color: var(--accent-blue);
+      color: var(--accent-blue-dark);
       border-color: rgba(37, 99, 235, 0.35);
       background: #eff6ff;
     }
@@ -460,14 +474,15 @@
     .slomo-rate-btn {
       background: transparent;
       border: none;
-      padding: 4px 9px;
+      padding: 4px 10px;
       border-radius: 16px;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
       transition: all 0.15s;
+      font-variant-numeric: tabular-nums;
     }
 
     .slomo-rate-btn.active, .slomo-rate-btn:hover {
@@ -481,7 +496,7 @@
       border: 1px solid var(--card-border);
       padding: 4px 10px;
       border-radius: 16px;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-dark);
@@ -534,8 +549,8 @@
     }
 
     .dpad-btn {
-      width: 34px;
-      height: 34px;
+      width: 38px;
+      height: 38px;
       background: var(--card-subtle);
       border: 1px solid var(--card-border);
       border-radius: 8px;
@@ -545,7 +560,7 @@
       justify-content: center;
       cursor: pointer;
       font-family: var(--font-mono);
-      font-size: 0.65rem;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--text-dark);
       transition: all 0.1s;
@@ -553,7 +568,7 @@
     }
 
     .dpad-btn span.sub {
-      font-size: 0.52rem;
+      font-size: 0.72rem;
       color: var(--text-subtle);
     }
 
@@ -596,14 +611,14 @@
     }
 
     .phase-num {
-      font-size: 0.65rem;
+      font-size: 0.76rem;
       font-family: var(--font-mono);
       font-weight: 700;
-      color: var(--accent-pink);
+      color: var(--text-pink);
     }
 
     .phase-title {
-      font-size: 0.80rem;
+      font-size: 0.84rem;
       font-weight: 800;
       color: var(--text-dark);
       text-transform: uppercase;
@@ -611,9 +626,9 @@
     }
 
     .phase-desc {
-      font-size: 0.68rem;
+      font-size: 0.80rem;
       color: var(--text-muted);
-      line-height: 1.3;
+      line-height: 1.35;
     }
 
     /* Action Controls in Bottom Right */
@@ -634,7 +649,7 @@
       border: 1px solid var(--card-border);
       padding: 6px 8px;
       border-radius: 8px;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-weight: 700;
       color: var(--text-dark);
       cursor: pointer;
@@ -652,17 +667,17 @@
     }
 
     .btn-ordiva.pink {
-      color: var(--accent-pink);
+      color: var(--text-pink);
     }
 
     .btn-ordiva.pink:hover {
-      background: var(--accent-pink);
+      background: var(--text-pink);
       color: #ffffff;
-      border-color: var(--accent-pink);
+      border-color: var(--text-pink);
     }
 
     .keyboard-hint {
-      font-size: 0.62rem;
+      font-size: 0.76rem;
       font-family: var(--font-mono);
       color: var(--text-subtle);
       text-align: center;
@@ -712,7 +727,7 @@
     }
 
     .neural-header-title p {
-      font-size: 0.80rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
     }
 
@@ -778,14 +793,14 @@
       top: 14px;
       left: 16px;
       background: #ffffff;
-      border: 1px solid var(--card-border);
       padding: 4px 10px;
       border-radius: 6px;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-dark);
       z-index: 10;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
     }
 
     #neuralCanvas {
@@ -802,17 +817,18 @@
     }
 
     .metric-card {
-      background: var(--card-subtle);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--card-border);
+      border-radius: 0;
+      padding: 10px 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .metric-title {
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-muted);
@@ -831,18 +847,19 @@
       font-weight: 800;
       color: var(--text-dark);
       letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
     }
 
     .metric-badge {
-      font-size: 0.68rem;
+      font-size: 0.76rem;
       font-family: var(--font-mono);
       font-weight: 700;
       padding: 2px 8px;
       border-radius: 12px;
     }
 
-    .metric-badge.good { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
-    .metric-badge.bad { background: #fef2f2; color: var(--accent-red); border: 1px solid #fecaca; }
+    .metric-badge.good { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .metric-badge.bad { background: #fef2f2; color: var(--text-red); border: 1px solid #fecaca; }
 
     .metric-bar-bg {
       width: 100%;
@@ -887,7 +904,7 @@
     }
 
     .contact-title p {
-      font-size: 0.80rem;
+      font-size: 0.88rem;
       color: var(--text-muted);
     }
 
@@ -924,41 +941,42 @@
     }
 
     .c-step-card {
-      background: #ffffff;
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 12px;
+      background: transparent;
+      border: none;
+      border-top: 2px solid var(--card-border);
+      border-radius: 0;
+      padding: 10px 0;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
 
     .c-step-card.active {
-      border-color: var(--accent-blue);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
-      background: #eff6ff;
+      border-top-color: var(--accent-blue);
+      background: transparent;
+      box-shadow: none;
     }
 
     .c-step-num {
-      font-size: 0.65rem;
+      font-size: 0.76rem;
       font-family: var(--font-mono);
       font-weight: 700;
-      color: var(--accent-pink);
+      color: var(--text-pink);
     }
 
     .c-step-title {
-      font-size: 0.76rem;
+      font-size: 0.84rem;
       font-weight: 800;
       color: var(--text-dark);
       text-transform: uppercase;
     }
 
     .c-step-desc {
-      font-size: 0.68rem;
+      font-size: 0.80rem;
       color: var(--text-muted);
-      line-height: 1.3;
+      line-height: 1.35;
     }
 
     /* Contact Physics Canvas & Table */
@@ -973,7 +991,7 @@
     .contact-canvas-card {
       background: #fafafa;
       border: 1px solid var(--card-border);
-      border-radius: 16px;
+      border-radius: 14px;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -987,10 +1005,9 @@
     }
 
     .joint-table-card {
-      background: var(--card-subtle);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
+      background: transparent;
+      border: none;
+      padding: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -1008,8 +1025,9 @@
     .joint-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.70rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
 
     .joint-table th {
@@ -1067,7 +1085,7 @@
         <span class="nav-meta-badge">B.Tech CSE SCS-701</span>
         <span style="color:var(--text-subtle)">|</span>
         <span class="nav-meta-badge" style="color:var(--accent-blue)" id="liveHzBadge">50.0 Hz Active</span>
-        <a href="http://192.168.1.15:8001/dashboard" target="_blank" class="nav-meta-badge" style="text-decoration:none; color:var(--accent-pink);">
+        <a href="http://192.168.1.15:8001/dashboard" target="_blank" class="nav-meta-badge" style="text-decoration:none; color:var(--text-pink);">
           Home Server ↗
         </a>
         
