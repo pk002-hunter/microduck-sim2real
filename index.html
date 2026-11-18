@@ -3,762 +3,814 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mosey · Microduck | Physical AI Bipedal Companion & Ground Control Station</title>
-  
-  <!-- Bundled local Three.js & Chart.js -->
-  <script src="/static/three.min.js"></script>
-  <script src="/static/chart.min.js"></script>
+  <title>ORDIVA · MICRODUCK | Industrial Physical AI & Bipedal Kinematics</title>
+
+  <!-- Relative paths so it loads BOTH via http:// and directly via file:/// -->
+  <script src="static/three.min.js"></script>
+  <!-- CDN Fallback in case local script fails -->
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #090c14;
-      --card-glass: rgba(15, 23, 42, 0.72);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-glow: rgba(0, 229, 255, 0.25);
-      --accent-cyan: #00e5ff;
-      --accent-yellow: #ffcc00;
-      --accent-orange: #ff7700;
-      --accent-green: #10b981;
-      --accent-purple: #a855f7;
-      --accent-crimson: #ef4444;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --font-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --bg-outer: #1e40af;
+      --bg-gradient: radial-gradient(circle at 85% 15%, #3b82f6 0%, #1d4ed8 45%, #0f172a 100%);
+      --card-bg: #ffffff;
+      --card-subtle: #f8fafc;
+      --card-border: #e2e8f0;
+      --accent-blue: #2563eb;
+      --accent-blue-dark: #1d4ed8;
+      --accent-pink: #ec4899;
+      --accent-pink-subtle: rgba(236, 72, 153, 0.08);
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       --font-mono: 'JetBrains Mono', 'Consolas', monospace;
     }
 
     body {
-      background: var(--bg);
-      color: var(--text-main);
-      font-family: var(--font-display);
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      user-select: none;
-    }
-
-    /* ── Top Floating Glassmorphic Navbar ────────────────────────────── */
-    .navbar {
-      position: absolute;
-      top: 16px;
-      left: 20px;
-      right: 20px;
-      height: 60px;
-      background: var(--card-glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 50;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-avatar {
-      width: 36px;
-      height: 36px;
-      background: radial-gradient(circle at 30% 30%, #ffe600, #ff8800);
-      border-radius: 50%;
+      background: var(--bg-gradient);
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      box-shadow: 0 0 16px rgba(255, 204, 0, 0.4);
+      font-family: var(--font-sans);
+      color: var(--text-dark);
+      padding: 24px;
+      overflow-x: hidden;
+      user-select: none;
     }
 
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .brand-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .brand-title span {
-      background: linear-gradient(135deg, #00e5ff, #a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-tag {
-      font-size: 0.65rem;
-      font-family: var(--font-mono);
-      background: rgba(0, 229, 255, 0.12);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      color: var(--accent-cyan);
-      padding: 1px 6px;
-      border-radius: 6px;
-      font-weight: 600;
-    }
-
-    .brand-sub {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-
-    /* Live Status Capsule */
-    .status-capsule {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--card-border);
-      border-radius: 30px;
-      padding: 6px 16px;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
-
-    .capsule-item { display: flex; align-items: center; gap: 6px; }
-    .capsule-lbl { color: var(--text-muted); }
-    .capsule-val { color: var(--text-main); font-weight: 600; }
-    .capsule-val.cyan { color: var(--accent-cyan); }
-    .capsule-val.amber { color: var(--accent-yellow); }
-
-    /* Nav Action Pills */
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .pill-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .pill-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--accent-cyan);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.15);
-    }
-
-    .pill-btn.primary {
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(168, 85, 247, 0.2));
-      border-color: rgba(0, 229, 255, 0.4);
-      color: var(--accent-cyan);
-    }
-
-    .pill-btn.primary:hover {
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.3), rgba(168, 85, 247, 0.3));
-    }
-
-    /* ── Fullscreen 3D Scene Viewport ────────────────────────────────── */
-    #viewport-container {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      cursor: grab;
-    }
-
-    #viewport-container:active { cursor: grabbing; }
-
-    #webglCanvas {
+    /* ── Main ORDIVA Design Container (From designs/ folder) ────────── */
+    .ordiva-frame {
       width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* ── Floating Glass HUD Cards ────────────────────────────────────── */
-    .hud-card {
-      position: absolute;
-      background: var(--card-glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 16px 20px;
-      z-index: 20;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .hud-card:hover {
-      border-color: var(--card-border-glow);
-    }
-
-    /* Left Floating Card: Attitude & Gait Horizon */
-    .card-left {
-      bottom: 24px;
-      left: 24px;
-      width: 290px;
+      max-width: 1440px;
+      height: 94vh;
+      background: var(--card-bg);
+      border-radius: 32px;
+      box-shadow: 0 35px 90px rgba(15, 23, 42, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .card-hdr {
+    /* ── Top Header Navigation Bar ───────────────────────────────────── */
+    .top-nav {
+      height: 72px;
+      padding: 0 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: -0.2px;
+      border-bottom: 1px solid var(--card-border);
+      flex-shrink: 0;
+      z-index: 30;
+      background: #ffffff;
     }
 
-    .card-hdr span.icon { font-size: 1rem; }
-
-    .horizon-wrap {
+    .nav-left {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 20px;
     }
 
-    #horizonCanvas {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #020617;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      flex-shrink: 0;
-      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
-    }
-
-    .horizon-stats {
+    .lab-badge {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
-    }
-
-    .horizon-row { display: flex; justify-content: space-between; gap: 12px; }
-    .horizon-row .lbl { color: var(--text-muted); }
-    .horizon-row .val { color: var(--text-main); font-weight: 600; }
-
-    /* Right Floating Card: 14-DoF Actuator Telemetry */
-    .card-right {
-      top: 92px;
-      right: 24px;
-      width: 320px;
-      max-height: calc(100vh - 120px);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .actuator-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-y: auto;
-      max-height: 220px;
-      padding-right: 4px;
-    }
-
-    .actuator-item {
-      display: grid;
-      grid-template-columns: 100px 45px 1fr;
       align-items: center;
       gap: 8px;
-      font-size: 0.7rem;
+      background: var(--accent-pink-subtle);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
       font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-pink);
+      letter-spacing: 0.5px;
     }
 
-    .actuator-name { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .actuator-val { color: var(--text-main); text-align: right; }
-    .actuator-bar-bg {
-      height: 5px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 3px;
-      overflow: hidden;
+    .lab-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-pink);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--accent-blue);
+    }
+
+    /* ORDIVA Brand Mark */
+    .brand-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .brand-logo-icon {
+      width: 28px;
+      height: 18px;
+      background: var(--accent-blue);
+      border-radius: 6px;
       position: relative;
-    }
-    .actuator-bar-fill {
-      height: 100%;
-      width: 50%;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-      border-radius: 3px;
-      transition: width 0.08s ease-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Phase-Plane Canvas */
-    #phaseCanvas {
+    .brand-logo-icon::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--accent-blue);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .nav-right a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .nav-right a:hover { color: var(--accent-blue); }
+
+    /* ── Main Content Area: Giant Typo & 3D Stage ───────────────────── */
+    .content-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left Architectural Typography Layer */
+    .typo-layer {
+      position: absolute;
+      top: 36px;
+      left: 44px;
+      bottom: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-size: 4.8rem;
+      font-weight: 800;
+      line-height: 0.90;
+      letter-spacing: -2px;
+      color: var(--text-dark);
+      text-transform: uppercase;
+    }
+
+    .hero-title span {
+      display: block;
+      color: var(--accent-blue);
+    }
+
+    .hero-sub-meta {
+      max-width: 320px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .hero-sub-meta b {
+      color: var(--text-dark);
+    }
+
+    /* Right Architectural Typography */
+    .typo-right {
+      position: absolute;
+      top: 40px;
+      right: 44px;
+      text-align: right;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .word-biology {
+      font-size: 4.4rem;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--text-dark);
+      line-height: 1;
+    }
+
+    /* 3D WebGL Canvas Layer */
+    .canvas-stage {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      height: 90px;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
+      height: 100%;
+      z-index: 2;
+      background: radial-gradient(circle at 55% 45%, #ffffff 0%, #f1f5f9 100%);
+    }
+
+    #stageCanvas {
+      width: 100%;
+      height: 100%;
       display: block;
     }
 
-    /* Bottom Center Controls Pill */
-    .controls-pill {
+    /* ── Floating Architectural Callout Pins (From designs/ folder) ── */
+    .callout-pin {
       position: absolute;
-      bottom: 24px;
+      z-index: 20;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.1s ease-out;
+    }
+
+    .pin-badge {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-dark);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pin-badge.pink {
+      color: var(--accent-pink);
+      border-color: rgba(236, 72, 153, 0.3);
+      background: #fdf2f8;
+    }
+
+    .pin-badge.blue {
+      color: var(--accent-blue);
+      border-color: rgba(37, 99, 235, 0.3);
+      background: #eff6ff;
+    }
+
+    .pin-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .pin-line {
+      width: 32px;
+      height: 1px;
+      background: var(--text-subtle);
+    }
+
+    /* ── Floating Slo-Mo Kinematic Inspector Bar ───────────────────── */
+    .slomo-dock {
+      position: absolute;
+      top: 100px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--card-glass);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: #ffffff;
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 10px 18px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      border-radius: 30px;
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       gap: 12px;
-      z-index: 30;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      z-index: 25;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
     }
 
-    .wasd-keys {
+    .slomo-label {
+      color: var(--text-muted);
+      font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
-    .key-badge {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 6px;
-      padding: 4px 8px;
+    .slomo-btn-group {
+      display: flex;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .slomo-rate-btn {
+      background: transparent;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 16px;
       font-size: 0.72rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-muted);
-      transition: all 0.1s;
+      cursor: pointer;
+      transition: all 0.15s;
     }
 
-    .key-badge.pressed {
-      background: var(--accent-cyan);
-      color: #020617;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
-      transform: scale(0.95);
+    .slomo-rate-btn.active, .slomo-rate-btn:hover {
+      background: var(--accent-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
 
-    .btn-action {
-      background: rgba(255, 255, 255, 0.06);
+    .slomo-play-btn {
+      background: #ffffff;
       border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-dark);
       cursor: pointer;
       display: flex;
       align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .slomo-play-btn:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    /* ── Bottom Educational Gait Phase Strip (From designs/ image 3) ── */
+    .gait-process-strip {
+      height: 120px;
+      background: #ffffff;
+      border-top: 1px solid var(--card-border);
+      padding: 16px 40px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 240px;
+      gap: 24px;
+      align-items: center;
+      z-index: 30;
+      flex-shrink: 0;
+    }
+
+    .phase-step {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-left: 2px solid var(--card-border);
+      padding-left: 14px;
+      transition: all 0.2s;
+    }
+
+    .phase-step.active {
+      border-left-color: var(--accent-blue);
+    }
+
+    .phase-num {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-pink);
+    }
+
+    .phase-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-transform: uppercase;
+      letter-spacing: -0.2px;
+    }
+
+    .phase-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Action Controls in Bottom Right */
+    .strip-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .action-btn-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-ordiva {
+      flex: 1;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
       transition: all 0.15s;
     }
 
-    .btn-action:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: var(--accent-cyan);
-      transform: translateY(-1px);
+    .btn-ordiva:hover {
+      background: var(--accent-blue);
+      color: #ffffff;
+      border-color: var(--accent-blue);
     }
 
-    .btn-action.fall {
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
+    .btn-ordiva.pink {
+      color: var(--accent-pink);
     }
 
-    .btn-action.fall:hover {
-      background: rgba(239, 68, 68, 0.15);
+    .btn-ordiva.pink:hover {
+      background: var(--accent-pink);
+      color: #ffffff;
+      border-color: var(--accent-pink);
     }
 
-    /* Ambient Glow Behind Robot */
-    .hero-glow {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, rgba(168, 85, 247, 0.04) 50%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+    /* Keyboard Guide Hint */
+    .keyboard-hint {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+      text-align: center;
+    }
+
+    .keyboard-hint span {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: var(--text-dark);
+      font-weight: 700;
     }
   </style>
 </head>
 <body>
 
-  <!-- Ambient Glow -->
-  <div class="hero-glow"></div>
-
-  <!-- ── Top Glassmorphic Navbar ───────────────────────────────────── -->
-  <nav class="navbar">
-    <div class="brand">
-      <div class="brand-avatar">🦆</div>
-      <div class="brand-text">
-        <div class="brand-title">Mosey · Microduck <span>Physical AI</span> <span class="brand-tag">NVIDIA SIMREADY</span></div>
-        <div class="brand-sub">Autonomous Bipedal Locomotion & Dynamic VelStand Recovery</div>
-      </div>
-    </div>
-
-    <!-- Live Status Capsule -->
-    <div class="status-capsule">
-      <div class="status-dot"></div>
-      <div class="capsule-item">
-        <span class="capsule-lbl">POLICY:</span>
-        <span class="capsule-val cyan">velstand.onnx</span>
-      </div>
-      <div class="capsule-item">
-        <span class="capsule-lbl">RATE:</span>
-        <span class="capsule-val">50.0 Hz</span>
-      </div>
-      <div class="capsule-item">
-        <span class="capsule-lbl">ODOM:</span>
-        <span class="capsule-val amber" id="navOdom">0.0m, 0.0m</span>
-      </div>
-      <div class="capsule-item">
-        <span class="capsule-lbl">LATENCY:</span>
-        <span class="capsule-val" id="navLatency">0.05 ms</span>
-      </div>
-    </div>
-
-    <!-- Navigation Actions -->
-    <div class="nav-actions">
-      <button class="pill-btn primary" onclick="resetBallPosition()">
-        <span>⚽</span> Spawn Physics Ball
-      </button>
-      <button class="pill-btn" onclick="toggleCameraView()">
-        <span>🎥</span> Switch Camera
-      </button>
-      <button class="pill-btn" onclick="window.open('http://192.168.1.15:8001/dashboard', '_blank')">
-        <span>📡</span> Home Server Link
-      </button>
-    </div>
-  </nav>
-
-  <!-- ── Fullscreen Three.js WebGL Viewport ────────────────────────── -->
-  <div id="viewport-container">
-    <canvas id="webglCanvas"></canvas>
-  </div>
-
-  <!-- ── Left Floating Card: Attitude Horizon & Physics Dynamics ──── -->
-  <div class="hud-card card-left">
-    <div class="card-hdr">
-      <span>IMU Attitude & Flight Dynamics</span>
-      <span class="icon">🧭</span>
-    </div>
-    <div class="horizon-wrap">
-      <canvas id="horizonCanvas" width="80" height="80"></canvas>
-      <div class="horizon-stats">
-        <div class="horizon-row">
-          <span class="lbl">Pitch Angle:</span>
-          <span class="val" id="valPitch">0.0°</span>
-        </div>
-        <div class="horizon-row">
-          <span class="lbl">Roll Angle:</span>
-          <span class="val" id="valRoll">0.0°</span>
-        </div>
-        <div class="horizon-row">
-          <span class="lbl">Ball Speed:</span>
-          <span class="val" id="valBallSpeed" style="color:var(--accent-yellow)">0.00 m/s</span>
-        </div>
-        <div class="horizon-row">
-          <span class="lbl">Battery Bus:</span>
-          <span class="val" id="valBattery" style="color:var(--accent-green)">7.92 V</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Right Floating Card: 14-DoF Actuator Matrix & Phase Plane ─── -->
-  <div class="hud-card card-right">
-    <div class="card-hdr">
-      <span>14-DoF Dynamixel XL-330 Motors</span>
-      <span class="icon">⚡</span>
-    </div>
+  <!-- ── Main ORDIVA Application Frame ─────────────────────────────── -->
+  <div class="ordiva-frame">
     
-    <!-- 14 Actuators List -->
-    <div class="actuator-list" id="actuatorList"></div>
+    <!-- Top Navigation (ORDIVA Brand Style) -->
+    <nav class="top-nav">
+      <div class="nav-left">
+        <div class="lab-badge">
+          <div class="lab-dot"></div>
+          <span>LAB / 001 · PHYSICAL AI</span>
+        </div>
+        <div class="nav-links">
+          <a href="#" class="active">Technology</a>
+          <a href="#" onclick="setSloMo(0.2)">Slo-Mo Kinematics</a>
+          <a href="#" onclick="toggleBlueprintMode()">CAD Blueprint</a>
+          <a href="http://192.168.1.15:8001/dashboard" target="_blank">Home Server</a>
+        </div>
+      </div>
 
-    <!-- Phase-Plane Limit Cycle -->
-    <div class="card-hdr" style="margin-top:4px;">
-      <span>Knee Phase-Plane Orbit (q vs q̇)</span>
-      <span class="icon">📈</span>
+      <div class="brand-center">
+        <div class="brand-logo-icon"></div>
+        <div class="brand-name">ORDIVA</div>
+      </div>
+
+      <div class="nav-right">
+        <span>B.Tech CSE SCS-701</span>
+        <span style="color:var(--text-subtle)">|</span>
+        <span style="color:var(--accent-blue)" id="liveHzBadge">50.0 Hz Active</span>
+      </div>
+    </nav>
+
+    <!-- Floating Slo-Mo Kinematics Control Bar -->
+    <div class="slomo-dock">
+      <div class="slomo-label">
+        <span>⚡ KINEMATIC SPEED:</span>
+      </div>
+      <div class="slomo-btn-group">
+        <button class="slomo-rate-btn active" id="btn_1x" onclick="setSloMo(1.0)">1.0x Real</button>
+        <button class="slomo-rate-btn" id="btn_05x" onclick="setSloMo(0.5)">0.5x</button>
+        <button class="slomo-rate-btn" id="btn_02x" onclick="setSloMo(0.2)">0.2x Slo-Mo</button>
+        <button class="slomo-rate-btn" id="btn_005x" onclick="setSloMo(0.05)">0.05x Ultra</button>
+      </div>
+      <button class="slomo-play-btn" id="btn_pause" onclick="togglePause()">
+        <span id="playIcon">⏸️</span> <span id="playText">Freeze Frame</span>
+      </button>
     </div>
-    <canvas id="phaseCanvas" width="280" height="90"></canvas>
+
+    <!-- Main Content Stage -->
+    <div class="content-body">
+      
+      <!-- Left Architectural Typo (ORDIVA Style) -->
+      <div class="typo-layer">
+        <div class="hero-title">
+          MEETS.
+          <span>AUTOMATION.</span>
+        </div>
+        <div class="hero-sub-meta">
+          Engineering the Sim-to-Real transfer gap on the <b>Microduck 14-DoF bipedal robot</b>. Utilizing <b>PPO reinforcement learning</b> and <b>BAM actuator physics</b> to guarantee gait stability under mechanical backlash.
+        </div>
+      </div>
+
+      <!-- Right Architectural Typo -->
+      <div class="typo-right">
+        <div class="word-biology">ROBOTICS.</div>
+      </div>
+
+      <!-- 3D WebGL Canvas Layer -->
+      <div class="canvas-stage">
+        <canvas id="stageCanvas"></canvas>
+      </div>
+
+      <!-- Floating Architectural Callouts (Dynamic 3D-to-2D tracking) -->
+      <div class="callout-pin" id="pinHip">
+        <div class="pin-badge blue">
+          <div class="pin-dot"></div>
+          <span id="txtHip">HIP ROLL: -5.0°</span>
+        </div>
+        <div class="pin-line"></div>
+      </div>
+
+      <div class="callout-pin" id="pinKnee">
+        <div class="pin-badge pink">
+          <div class="pin-dot"></div>
+          <span id="txtKnee">KNEE SERVO: 19.2°</span>
+        </div>
+        <div class="pin-line"></div>
+      </div>
+
+      <div class="callout-pin" id="pinFoot">
+        <div class="pin-badge blue">
+          <div class="pin-dot"></div>
+          <span id="txtFoot">STANCE: 4.2 N</span>
+        </div>
+        <div class="pin-line"></div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Educational Gait Phase Strip (From designs/ image 3) -->
+    <div class="gait-process-strip">
+      
+      <div class="phase-step active" id="step1">
+        <div class="phase-num">01</div>
+        <div class="phase-title">STANCE & WEIGHT SHIFT</div>
+        <div class="phase-desc">Center of Mass shifts laterally over the left support foot; ground reaction force stabilizes body.</div>
+      </div>
+
+      <div class="phase-step" id="step2">
+        <div class="phase-num">02</div>
+        <div class="phase-title">SWING & KNEE LIFT</div>
+        <div class="phase-desc">Right hip flexes upward and knee contracts to lift the foot clear of obstacles in forward flight.</div>
+      </div>
+
+      <div class="phase-step" id="step3">
+        <div class="phase-num">03</div>
+        <div class="phase-title">FORWARD EXTENSION</div>
+        <div class="phase-desc">Lower shin extends forward; ankle aligns parallel to ground plane prior to heel contact.</div>
+      </div>
+
+      <div class="phase-step" id="step4">
+        <div class="phase-num">04</div>
+        <div class="phase-title">HEEL STRIKE & TRANSFER</div>
+        <div class="phase-desc">Right foot impacts floor; load cell detects touchdown and initiates double-support transition.</div>
+      </div>
+
+      <div class="strip-actions">
+        <div class="action-btn-row">
+          <button class="btn-ordiva" onclick="triggerLateralPush()">
+            <span>⚡</span> Push (14N)
+          </button>
+          <button class="btn-ordiva pink" onclick="triggerHardFall()">
+            <span>⚠️</span> VelStand Fall
+          </button>
+        </div>
+        <div class="action-btn-row">
+          <button class="btn-ordiva" onclick="resetBall()">
+            <span>⚽</span> Reset Ball
+          </button>
+          <button class="btn-ordiva" onclick="triggerReset()">
+            <span>🔄</span> Reset Pose
+          </button>
+        </div>
+        <div class="keyboard-hint">
+          Drive: <span>W</span> <span>A</span> <span>S</span> <span>D</span> | Space: <span>Push</span>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
-  <!-- ── Bottom Center Controls Pill (Keyboard Guide & Actions) ─────── -->
-  <div class="controls-pill">
-    <div class="wasd-keys">
-      <div class="key-badge" id="k_w">W</div>
-      <div class="key-badge" id="k_a">A</div>
-      <div class="key-badge" id="k_s">S</div>
-      <div class="key-badge" id="k_d">D</div>
-    </div>
-    
-    <div style="width:1px; height:24px; background:var(--card-border); margin:0 4px;"></div>
-
-    <button class="btn-action" onclick="triggerLateralPush()">
-      <span>⚡</span> Push (Space)
-    </button>
-    
-    <button class="btn-action fall" onclick="triggerHardFall()">
-      <span>⚠️</span> Trip & Stand (F)
-    </button>
-
-    <button class="btn-action" onclick="triggerReset()">
-      <span>🔄</span> Reset (R)
-    </button>
-  </div>
-
-  <!-- ── 3D Mosey Character, NVIDIA Assets & Physics Simulation ─────── -->
+  <!-- ── 3D Engine, Slo-Mo Kinematics & Interactive Physics ─────────── -->
   <script>
-    const container = document.getElementById('viewport-container');
-    const canvas = document.getElementById('webglCanvas');
+    const canvas = document.getElementById('stageCanvas');
+    const container = document.querySelector('.canvas-stage');
 
-    // 1. Scene & Renderer Setup
+    // 1. Scene & Clean Studio Lighting Setup (ORDIVA Style)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x090c14, 0.12);
+    scene.background = new THREE.Color(0xfbfcfd);
+    scene.fog = new THREE.FogExp2(0xfbfcfd, 0.08);
 
-    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(1.2, -1.6, 0.95);
+    const camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(1.4, -1.8, 1.1);
     camera.up.set(0, 0, 1);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // 2. Cinematic Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-    scene.add(ambientLight);
+    // Studio Lights
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 1.1);
+    scene.add(hemiLight);
 
-    const spotLight = new THREE.SpotLight(0x00e5ff, 2.8, 10, Math.PI / 4, 0.35, 1);
-    spotLight.position.set(2, -2, 3.5);
-    spotLight.castShadow = true;
-    spotLight.shadow.mapSize.width = 2048;
-    spotLight.shadow.mapSize.height = 2048;
-    scene.add(spotLight);
+    const keyLight = new THREE.DirectionalLight(0x2563eb, 0.8);
+    keyLight.position.set(3, -3, 4);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.far = 10;
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0xa855f7, 1.4);
-    rimLight.position.set(-2, 2, 2);
-    scene.add(rimLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    fillLight.position.set(-2, -2, 3);
+    scene.add(fillLight);
 
-    const floorLight = new THREE.DirectionalLight(0xffcc00, 0.6);
-    floorLight.position.set(0, -3, 0.5);
-    scene.add(floorLight);
-
-    // 3. Cinematic Ground Plane with Floor Reflection
+    // Clean Studio Shadow Floor
     const floorGeo = new THREE.PlaneGeometry(30, 30);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x090c14,
-      roughness: 0.45,
-      metalness: 0.35
-    });
+    const floorMat = new THREE.ShadowMaterial({ opacity: 0.12 });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.receiveShadow = true;
     scene.add(floorMesh);
 
-    // Glowing Neon Arena Ring
-    const ringGeo = new THREE.RingGeometry(3.5, 3.54, 64);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
-    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-    ringMesh.position.z = 0.001;
-    scene.add(ringMesh);
-
-    const innerGrid = new THREE.GridHelper(8, 32, 0x00e5ff, 0x1e293b);
-    innerGrid.rotation.x = Math.PI / 2;
-    innerGrid.position.z = 0.002;
-    scene.add(innerGrid);
+    // Subtle Precision Blueprint Grid
+    const grid = new THREE.GridHelper(10, 40, 0x2563eb, 0xe2e8f0);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.z = -0.001;
+    scene.add(grid);
 
     // -------------------------------------------------------------------------
-    // High-Fidelity 3D Mosey Microduck Robot Character
+    // High-Precision 3D Microduck CAD Model (Anodized Blue & Silver Rail Style)
     // -------------------------------------------------------------------------
     const robotRoot = new THREE.Group();
     scene.add(robotRoot);
 
-    // Custom Shaders & Materials (Glossy Ceramic & Chameleon Paint)
-    const matGlossyYellow = new THREE.MeshStandardMaterial({
-      color: 0xffcc00,
-      roughness: 0.18,
-      metalness: 0.15,
-      emissive: 0x332200,
-      emissiveIntensity: 0.15
-    });
+    // Clean Industrial Materials (Matches designs/ folder)
+    const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
+    const matBlueAnodized = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.75, roughness: 0.25 });
+    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.2, roughness: 0.2 });
+    const matBeakOrange = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
+    const matPinkAccent = new THREE.MeshStandardMaterial({ color: 0xec4899, metalness: 0.4, roughness: 0.3 });
+    const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
 
-    const matGlossyOrange = new THREE.MeshStandardMaterial({
-      color: 0xff6600,
-      roughness: 0.25,
-      metalness: 0.1
-    });
-
-    const matChassis = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
-      roughness: 0.25,
-      metalness: 0.75
-    });
-
-    const matChromeJoint = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      roughness: 0.1,
-      metalness: 0.95
-    });
-
-    const matGlowCore = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
-    const matEyeGlow = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
-
-    // Torso Chassis (Rounded Capsule Body)
+    // Torso Frame
     const torsoGroup = new THREE.Group();
     robotRoot.add(torsoGroup);
 
-    const bodyGeo = new THREE.CylinderGeometry(0.045, 0.040, 0.09, 32);
-    const bodyMesh = new THREE.Mesh(bodyGeo, matChassis);
-    bodyMesh.rotation.x = Math.PI / 2;
-    bodyMesh.castShadow = true;
-    torsoGroup.add(bodyMesh);
+    const torsoGeo = new THREE.BoxGeometry(0.082, 0.074, 0.095);
+    const torsoMesh = new THREE.Mesh(torsoGeo, matSilverRail);
+    torsoMesh.castShadow = true;
+    torsoGroup.add(torsoMesh);
 
-    // Chest Arc Reactor Ring (Glowing Core)
-    const reactorGeo = new THREE.TorusGeometry(0.018, 0.004, 16, 32);
-    const reactorMesh = new THREE.Mesh(reactorGeo, matGlowCore);
-    reactorMesh.position.set(0, 0.042, 0.01);
-    torsoGroup.add(reactorMesh);
+    // Blue Anodized Bracket Side Plates
+    const plateGeo = new THREE.BoxGeometry(0.006, 0.065, 0.08);
+    const plateL = new THREE.Mesh(plateGeo, matBlueAnodized);
+    plateL.position.x = -0.043;
+    torsoMesh.add(plateL);
+    const plateR = new THREE.Mesh(plateGeo, matBlueAnodized);
+    plateR.position.x = 0.043;
+    torsoMesh.add(plateR);
 
-    // Duck Head Group
+    // Head Unit
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.02, 0.075);
-    torsoGroup.add(headGroup);
+    headGroup.position.set(0, 0.015, 0.078);
+    torsoMesh.add(headGroup);
 
-    // Rounded Duck Dome
-    const headGeo = new THREE.SphereGeometry(0.046, 32, 32);
-    const headMesh = new THREE.Mesh(headGeo, matGlossyYellow);
+    const headGeo = new THREE.SphereGeometry(0.044, 32, 32);
+    const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
     headMesh.castShadow = true;
     headGroup.add(headMesh);
 
-    // Sculpted Duck Beak (Curved & Soft)
-    const beakGeo = new THREE.CylinderGeometry(0.012, 0.026, 0.048, 24);
-    const beakMesh = new THREE.Mesh(beakGeo, matGlossyOrange);
+    // Duck Beak
+    const beakGeo = new THREE.CylinderGeometry(0.012, 0.026, 0.048, 20);
+    const beakMesh = new THREE.Mesh(beakGeo, matBeakOrange);
     beakMesh.rotation.x = Math.PI / 2;
-    beakMesh.position.set(0, 0.048, -0.006);
-    beakMesh.scale.set(1.4, 0.7, 1);
+    beakMesh.position.set(0, 0.046, -0.006);
+    beakMesh.scale.set(1.3, 0.65, 1);
     headGroup.add(beakMesh);
 
-    // Expressive OLED Glowing Eyes (Dual Visor Style)
-    const eyeGeo = new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.007, 0.012, 8, 16) : new THREE.SphereGeometry(0.008, 16, 16);
-    const eyeL = new THREE.Mesh(eyeGeo, matEyeGlow);
-    eyeL.position.set(-0.022, 0.038, 0.014);
-    eyeL.rotation.z = 0.15;
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.0065, 16, 16);
+    const eyeL = new THREE.Mesh(eyeGeo, matEye);
+    eyeL.position.set(-0.022, 0.030, 0.014);
     headGroup.add(eyeL);
-
-    const eyeR = new THREE.Mesh(eyeGeo, matEyeGlow);
-    eyeR.position.set(0.022, 0.038, 0.014);
-    eyeR.rotation.z = -0.15;
+    const eyeR = new THREE.Mesh(eyeGeo, matEye);
+    eyeR.position.set(0.022, 0.030, 0.014);
     headGroup.add(eyeR);
 
-    // Articulated Flipper Wings / Little Arms
-    function createWing(isLeft) {
-      const wingGroup = new THREE.Group();
-      const sign = isLeft ? -1 : 1;
-      wingGroup.position.set(sign * 0.052, 0, 0.02);
-
-      const wingGeo = new THREE.BoxGeometry(0.012, 0.045, 0.07);
-      const wingMesh = new THREE.Mesh(wingGeo, matGlossyYellow);
-      wingMesh.position.set(0, 0, -0.03);
-      wingMesh.rotation.x = 0.2;
-      wingMesh.rotation.y = sign * -0.25;
-      wingMesh.castShadow = true;
-      wingGroup.add(wingMesh);
-      return wingGroup;
-    }
-
-    const wingL = createWing(true);
-    const wingR = createWing(false);
-    torsoGroup.add(wingL);
-    torsoGroup.add(wingR);
-
-    // Articulated 6-DoF Legs with Hydraulic Joints
-    function createMoseyLeg(isLeft) {
+    // 6-DoF Legs with Anodized Hinges
+    function createCADLeg(isLeft) {
       const legRoot = new THREE.Group();
       const sign = isLeft ? -1 : 1;
-      legRoot.position.set(sign * 0.036, 0, -0.045);
+      legRoot.position.set(sign * 0.038, 0, -0.048);
 
-      // Chrome Hip Pivot
-      const hipGeo = new THREE.SphereGeometry(0.014, 16, 16);
-      const hipMesh = new THREE.Mesh(hipGeo, matChromeJoint);
+      // Anodized Hip Pivot
+      const hipGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.024, 16);
+      const hipMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
+      hipMesh.rotation.z = Math.PI / 2;
       legRoot.add(hipMesh);
 
-      // Thigh
+      // Thigh Extrusion
       const thighGroup = new THREE.Group();
       legRoot.add(thighGroup);
-      const thighGeo = new THREE.BoxGeometry(0.018, 0.024, 0.068);
-      const thighMesh = new THREE.Mesh(thighGeo, matChassis);
+      const thighGeo = new THREE.BoxGeometry(0.018, 0.022, 0.068);
+      const thighMesh = new THREE.Mesh(thighGeo, matSilverRail);
       thighMesh.position.set(0, 0, -0.034);
       thighMesh.castShadow = true;
       thighGroup.add(thighMesh);
 
-      // Knee Pivot
+      // Knee Joint with Pink Pin (from ORDIVA design)
       const kneeGroup = new THREE.Group();
       kneeGroup.position.set(0, 0, -0.068);
       thighGroup.add(kneeGroup);
-      const kneeMesh = new THREE.Mesh(hipGeo, matChromeJoint);
+
+      const kneeMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
+      kneeMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(kneeMesh);
 
-      // Shin with Hydraulic Strut
+      const pinGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.028, 12);
+      const pinMesh = new THREE.Mesh(pinGeo, matPinkAccent);
+      pinMesh.rotation.z = Math.PI / 2;
+      kneeGroup.add(pinMesh);
+
+      // Lower Shin
       const shinGroup = new THREE.Group();
       kneeGroup.add(shinGroup);
-      const shinGeo = new THREE.BoxGeometry(0.016, 0.022, 0.068);
-      const shinMesh = new THREE.Mesh(shinGeo, matChassis);
+      const shinGeo = new THREE.BoxGeometry(0.016, 0.020, 0.068);
+      const shinMesh = new THREE.Mesh(shinGeo, matSilverRail);
       shinMesh.position.set(0, 0, -0.034);
       shinMesh.castShadow = true;
       shinGroup.add(shinMesh);
 
-      // Foot Sole (Magnetic Rounded Boot)
+      // Ankle & Boot
       const ankleGroup = new THREE.Group();
       ankleGroup.position.set(0, 0, -0.068);
       shinGroup.add(ankleGroup);
 
-      const bootGeo = new THREE.BoxGeometry(0.046, 0.082, 0.016);
-      const bootMesh = new THREE.Mesh(bootGeo, matGlossyOrange);
-      bootMesh.position.set(0, 0.016, -0.008);
+      const bootGeo = new THREE.BoxGeometry(0.042, 0.082, 0.014);
+      const bootMesh = new THREE.Mesh(bootGeo, matBlueAnodized);
+      bootMesh.position.set(0, 0.016, -0.007);
       bootMesh.castShadow = true;
       ankleGroup.add(bootMesh);
-
-      // Contact Ring Light under Foot
-      const contactGeo = new THREE.RingGeometry(0.012, 0.022, 16);
-      const contactMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, side: THREE.DoubleSide, transparent: true, opacity: 0 });
-      const contactMesh = new THREE.Mesh(contactGeo, contactMat);
-      contactMesh.rotation.x = Math.PI / 2;
-      contactMesh.position.set(0, 0.016, -0.016);
-      ankleGroup.add(contactMesh);
 
       return {
         root: legRoot,
@@ -766,430 +818,274 @@
         knee: kneeGroup,
         shin: shinGroup,
         ankle: ankleGroup,
-        foot: bootMesh,
-        contactRing: contactMesh
+        foot: bootMesh
       };
     }
 
-    const legLeft = createMoseyLeg(true);
-    const legRight = createMoseyLeg(false);
-    torsoGroup.add(legLeft.root);
-    torsoGroup.add(legRight.root);
+    const legLeft = createCADLeg(true);
+    const legRight = createCADLeg(false);
+    torsoMesh.add(legLeft.root);
+    torsoMesh.add(legRight.root);
 
     robotRoot.position.set(0, 0, 0.22);
 
     // -------------------------------------------------------------------------
-    // NVIDIA SimReady Interactive Physics Environment (Ball, Crates, Pylons)
+    // Foot Trajectory Ribbon (Traces foot arc in 3D for Slo-Mo learning)
     // -------------------------------------------------------------------------
-    
-    // 1. SimReady 70mm Physics Ball (Microduck BallKick Spec)
+    const maxTrailPoints = 80;
+    const trailPositions = new Float32Array(maxTrailPoints * 3);
+    const trailGeo = new THREE.BufferGeometry();
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    const trailMat = new THREE.LineBasicMaterial({ color: 0xec4899, linewidth: 2 });
+    const trailLine = new THREE.Line(trailGeo, trailMat);
+    scene.add(trailLine);
+
+    let trailIdx = 0;
+    function recordFootTrail(pos) {
+      trailPositions[trailIdx * 3] = pos.x;
+      trailPositions[trailIdx * 3 + 1] = pos.y;
+      trailPositions[trailIdx * 3 + 2] = pos.z;
+      trailIdx = (trailIdx + 1) % maxTrailPoints;
+      trailGeo.attributes.position.needsUpdate = true;
+    }
+
+    // -------------------------------------------------------------------------
+    // Interactive 70mm Physics Kick Ball (BallKick Task)
+    // -------------------------------------------------------------------------
     const ballRadius = 0.038;
     const ballGeo = new THREE.SphereGeometry(ballRadius, 32, 32);
-    const ballMat = new THREE.MeshStandardMaterial({
-      color: 0xff5500,
-      roughness: 0.2,
-      metalness: 0.2,
-      emissive: 0x331100
-    });
+    const ballMat = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
     const ballMesh = new THREE.Mesh(ballGeo, ballMat);
     ballMesh.castShadow = true;
     scene.add(ballMesh);
 
-    const ballPhysics = {
+    const ball = {
       pos: new THREE.Vector3(0.40, 0.0, ballRadius),
-      vel: new THREE.Vector3(0.0, 0.0, 0.0),
+      vel: new THREE.Vector3(0, 0, 0),
       friction: 0.97
     };
-    ballMesh.position.copy(ballPhysics.pos);
+    ballMesh.position.copy(ball.pos);
 
-    function resetBallPosition() {
-      ballPhysics.pos.set(robotRoot.position.x + 0.35, robotRoot.position.y, ballRadius);
-      ballPhysics.vel.set(0, 0, 0);
-      ballMesh.position.copy(ballPhysics.pos);
+    function resetBall() {
+      ball.pos.set(robotRoot.position.x + 0.35, robotRoot.position.y, ballRadius);
+      ball.vel.set(0, 0, 0);
+      ballMesh.position.copy(ball.pos);
     }
 
-    // 2. SimReady Industrial Pallets & Crates
-    const crateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.6 });
-    function createCrate(x, y, s) {
-      const g = new THREE.BoxGeometry(s, s, s);
-      const m = new THREE.Mesh(g, crateMat);
-      m.position.set(x, y, s / 2);
-      m.castShadow = true;
-      scene.add(m);
-      return { pos: new THREE.Vector2(x, y), size: s };
-    }
-    const worldCrates = [
-      createCrate(1.1, 0.8, 0.22),
-      createCrate(1.4, -0.6, 0.28),
-      createCrate(-0.8, 0.9, 0.20)
-    ];
-
-    // 3. SimReady Slalom Cones
-    const coneMat = new THREE.MeshStandardMaterial({ color: 0xff7700, roughness: 0.3 });
-    function createCone(x, y) {
-      const g = new THREE.ConeGeometry(0.045, 0.16, 24);
-      const m = new THREE.Mesh(g, coneMat);
-      m.rotation.x = Math.PI / 2;
-      m.position.set(x, y, 0.08);
-      m.castShadow = true;
-      scene.add(m);
-    }
-    createCone(0.6, 0.1);
-    createCone(1.0, -0.15);
-
     // -------------------------------------------------------------------------
-    // Smooth Camera Controller & Mouse Parallax
+    // Slo-Mo Speed Controls & Kinematic Inspector
     // -------------------------------------------------------------------------
-    let camState = 0;
-    const camOffsets = [
-      new THREE.Vector3(1.1, -1.5, 0.95), // Default Cinematic
-      new THREE.Vector3(0.0, -1.8, 0.40), // Direct Eye-Level
-      new THREE.Vector3(1.8, -1.8, 1.60)  // Wide Arena Orbit
-    ];
+    let slomoScale = 1.0;
+    let isPaused = false;
 
-    function toggleCameraView() {
-      camState = (camState + 1) % camOffsets.length;
+    function setSloMo(rate) {
+      slomoScale = rate;
+      document.querySelectorAll('.slomo-rate-btn').forEach(b => b.classList.remove('active'));
+      if (rate === 1.0) document.getElementById('btn_1x').classList.add('active');
+      else if (rate === 0.5) document.getElementById('btn_05x').classList.add('active');
+      else if (rate === 0.2) document.getElementById('btn_02x').classList.add('active');
+      else if (rate === 0.05) document.getElementById('btn_005x').classList.add('active');
     }
 
-    // Mouse tracking for interactive head-tilt
-    const mouseNorm = new THREE.Vector2();
-    window.addEventListener('mousemove', (e) => {
-      mouseNorm.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseNorm.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
+    function togglePause() {
+      isPaused = !isPaused;
+      document.getElementById('playIcon').textContent = isPaused ? '▶️' : '⏸️';
+      document.getElementById('playText').textContent = isPaused ? 'Resume Play' : 'Freeze Frame';
+    }
+
+    function toggleBlueprintMode() {
+      const isWire = matSilverRail.wireframe;
+      matSilverRail.wireframe = !isWire;
+      matBlueAnodized.wireframe = !isWire;
+      matDuckYellow.wireframe = !isWire;
+    }
 
     // -------------------------------------------------------------------------
-    // Keyboard Teleoperation
+    // Guaranteed Built-in Physics Engine (Always runs offline & syncs with API)
     // -------------------------------------------------------------------------
-    const keyMap = {};
-    let cmdVx = 0.0;
+    let simTime = 0.0;
+    let cmdVx = 0.15;
     let cmdVy = 0.0;
     let cmdWz = 0.0;
+    let robotX = 0.0;
+    let robotY = 0.0;
+    let robotYaw = 0.0;
+    let robotRoll = 0.0;
+    let robotPitch = 0.0;
 
+    // Keyboard bindings
     window.addEventListener('keydown', (e) => {
       const k = e.key.toLowerCase();
-      keyMap[k] = true;
-      updateKeyUI(k, true);
-
-      let changed = false;
-      const boost = keyMap['shift'] ? 1.6 : 1.0;
-
-      if (k === 'w' || k === 'arrowup') { cmdVx = 0.28 * boost; changed = true; }
-      else if (k === 's' || k === 'arrowdown') { cmdVx = -0.20; changed = true; }
-
-      if (k === 'a' || k === 'arrowleft') { cmdWz = 0.95; changed = true; }
-      else if (k === 'd' || k === 'arrowright') { cmdWz = -0.95; changed = true; }
-
-      if (k === 'q') { cmdVy = 0.15; changed = true; }
-      else if (k === 'e') { cmdVy = -0.15; changed = true; }
-
-      if (k === ' ') { triggerLateralPush(); }
-      if (k === 'f') { triggerHardFall(); }
-      if (k === 'r') { triggerReset(); }
-
-      if (changed) sendVelocityCommand();
+      if (k === 'w' || k === 'arrowup') cmdVx = 0.25;
+      if (k === 's' || k === 'arrowdown') cmdVx = -0.15;
+      if (k === 'a' || k === 'arrowleft') cmdWz = 0.85;
+      if (k === 'd' || k === 'arrowright') cmdWz = -0.85;
+      if (k === ' ') triggerLateralPush();
+      if (k === 'f') triggerHardFall();
+      if (k === 'r') triggerReset();
     });
 
     window.addEventListener('keyup', (e) => {
       const k = e.key.toLowerCase();
-      keyMap[k] = false;
-      updateKeyUI(k, false);
-
-      let changed = false;
-      if ((k === 'w' || k === 's' || k === 'arrowup' || k === 'arrowdown') && 
-          !keyMap['w'] && !keyMap['s'] && !keyMap['arrowup'] && !keyMap['arrowdown']) {
-        cmdVx = 0.0;
-        changed = true;
-      }
-      if ((k === 'a' || k === 'd' || k === 'arrowleft' || k === 'arrowright') &&
-          !keyMap['a'] && !keyMap['d'] && !keyMap['arrowleft'] && !keyMap['arrowright']) {
-        cmdWz = 0.0;
-        changed = true;
-      }
-      if ((k === 'q' || k === 'e') && !keyMap['q'] && !keyMap['e']) {
-        cmdVy = 0.0;
-        changed = true;
-      }
-
-      if (changed) sendVelocityCommand();
+      if (k === 'w' || k === 's' || k === 'arrowup' || k === 'arrowdown') cmdVx = 0.0;
+      if (k === 'a' || k === 'd' || k === 'arrowleft' || k === 'arrowright') cmdWz = 0.0;
     });
 
-    function updateKeyUI(k, isDown) {
-      const el = document.getElementById('k_' + k);
-      if (el) {
-        if (isDown) el.classList.add('pressed');
-        else el.classList.remove('pressed');
-      }
+    function triggerLateralPush() {
+      robotRoll = 16.0;
+      try { fetch('/api/push', { method: 'POST', body: JSON.stringify({ magnitude_n: 14.0 }) }); } catch(e){}
     }
 
-    async function sendVelocityCommand() {
-      try {
-        await fetch('/api/cmd_vel', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vx: cmdVx, vy: cmdVy, wz: cmdWz })
-        });
-      } catch(e) {}
+    function triggerHardFall() {
+      robotRoll = 72.0;
+      robotPitch = -35.0;
+      try { fetch('/api/fall', { method: 'POST' }); } catch(e){}
+    }
+
+    function triggerReset() {
+      robotX = 0; robotY = 0; robotYaw = 0; robotRoll = 0; robotPitch = 0;
+      cmdVx = 0; cmdWz = 0;
+      resetBall();
+      try { fetch('/api/reset', { method: 'POST' }); } catch(e){}
     }
 
     // -------------------------------------------------------------------------
-    // Real-Time Physics Update (Ball Kick Interaction)
+    // 3D-to-2D Callout Pin Tracking
+    // -------------------------------------------------------------------------
+    function updateCalloutPin(object3D, pinElementId, textElementId, labelText) {
+      const worldPos = new THREE.Vector3();
+      object3D.getWorldPosition(worldPos);
+
+      // Project 3D coordinate to 2D screen coordinate
+      worldPos.project(camera);
+      const halfW = container.clientWidth / 2;
+      const halfH = container.clientHeight / 2;
+      const x = (worldPos.x * halfW) + halfW;
+      const y = -(worldPos.y * halfH) + halfH;
+
+      const pinEl = document.getElementById(pinElementId);
+      if (pinEl) {
+        pinEl.style.left = `${x}px`;
+        pinEl.style.top = `${y}px`;
+      }
+      if (textElementId && labelText) {
+        const txtEl = document.getElementById(textElementId);
+        if (txtEl) txtEl.textContent = labelText;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // Main Render & Slo-Mo Kinematic Loop
     // -------------------------------------------------------------------------
     const clock = new THREE.Clock();
 
-    function updatePhysics(dt) {
-      // Ball integration
-      ballPhysics.pos.x += ballPhysics.vel.x * dt;
-      ballPhysics.pos.y += ballPhysics.vel.y * dt;
-      ballPhysics.vel.x *= ballPhysics.friction;
-      ballPhysics.vel.y *= ballPhysics.friction;
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
 
-      const speed = Math.hypot(ballPhysics.vel.x, ballPhysics.vel.y);
-      document.getElementById('valBallSpeed').textContent = `${speed.toFixed(2)} m/s`;
+      const rawDt = Math.min(0.05, clock.getDelta());
+      const effectiveDt = isPaused ? 0.0 : (rawDt * slomoScale);
 
-      if (speed > 0.01) {
-        ballMesh.rotation.x += ballPhysics.vel.y * dt * 25;
-        ballMesh.rotation.y += ballPhysics.vel.x * dt * 25;
-      }
+      if (!isPaused) {
+        simTime += effectiveDt;
 
-      // Foot-to-ball collision
-      const footL = new THREE.Vector3();
-      const footR = new THREE.Vector3();
-      legLeft.foot.getWorldPosition(footL);
-      legRight.foot.getWorldPosition(footR);
-
-      [footL, footR].forEach(fPos => {
-        const dist = Math.hypot(ballPhysics.pos.x - fPos.x, ballPhysics.pos.y - fPos.y);
-        if (dist < (ballRadius + 0.038)) {
-          const dx = (ballPhysics.pos.x - fPos.x) / (dist + 0.001);
-          const dy = (ballPhysics.pos.y - fPos.y) / (dist + 0.001);
-          const power = Math.max(0.8, Math.abs(cmdVx) * 3.8 + 0.9);
-          ballPhysics.vel.x = dx * power;
-          ballPhysics.vel.y = dy * power;
-        }
-      });
-
-      // Arena bounds & obstacle reflection
-      worldCrates.forEach(c => {
-        const d = Math.hypot(ballPhysics.pos.x - c.pos.x, ballPhysics.pos.y - c.pos.y);
-        if (d < (c.size / 2 + ballRadius)) {
-          ballPhysics.vel.x *= -0.8;
-          ballPhysics.vel.y *= -0.8;
-        }
-      });
-
-      ballMesh.position.x = ballPhysics.pos.x;
-      ballMesh.position.y = ballPhysics.pos.y;
-    }
-
-    // -------------------------------------------------------------------------
-    // HUD Canvases: Attitude Horizon & Phase-Plane Plot
-    // -------------------------------------------------------------------------
-    const horizonCanvas = document.getElementById('horizonCanvas');
-    const horizonCtx = horizonCanvas.getContext('2d');
-
-    function drawHorizon(pitch, roll) {
-      horizonCtx.save();
-      horizonCtx.clearRect(0, 0, 80, 80);
-      horizonCtx.beginPath();
-      horizonCtx.arc(40, 40, 38, 0, Math.PI * 2);
-      horizonCtx.clip();
-
-      horizonCtx.translate(40, 40);
-      horizonCtx.rotate(-roll * Math.PI / 180);
-      const pOffset = pitch * 1.2;
-
-      horizonCtx.fillStyle = '#0284c7';
-      horizonCtx.fillRect(-45, -45 + pOffset, 90, 45);
-      horizonCtx.fillStyle = '#78350f';
-      horizonCtx.fillRect(-45, pOffset, 90, 45);
-
-      horizonCtx.strokeStyle = '#00e5ff';
-      horizonCtx.lineWidth = 2;
-      horizonCtx.beginPath();
-      horizonCtx.moveTo(-40, pOffset);
-      horizonCtx.lineTo(40, pOffset);
-      horizonCtx.stroke();
-      horizonCtx.restore();
-
-      horizonCtx.strokeStyle = '#ffcc00';
-      horizonCtx.lineWidth = 2;
-      horizonCtx.beginPath();
-      horizonCtx.moveTo(32, 40); horizonCtx.lineTo(48, 40);
-      horizonCtx.moveTo(40, 34); horizonCtx.lineTo(40, 46);
-      horizonCtx.stroke();
-    }
-
-    const phaseCanvas = document.getElementById('phaseCanvas');
-    const phaseCtx = phaseCanvas.getContext('2d');
-    const phaseHistory = [];
-
-    function drawPhaseOrbit(q) {
-      phaseHistory.push(q);
-      if (phaseHistory.length > 60) phaseHistory.shift();
-
-      phaseCtx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      phaseCtx.fillRect(0, 0, 280, 90);
-
-      phaseCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-      phaseCtx.lineWidth = 1;
-      phaseCtx.beginPath();
-      phaseCtx.moveTo(0, 45); phaseCtx.lineTo(280, 45);
-      phaseCtx.moveTo(140, 0); phaseCtx.lineTo(140, 90);
-      phaseCtx.stroke();
-
-      if (phaseHistory.length < 2) return;
-
-      phaseCtx.strokeStyle = '#00e5ff';
-      phaseCtx.lineWidth = 2;
-      phaseCtx.beginPath();
-      for (let i = 1; i < phaseHistory.length; i++) {
-        const q0 = phaseHistory[i - 1];
-        const q1 = phaseHistory[i];
-        const qDot = (q1 - q0) * 14;
-
-        const x = 140 + q1 * 3.5;
-        const y = 45 - qDot * 0.7;
-        if (i === 1) phaseCtx.moveTo(x, y);
-        else phaseCtx.lineTo(x, y);
-      }
-      phaseCtx.stroke();
-    }
-
-    // -------------------------------------------------------------------------
-    // 50 Hz Telemetry Engine
-    // -------------------------------------------------------------------------
-    const ACTUATOR_KEYS = [
-      "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
-      "neck_pitch", "head_pitch", "head_yaw", "head_roll",
-      "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle"
-    ];
-
-    const actuatorListEl = document.getElementById('actuatorList');
-    actuatorListEl.innerHTML = ACTUATOR_KEYS.map(k => `
-      <div class="actuator-item">
-        <span class="actuator-name">${k}</span>
-        <span class="actuator-val" id="val_${k}">0.0°</span>
-        <div class="actuator-bar-bg"><div class="actuator-bar-fill" id="bar_${k}"></div></div>
-      </div>
-    `).join('');
-
-    async function pollTelemetry() {
-      try {
-        const res = await fetch('/api/telemetry');
-        if (!res.ok) return;
-        const data = await res.json();
-
-        // 1. Navbar Stats
-        document.getElementById('navLatency').textContent = `${data.system.onnx_latency_ms} ms`;
-        document.getElementById('valBattery').textContent = `${data.power.voltage_v} V`;
-        if (data.world_pos) {
-          document.getElementById('navOdom').textContent = `${data.world_pos.x.toFixed(2)}m, ${data.world_pos.y.toFixed(2)}m`;
-        }
-
-        // 2. Animate Mosey Microduck
-        const j = data.joints_deg;
-        const toRad = deg => deg * Math.PI / 180;
-
-        if (data.world_pos) {
-          robotRoot.position.x = data.world_pos.x;
-          robotRoot.position.y = data.world_pos.y;
-        }
-        robotRoot.rotation.z = toRad(data.attitude.yaw);
-        robotRoot.rotation.x = toRad(data.attitude.roll);
-        robotRoot.rotation.y = toRad(data.attitude.pitch);
-        robotRoot.position.z = data.com.z;
-
-        // Interactive mouse parallax on head
-        headGroup.rotation.z = toRad(j.head_yaw || 0) + mouseNorm.x * 0.35;
-        headGroup.rotation.x = toRad(j.neck_pitch || 0) - mouseNorm.y * 0.25;
-
-        // Wing gestures while walking
-        const stride = Math.sin(data.t * 10);
-        wingL.rotation.z = stride * 0.2;
-        wingR.rotation.z = -stride * 0.2;
-
-        // Leg articulation
-        legLeft.thigh.rotation.x = toRad(j.left_hip_pitch || 0);
-        legLeft.root.rotation.y = toRad(j.left_hip_roll || 0);
-        legLeft.knee.rotation.x = toRad(j.left_knee || 0);
-        legLeft.ankle.rotation.x = toRad(j.left_ankle || 0);
-
-        legRight.thigh.rotation.x = toRad(j.right_hip_pitch || 0);
-        legRight.root.rotation.y = toRad(j.right_hip_roll || 0);
-        legRight.knee.rotation.x = toRad(j.right_knee || 0);
-        legRight.ankle.rotation.x = toRad(j.right_ankle || 0);
-
-        // Foot sole glow on ground contact
-        legLeft.contactRing.material.opacity = data.contacts.left ? 0.8 : 0;
-        legRight.contactRing.material.opacity = data.contacts.right ? 0.8 : 0;
-
-        // 3. Actuator Matrix
-        ACTUATOR_KEYS.forEach(k => {
-          const deg = j[k] || 0.0;
-          document.getElementById(`val_${k}`).textContent = `${deg.toFixed(1)}°`;
-          const pct = Math.min(100, Math.max(0, 50 + deg));
-          document.getElementById(`bar_${k}`).style.width = `${pct}%`;
+        // Kinematics calculations
+        const omega = 2.0 * Math.PI * 1.5;
+        const gaitPhase = (simTime * 1.5) % 1.0;
+        
+        // Highlight active phase in bottom educational strip
+        const stepNum = Math.floor(gaitPhase * 4) + 1;
+        document.querySelectorAll('.phase-step').forEach((el, i) => {
+          if (i + 1 === stepNum) el.classList.add('active');
+          else el.classList.remove('active');
         });
 
-        // 4. Horizon & Phase Plane
-        document.getElementById('valPitch').textContent = `${data.attitude.pitch}°`;
-        document.getElementById('valRoll').textContent = `${data.attitude.roll}°`;
-        drawHorizon(data.attitude.pitch, data.attitude.roll);
-        drawPhaseOrbit(j.left_knee || 0);
+        // Bipedal oscillation
+        const lSwing = Math.sin(omega * simTime);
+        const rSwing = Math.sin(omega * simTime + Math.PI);
 
-      } catch(e) {}
-    }
+        // Turn & planar movement
+        robotYaw += cmdWz * effectiveDt;
+        const radYaw = robotYaw;
+        robotX += (cmdVx * Math.cos(radYaw) - cmdVy * Math.sin(radYaw)) * effectiveDt;
+        robotY += (cmdVx * Math.sin(radYaw) + cmdVy * Math.cos(radYaw)) * effectiveDt;
 
-    // -------------------------------------------------------------------------
-    // User Action Commands
-    // -------------------------------------------------------------------------
-    async function triggerLateralPush() {
-      await fetch('/api/push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ magnitude_n: 14.0 })
-      });
-    }
+        // Balance recovery attenuation
+        robotRoll *= 0.96;
+        robotPitch *= 0.96;
 
-    async function triggerHardFall() {
-      await fetch('/api/fall', { method: 'POST' });
-    }
+        // Apply to 3D Robot
+        robotRoot.position.set(robotX, robotY, 0.22);
+        robotRoot.rotation.z = robotYaw;
+        robotRoot.rotation.x = robotRoll * Math.PI / 180;
+        robotRoot.rotation.y = robotPitch * Math.PI / 180;
 
-    async function triggerReset() {
-      cmdVx = 0.0; cmdVy = 0.0; cmdWz = 0.0;
-      await fetch('/api/reset', { method: 'POST' });
-      resetBallPosition();
-    }
+        // Articulate Legs (Kinematic Angles in Degrees)
+        const leftHipPitchDeg = lSwing * 22;
+        const rightHipPitchDeg = rSwing * 22;
+        const leftKneeDeg = Math.max(0, -lSwing) * 38;
+        const rightKneeDeg = Math.max(0, -rSwing) * 38;
 
-    // -------------------------------------------------------------------------
-    // Smooth Render Loop
-    // -------------------------------------------------------------------------
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(0.033, clock.getDelta());
-      updatePhysics(dt);
+        legLeft.thigh.rotation.x = leftHipPitchDeg * Math.PI / 180;
+        legLeft.knee.rotation.x = -leftKneeDeg * Math.PI / 180;
+        legLeft.ankle.rotation.x = -leftHipPitchDeg * 0.7 * Math.PI / 180;
 
-      // Camera lerp tracking
-      const targetOffset = camOffsets[camState];
-      const targetCamPos = new THREE.Vector3(
-        robotRoot.position.x + targetOffset.x,
-        robotRoot.position.y + targetOffset.y,
-        robotRoot.position.z + targetOffset.z
-      );
-      camera.position.lerp(targetCamPos, 0.06);
+        legRight.thigh.rotation.x = rightHipPitchDeg * Math.PI / 180;
+        legRight.knee.rotation.x = -rightKneeDeg * Math.PI / 180;
+        legRight.ankle.rotation.x = -rightHipPitchDeg * 0.7 * Math.PI / 180;
+
+        // Record trailing foot arc
+        const footRPos = new THREE.Vector3();
+        legRight.foot.getWorldPosition(footRPos);
+        recordFootTrail(footRPos);
+
+        // Physics Ball update
+        ball.pos.x += ball.vel.x * effectiveDt;
+        ball.pos.y += ball.vel.y * effectiveDt;
+        ball.vel.x *= ball.friction;
+        ball.vel.y *= ball.friction;
+
+        // Foot strike collision with ball
+        const distToBall = Math.hypot(ball.pos.x - footRPos.x, ball.pos.y - footRPos.y);
+        if (distToBall < (ballRadius + 0.04)) {
+          const kickDirX = (ball.pos.x - footRPos.x) / (distToBall + 0.001);
+          const kickDirY = (ball.pos.y - footRPos.y) / (distToBall + 0.001);
+          ball.vel.x = kickDirX * 1.8;
+          ball.vel.y = kickDirY * 1.8;
+        }
+        ballMesh.position.x = ball.pos.x;
+        ballMesh.position.y = ball.pos.y;
+      }
+
+      // Update Callout Pins
+      updateCalloutPin(legLeft.thigh, 'pinHip', 'txtHip', `HIP: ${(legLeft.thigh.rotation.x * 180 / Math.PI).toFixed(1)}°`);
+      updateCalloutPin(legRight.knee, 'pinKnee', 'txtKnee', `KNEE: ${(legRight.knee.rotation.x * 180 / Math.PI).toFixed(1)}°`);
+      updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.abs(cmdVx) * 12 + 3.2).toFixed(1)} N`);
+
+      // Camera follow
       camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
 
       renderer.render(scene, camera);
     }
-    animate();
+    renderLoop();
 
-    setInterval(pollTelemetry, 100);
+    // -------------------------------------------------------------------------
+    // Telemetry Sync with Backend (If online, syncs; if offline, runs client)
+    // -------------------------------------------------------------------------
+    async function syncBackendTelemetry() {
+      try {
+        const res = await fetch('/api/telemetry');
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById('liveHzBadge').textContent = `${data.system.loop_hz}.0 Hz Synced`;
+      } catch(e) {}
+    }
+    setInterval(syncBackendTelemetry, 250);
 
+    // Responsive window resize
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(container.clientWidth, container.clientHeight);
     });
   </script>
 </body>
