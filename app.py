@@ -343,6 +343,15 @@ class MicroduckEngine:
                 self.bus_current = round(float(total_current), 2)
                 self.bus_voltage = round(7.95 - total_current * 0.14, 2)
 
+                # 2D World Odometry & Navigation Integration (Vx, Vy, Wz)
+                yaw_rad = math.radians(self.yaw)
+                self.yaw += math.degrees(self.command_vel[2] * DT)
+                self.yaw = (self.yaw + 180.0) % 360.0 - 180.0 # wrap [-180, 180]
+                vx_world = self.command_vel[0] * math.cos(yaw_rad) - self.command_vel[1] * math.sin(yaw_rad)
+                vy_world = self.command_vel[0] * math.sin(yaw_rad) + self.command_vel[1] * math.cos(yaw_rad)
+                self.pos[0] += vx_world * DT
+                self.pos[1] += vy_world * DT
+
             self.inference_latency_ms = round((time.perf_counter() - t0) * 1000, 3)
 
     def get_telemetry_packet(self) -> Dict[str, Any]:
@@ -368,6 +377,7 @@ class MicroduckEngine:
                     "ang_vel_z": round(float(self.ang_vel[2]), 2),
                 },
                 "com": {"x": float(self.com_x), "y": float(self.com_y), "z": round(float(self.pos[2]), 3)},
+                "world_pos": {"x": round(float(self.pos[0]), 3), "y": round(float(self.pos[1]), 3), "z": round(float(self.pos[2]), 3)},
                 "zmp": {"x": float(self.zmp_x), "y": float(self.zmp_y)},
                 "grf": {"left_n": float(self.grf_l), "right_n": float(self.grf_r)},
                 "contacts": {"left": bool(self.foot_contact_l > 0.3), "right": bool(self.foot_contact_r > 0.3)},

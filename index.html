@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MicroDuck GCS | Sim-to-Real Robotics Telemetry Console</title>
+  <title>MicroDuck GCS | NVIDIA SimReady Physics & Teleoperation Console</title>
   
-  <!-- Offline bundled libraries (fallback to local static) -->
+  <!-- Offline bundled libraries -->
   <script src="/static/three.min.js"></script>
   <script src="/static/chart.min.js"></script>
 
@@ -21,6 +21,7 @@
       --accent-amber: #ffb300;
       --accent-green: #00ff88;
       --accent-crimson: #ff3366;
+      --accent-nvidia: #76b900;
       --text-bright: #f0f6fc;
       --text-muted: #8b949e;
       --font-mono: 'Consolas', 'JetBrains Mono', 'Fira Code', monospace;
@@ -70,6 +71,18 @@
 
     .brand-title span {
       color: var(--accent-cyan);
+    }
+
+    .nvidia-tag {
+      background: rgba(118, 185, 0, 0.15);
+      border: 1px solid var(--accent-nvidia);
+      color: var(--accent-nvidia);
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      margin-left: 6px;
     }
 
     .brand-sub {
@@ -134,12 +147,7 @@
       display: block;
     }
 
-    /* Viewport Floating Overlays */
-    .overlay-hud {
-      position: absolute;
-      pointer-events: none;
-    }
-
+    /* Camera Presets */
     .cam-controls {
       position: absolute;
       top: 14px;
@@ -147,6 +155,7 @@
       display: flex;
       gap: 6px;
       pointer-events: auto;
+      z-index: 10;
     }
 
     .hud-btn {
@@ -168,6 +177,62 @@
       background: rgba(0, 229, 255, 0.1);
     }
 
+    /* Keyboard Teleoperation HUD */
+    .key-hud {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(13, 17, 24, 0.90);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .key-hud-title {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      color: var(--accent-nvidia);
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .keycap {
+      background: #161e2e;
+      border: 1px solid #283548;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 26px;
+      text-align: center;
+      transition: all 0.08s;
+      box-shadow: 0 2px 0 #0a0d14;
+    }
+
+    .keycap.active {
+      background: rgba(0, 229, 255, 0.25);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+      transform: translateY(2px);
+    }
+
+    .keycap.wide { padding: 4px 12px; }
+
     /* Attitude Gyro (Artificial Horizon) */
     .gyro-card {
       position: absolute;
@@ -183,6 +248,7 @@
       gap: 6px;
       backdrop-filter: blur(6px);
       pointer-events: auto;
+      z-index: 10;
     }
 
     .gyro-title {
@@ -219,6 +285,7 @@
       gap: 16px;
       backdrop-filter: blur(6px);
       pointer-events: auto;
+      z-index: 10;
     }
 
     .foot-sole {
@@ -235,7 +302,6 @@
       border-radius: 6px;
       background: #090d14;
       transition: all 0.1s;
-      position: relative;
     }
 
     .sole-box.contact {
@@ -249,7 +315,7 @@
 
     /* Right Telemetry Column */
     .telemetry-col {
-      width: 380px;
+      width: 370px;
       background: var(--panel);
       border-left: 1px solid var(--panel-border);
       display: flex;
@@ -283,14 +349,14 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 220px;
+      max-height: 200px;
       overflow-y: auto;
       padding-right: 4px;
     }
 
     .joint-row {
       display: grid;
-      grid-template-columns: 110px 50px 1fr 40px;
+      grid-template-columns: 105px 48px 1fr 40px;
       align-items: center;
       gap: 6px;
       font-size: 0.72rem;
@@ -306,7 +372,7 @@
     /* Phase Orbit Canvas */
     #orbitCanvas {
       width: 100%;
-      height: 120px;
+      height: 110px;
       background: #090d14;
       border: 1px solid var(--panel-border);
       border-radius: 4px;
@@ -330,7 +396,7 @@
     .metric-lbl { font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); }
     .metric-val { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); font-family: var(--font-mono); margin-top: 2px; }
 
-    /* ── Bottom Command Console ──────────────────────────────────────── */
+    /* ── Bottom Command Console ────────────────────────────────────── */
     footer {
       background: var(--panel-header);
       border-top: 1px solid var(--panel-border);
@@ -391,9 +457,9 @@
       background: #162030;
       border: 1px solid #26354d;
       color: var(--text-bright);
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 5px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       font-family: var(--font-mono);
       cursor: pointer;
@@ -427,15 +493,13 @@
       background: rgba(255, 51, 102, 0.15);
     }
 
-    .btn-act.btn-estop {
-      background: #2a1017;
-      border-color: #5c1827;
-      color: #ff5c7c;
+    .btn-act.btn-ball {
+      border-color: var(--accent-nvidia);
+      color: var(--accent-nvidia);
     }
 
-    .btn-act.btn-estop:hover {
-      background: #40121e;
-      border-color: var(--accent-crimson);
+    .btn-act.btn-ball:hover {
+      background: rgba(118, 185, 0, 0.15);
     }
   </style>
 </head>
@@ -446,23 +510,23 @@
     <div class="brand">
       <div class="brand-icon">🦆</div>
       <div>
-        <div class="brand-title">MICRODUCK <span>GCS</span></div>
-        <div class="brand-sub">Sim-to-Real Telemetry & Policy Evaluation Console</div>
+        <div class="brand-title">MICRODUCK <span>GCS</span> <span class="nvidia-tag">NVIDIA SIMREADY</span></div>
+        <div class="brand-sub">Physics-Enabled Teleoperation & VelStand Evaluation</div>
       </div>
     </div>
 
     <div class="sys-badges">
       <div class="badge">
         <div class="badge-dot"></div>
-        <span class="badge-label">NODE:</span>
-        <span class="badge-val">50.0 Hz</span>
+        <span class="badge-label">ODOM:</span>
+        <span class="badge-val" id="badgeOdom">X: 0.0m | Y: 0.0m</span>
       </div>
       <div class="badge">
         <span class="badge-label">POLICY:</span>
-        <span class="badge-val" id="badgePolicy">velstand.onnx</span>
+        <span class="badge-val">velstand.onnx</span>
       </div>
       <div class="badge">
-        <span class="badge-label">ONNX LATENCY:</span>
+        <span class="badge-label">INFERENCE:</span>
         <span class="badge-val" id="badgeLatency">0.05 ms</span>
       </div>
       <div class="badge">
@@ -472,10 +536,6 @@
       <div class="badge">
         <span class="badge-label">STATE:</span>
         <span class="badge-val mode-walk" id="badgeState">WALK</span>
-      </div>
-      <div class="badge">
-        <span class="badge-label">HOME SERVER:</span>
-        <span class="badge-val" style="color:var(--accent-green);">PORT 8001 (LAN)</span>
       </div>
     </div>
   </header>
@@ -490,9 +550,29 @@
       <!-- Camera Presets -->
       <div class="cam-controls">
         <button class="hud-btn active" onclick="setCamPreset('follow')">Follow Cam</button>
-        <button class="hud-btn" onclick="setCamPreset('iso')">Isometric</button>
+        <button class="hud-btn" onclick="setCamPreset('iso')">Isometric Arena</button>
         <button class="hud-btn" onclick="setCamPreset('front')">Front View</button>
         <button class="hud-btn" onclick="setCamPreset('zmp')">Top-Down ZMP</button>
+      </div>
+
+      <!-- Keyboard Teleoperation HUD -->
+      <div class="key-hud">
+        <div class="key-hud-title">KEYBOARD TELEOPERATION</div>
+        <div class="key-row">
+          <div class="keycap" id="key_q">Q</div>
+          <div class="keycap" id="key_w">W</div>
+          <div class="keycap" id="key_e">E</div>
+        </div>
+        <div class="key-row">
+          <div class="keycap" id="key_a">A</div>
+          <div class="keycap" id="key_s">S</div>
+          <div class="keycap" id="key_d">D</div>
+        </div>
+        <div class="key-row">
+          <div class="keycap wide" id="key_space">SPACE (PUSH)</div>
+          <div class="keycap" id="key_f">F (FALL)</div>
+          <div class="keycap" id="key_r">R</div>
+        </div>
       </div>
 
       <!-- Attitude Artificial Horizon -->
@@ -526,9 +606,7 @@
           <span>14-DoF Dynamixel XL-330 Matrix</span>
           <span class="highlight">ENCODERS</span>
         </div>
-        <div class="joint-matrix" id="jointMatrix">
-          <!-- Populated by JavaScript -->
-        </div>
+        <div class="joint-matrix" id="jointMatrix"></div>
       </div>
 
       <!-- Phase Plane Limit Cycle -->
@@ -537,22 +615,22 @@
           <span>Phase-Plane Orbit (q vs q̇)</span>
           <span class="highlight">KNEE LIMIT CYCLE</span>
         </div>
-        <canvas id="orbitCanvas" width="340" height="120"></canvas>
+        <canvas id="orbitCanvas" width="340" height="110"></canvas>
       </div>
 
       <!-- System Health Metrics -->
       <div class="panel-sec" style="border-bottom:none;">
         <div class="panel-hdr">
-          <span>Electrical & Kinematic Health</span>
-          <span class="highlight">BAM M6</span>
+          <span>NVIDIA SimReady Kinematics</span>
+          <span class="highlight">PHYSX / BAM</span>
         </div>
         <div class="metrics-grid">
           <div class="metric-cell">
-            <div class="metric-lbl">BUS CURRENT</div>
-            <div class="metric-val" id="valCurrent">0.85 A</div>
+            <div class="metric-lbl">BALL VELOCITY</div>
+            <div class="metric-val" id="valBallVel">0.00 m/s</div>
           </div>
           <div class="metric-cell">
-            <div class="metric-lbl">TOTAL POWER</div>
+            <div class="metric-lbl">BUS POWER</div>
             <div class="metric-val" id="valPower">6.7 W</div>
           </div>
           <div class="metric-cell">
@@ -560,8 +638,8 @@
             <div class="metric-val" id="valComX">0.00 mm</div>
           </div>
           <div class="metric-cell">
-            <div class="metric-lbl">SIM BACKLASH</div>
-            <div class="metric-val" id="valBacklash">±2.0°</div>
+            <div class="metric-lbl">BACKLASH ANGLE</div>
+            <div class="metric-val">±2.0°</div>
           </div>
         </div>
       </div>
@@ -584,34 +662,31 @@
     </div>
 
     <div class="action-btn-group">
+      <button class="btn-act btn-ball" onclick="resetBallPosition()">
+        <span>⚽</span> RESET SIMREADY BALL
+      </button>
       <button class="btn-act btn-push" onclick="triggerLateralPush()">
-        <span>⚡</span> APPLY LATERAL PUSH (14 N)
+        <span>⚡</span> PUSH (14 N) [SPACE]
       </button>
       <button class="btn-act btn-fall" onclick="triggerHardFall()">
-        <span>⚠️</span> SIMULATE HARD TRIP (FALL RECOVERY)
-      </button>
-      <button class="btn-act btn-estop" onclick="triggerEstop()">
-        <span>🛑</span> E-STOP
+        <span>⚠️</span> TRIP / FALL [F]
       </button>
       <button class="btn-act" onclick="triggerReset()">
-        <span>🔄</span> RESET
+        <span>🔄</span> RESET [R]
       </button>
     </div>
   </footer>
 
-  <!-- ── 3D Scene & Live Telemetry Logic ───────────────────────────── -->
+  <!-- ── 3D Scene, NVIDIA SimReady Assets & Teleoperation ───────────── -->
   <script>
-    // -------------------------------------------------------------------------
-    // 3D Three.js High-Fidelity Microduck Setup
-    // -------------------------------------------------------------------------
     const container = document.querySelector('.viewport-container');
     const canvas = document.getElementById('viewport');
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x07090e, 0.25);
+    scene.fog = new THREE.FogExp2(0x07090e, 0.18);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.05, 50);
-    camera.position.set(0.65, -0.75, 0.45);
+    camera.position.set(0.75, -0.95, 0.60);
     camera.up.set(0, 0, 1);
 
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
@@ -621,33 +696,127 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
     const keyLight = new THREE.DirectionalLight(0x00e5ff, 1.2);
-    keyLight.position.set(2, -2, 3);
+    keyLight.position.set(3, -3, 4);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 1024;
     keyLight.shadow.mapSize.height = 1024;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffb300, 0.6);
-    fillLight.position.set(-2, 2, 2);
+    const fillLight = new THREE.DirectionalLight(0x76b900, 0.5);
+    fillLight.position.set(-3, 3, 2);
     scene.add(fillLight);
 
-    // Infinite Engineering Grid Floor
-    const grid = new THREE.GridHelper(10, 50, 0x00e5ff, 0x1b2332);
+    // Arena Floor
+    const grid = new THREE.GridHelper(16, 64, 0x00e5ff, 0x1b2332);
     grid.rotation.x = Math.PI / 2;
     grid.position.z = 0;
     scene.add(grid);
 
-    // Coordinate Triad Axes
-    const axes = new THREE.AxesHelper(0.12);
-    axes.position.set(-0.35, -0.35, 0.01);
-    scene.add(axes);
+    // -------------------------------------------------------------------------
+    // NVIDIA SimReady Interactive 3D Assets (Obstacles, Crates, Cones, Ball)
+    // -------------------------------------------------------------------------
+    
+    // 1. SimReady 70mm Physics Kick Ball (Microduck BallKick Spec)
+    const ballRadius = 0.035; // 70mm diameter
+    const ballGeo = new THREE.SphereGeometry(ballRadius, 24, 24);
+    const ballMat = new THREE.MeshStandardMaterial({ 
+      color: 0xff5500, 
+      roughness: 0.35, 
+      metalness: 0.1,
+      emissive: 0x221100
+    });
+    const ballMesh = new THREE.Mesh(ballGeo, ballMat);
+    ballMesh.castShadow = true;
+    scene.add(ballMesh);
+
+    // Ball Physics State
+    const ballState = {
+      pos: new THREE.Vector3(0.35, 0.05, ballRadius),
+      vel: new THREE.Vector3(0.0, 0.0, 0.0),
+      mass: 0.015, // 15 grams (official spec)
+      friction: 0.965
+    };
+    ballMesh.position.copy(ballState.pos);
+
+    function resetBallPosition() {
+      ballState.pos.set(robotRoot.position.x + 0.30, robotRoot.position.y, ballRadius);
+      ballState.vel.set(0, 0, 0);
+      ballMesh.position.copy(ballState.pos);
+    }
+
+    // 2. SimReady Industrial Cargo Crates (Wooden Pallets with Metal Brackets)
+    const crateMat = new THREE.MeshStandardMaterial({ color: 0x8a623a, roughness: 0.7, metalness: 0.2 });
+    const crateMetalMat = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.3, metalness: 0.8 });
+
+    function createSimReadyCrate(x, y, size) {
+      const crateGroup = new THREE.Group();
+      crateGroup.position.set(x, y, size / 2);
+
+      const boxGeo = new THREE.BoxGeometry(size, size, size);
+      const boxMesh = new THREE.Mesh(boxGeo, crateMat);
+      boxMesh.castShadow = true;
+      crateGroup.add(boxMesh);
+
+      // Steel framing corners
+      const frameGeo = new THREE.BoxGeometry(size * 1.02, size * 1.02, size * 0.15);
+      const frameMesh = new THREE.Mesh(frameGeo, crateMetalMat);
+      crateGroup.add(frameMesh);
+
+      scene.add(crateGroup);
+      return { pos: new THREE.Vector2(x, y), size: size };
+    }
+
+    const crates = [
+      createSimReadyCrate(0.8, 0.6, 0.16),
+      createSimReadyCrate(1.2, -0.5, 0.22),
+      createSimReadyCrate(-0.6, 0.7, 0.18)
+    ];
+
+    // 3. SimReady Traffic Slalom Safety Cones
+    const coneOrangeMat = new THREE.MeshStandardMaterial({ color: 0xff4400, roughness: 0.4 });
+    const coneWhiteMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.2 });
+
+    function createSimReadyCone(x, y) {
+      const coneGroup = new THREE.Group();
+      coneGroup.position.set(x, y, 0);
+
+      // Square base
+      const baseGeo = new THREE.BoxGeometry(0.12, 0.12, 0.015);
+      const baseMesh = new THREE.Mesh(baseGeo, coneOrangeMat);
+      baseMesh.position.z = 0.0075;
+      baseMesh.castShadow = true;
+      coneGroup.add(baseMesh);
+
+      // Cone
+      const coneGeo = new THREE.ConeGeometry(0.045, 0.16, 16);
+      const coneMesh = new THREE.Mesh(coneGeo, coneOrangeMat);
+      coneMesh.rotation.x = Math.PI / 2;
+      coneMesh.position.z = 0.08;
+      coneMesh.castShadow = true;
+      coneGroup.add(coneMesh);
+
+      scene.add(coneGroup);
+    }
+
+    createSimReadyCone(0.5, 0.0);
+    createSimReadyCone(0.9, 0.15);
+    createSimReadyCone(1.3, -0.15);
+
+    // 4. SimReady Training Ramp / Incline (12 deg)
+    const rampGeo = new THREE.BoxGeometry(0.5, 0.8, 0.03);
+    const rampMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 });
+    const rampMesh = new THREE.Mesh(rampGeo, rampMat);
+    rampMesh.position.set(-0.7, -0.4, 0.06);
+    rampMesh.rotation.y = -0.21; // ~12 degrees
+    rampMesh.receiveShadow = true;
+    scene.add(rampMesh);
 
     // -------------------------------------------------------------------------
-    // Microduck 3D Procedural Robotic Anatomy
+    // Microduck 3D High-Fidelity Robot Anatomy
     // -------------------------------------------------------------------------
     const robotRoot = new THREE.Group();
     scene.add(robotRoot);
@@ -691,19 +860,17 @@
     eyeR.position.set(0.022, 0.025, 0.015);
     headGroup.add(eyeR);
 
-    // Build Articulated Legs (Left & Right)
+    // Build Articulated Legs
     function createLeg(isLeft) {
       const legGroup = new THREE.Group();
       const sign = isLeft ? -1 : 1;
       legGroup.position.set(sign * 0.038, 0, -0.045);
 
-      // Hip Joint
       const hipGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 16);
       const hipMesh = new THREE.Mesh(hipGeo, matJoint);
       hipMesh.rotation.z = Math.PI / 2;
       legGroup.add(hipMesh);
 
-      // Upper Leg
       const thighGroup = new THREE.Group();
       legGroup.add(thighGroup);
       const thighGeo = new THREE.BoxGeometry(0.018, 0.022, 0.07);
@@ -712,7 +879,6 @@
       thighMesh.castShadow = true;
       thighGroup.add(thighMesh);
 
-      // Knee Joint
       const kneeGroup = new THREE.Group();
       kneeGroup.position.set(0, 0, -0.07);
       thighGroup.add(kneeGroup);
@@ -720,7 +886,6 @@
       kneeMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(kneeMesh);
 
-      // Lower Shin
       const shinGroup = new THREE.Group();
       kneeGroup.add(shinGroup);
       const shinGeo = new THREE.BoxGeometry(0.016, 0.02, 0.07);
@@ -729,7 +894,6 @@
       shinMesh.castShadow = true;
       shinGroup.add(shinMesh);
 
-      // Ankle & Foot
       const ankleGroup = new THREE.Group();
       ankleGroup.position.set(0, 0, -0.07);
       shinGroup.add(ankleGroup);
@@ -745,7 +909,8 @@
         thigh: thighGroup,
         knee: kneeGroup,
         shin: shinGroup,
-        ankle: ankleGroup
+        ankle: ankleGroup,
+        foot: footMesh
       };
     }
 
@@ -754,29 +919,187 @@
     torsoMesh.add(legLeft.root);
     torsoMesh.add(legRight.root);
 
-    // Initial position
     robotRoot.position.set(0, 0, 0.22);
 
-    // Camera preset states
-    let camMode = 'follow';
-    function setCamPreset(mode) {
-      camMode = mode;
-      document.querySelectorAll('.cam-controls .hud-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+    // -------------------------------------------------------------------------
+    // Keyboard Teleoperation Engine
+    // -------------------------------------------------------------------------
+    const activeKeys = {};
+    let cmdVx = 0.20;
+    let cmdVy = 0.0;
+    let cmdWz = 0.0;
 
-      if (mode === 'iso') {
-        camera.position.set(0.7, -0.7, 0.5);
-      } else if (mode === 'front') {
-        camera.position.set(0, -0.9, 0.25);
-      } else if (mode === 'zmp') {
-        camera.position.set(0, 0, 1.1);
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      activeKeys[k] = true;
+      highlightKeycap(k, true);
+
+      // Keyboard mappings
+      let changed = false;
+      const boost = activeKeys['shift'] ? 1.6 : 1.0;
+
+      if (k === 'w' || k === 'arrowup') { cmdVx = 0.28 * boost; changed = true; }
+      else if (k === 's' || k === 'arrowdown') { cmdVx = -0.20; changed = true; }
+      
+      if (k === 'a' || k === 'arrowleft') { cmdWz = 0.85; changed = true; }
+      else if (k === 'd' || k === 'arrowright') { cmdWz = -0.85; changed = true; }
+
+      if (k === 'q') { cmdVy = 0.15; changed = true; }
+      else if (k === 'e') { cmdVy = -0.15; changed = true; }
+
+      if (k === ' ') { triggerLateralPush(); }
+      if (k === 'f') { triggerHardFall(); }
+      if (k === 'r') { triggerReset(); }
+
+      if (changed) sendVelocityCommand();
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      activeKeys[k] = false;
+      highlightKeycap(k, false);
+
+      let changed = false;
+      if ((k === 'w' || k === 's' || k === 'arrowup' || k === 'arrowdown') && 
+          !activeKeys['w'] && !activeKeys['s'] && !activeKeys['arrowup'] && !activeKeys['arrowdown']) {
+        cmdVx = 0.0;
+        changed = true;
       }
-      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z);
+      if ((k === 'a' || k === 'd' || k === 'arrowleft' || k === 'arrowright') &&
+          !activeKeys['a'] && !activeKeys['d'] && !activeKeys['arrowleft'] && !activeKeys['arrowright']) {
+        cmdWz = 0.0;
+        changed = true;
+      }
+      if ((k === 'q' || k === 'e') && !activeKeys['q'] && !activeKeys['e']) {
+        cmdVy = 0.0;
+        changed = true;
+      }
+
+      if (changed) sendVelocityCommand();
+    });
+
+    function highlightKeycap(key, isDown) {
+      let capId = 'key_' + key;
+      if (key === ' ') capId = 'key_space';
+      const el = document.getElementById(capId);
+      if (el) {
+        if (isDown) el.classList.add('active');
+        else el.classList.remove('active');
+      }
+    }
+
+    async function sendVelocityCommand() {
+      document.getElementById('sliderVx').value = cmdVx;
+      document.getElementById('sliderWz').value = cmdWz;
+      document.getElementById('lblVx').textContent = `${cmdVx.toFixed(2)} m/s`;
+      document.getElementById('lblWz').textContent = `${cmdWz.toFixed(2)} rad/s`;
+
+      try {
+        await fetch('/api/cmd_vel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vx: cmdVx, vy: cmdVy, wz: cmdWz })
+        });
+      } catch(e) {}
     }
 
     // -------------------------------------------------------------------------
-    // Phase Plane Canvas (q vs q_dot) & Attitude Gyro Canvas
+    // Real-Time Physics Update Loop (Ball Kicking & Collisions)
     // -------------------------------------------------------------------------
+    const clock = new THREE.Clock();
+
+    function updateSimulationPhysics(dt) {
+      // 1. Ball physics update
+      ballState.pos.x += ballState.vel.x * dt;
+      ballState.pos.y += ballState.vel.y * dt;
+      ballState.vel.x *= ballState.friction;
+      ballState.vel.y *= ballState.friction;
+
+      // Ball rotation based on velocity
+      const ballSpeed = Math.sqrt(ballState.vel.x ** 2 + ballState.vel.y ** 2);
+      document.getElementById('valBallVel').textContent = `${ballSpeed.toFixed(2)} m/s`;
+
+      if (ballSpeed > 0.01) {
+        ballMesh.rotation.x += ballState.vel.y * dt * 20;
+        ballMesh.rotation.y += ballState.vel.x * dt * 20;
+      }
+
+      // 2. Robot foot to ball collision (BallKick Task)
+      const footLWorld = new THREE.Vector3();
+      const footRWorld = new THREE.Vector3();
+      legLeft.foot.getWorldPosition(footLWorld);
+      legRight.foot.getWorldPosition(footRWorld);
+
+      [footLWorld, footRWorld].forEach(footPos => {
+        const dist = Math.hypot(ballState.pos.x - footPos.x, ballState.pos.y - footPos.y);
+        const hitThreshold = ballRadius + 0.035;
+
+        if (dist < hitThreshold) {
+          // Compute impulse direction
+          const kickDirX = (ballState.pos.x - footPos.x) / (dist + 0.001);
+          const kickDirY = (ballState.pos.y - footPos.y) / (dist + 0.001);
+          const kickPower = Math.max(0.6, Math.abs(cmdVx) * 3.5 + 0.8);
+
+          ballState.vel.x = kickDirX * kickPower;
+          ballState.vel.y = kickDirY * kickPower;
+
+          // Light up foot contact on kick
+          document.getElementById('soleLeft').classList.add('contact');
+        }
+      });
+
+      // 3. Crate collisions
+      crates.forEach(c => {
+        const distCrate = Math.hypot(ballState.pos.x - c.pos.x, ballState.pos.y - c.pos.y);
+        if (distCrate < (c.size / 2 + ballRadius)) {
+          ballState.vel.x *= -0.75;
+          ballState.vel.y *= -0.75;
+        }
+      });
+
+      // Update mesh position
+      ballMesh.position.x = ballState.pos.x;
+      ballMesh.position.y = ballState.pos.y;
+    }
+
+    // -------------------------------------------------------------------------
+    // Artificial Horizon & Phase Plane Displays
+    // -------------------------------------------------------------------------
+    const gyroCanvas = document.getElementById('gyroCanvas');
+    const gyroCtx = gyroCanvas.getContext('2d');
+
+    function drawArtificialHorizon(pitchDeg, rollDeg) {
+      gyroCtx.save();
+      gyroCtx.clearRect(0, 0, 100, 100);
+      gyroCtx.beginPath();
+      gyroCtx.arc(50, 50, 48, 0, Math.PI * 2);
+      gyroCtx.clip();
+
+      gyroCtx.translate(50, 50);
+      gyroCtx.rotate(-rollDeg * Math.PI / 180);
+      const pitchOffset = pitchDeg * 1.5;
+
+      gyroCtx.fillStyle = '#10304a';
+      gyroCtx.fillRect(-60, -60 + pitchOffset, 120, 60);
+      gyroCtx.fillStyle = '#261b12';
+      gyroCtx.fillRect(-60, pitchOffset, 120, 60);
+
+      gyroCtx.strokeStyle = '#00e5ff';
+      gyroCtx.lineWidth = 2;
+      gyroCtx.beginPath();
+      gyroCtx.moveTo(-50, pitchOffset);
+      gyroCtx.lineTo(50, pitchOffset);
+      gyroCtx.stroke();
+      gyroCtx.restore();
+
+      gyroCtx.strokeStyle = '#ffb300';
+      gyroCtx.lineWidth = 2;
+      gyroCtx.beginPath();
+      gyroCtx.moveTo(40, 50); gyroCtx.lineTo(60, 50);
+      gyroCtx.moveTo(50, 42); gyroCtx.lineTo(50, 58);
+      gyroCtx.stroke();
+    }
+
     const orbitCanvas = document.getElementById('orbitCanvas');
     const orbitCtx = orbitCanvas.getContext('2d');
     const orbitHistory = [];
@@ -788,12 +1111,11 @@
       orbitCtx.fillStyle = '#090d14';
       orbitCtx.fillRect(0, 0, orbitCanvas.width, orbitCanvas.height);
 
-      // Crosshairs
       orbitCtx.strokeStyle = '#1b2332';
       orbitCtx.lineWidth = 1;
       orbitCtx.beginPath();
-      orbitCtx.moveTo(0, 60); orbitCtx.lineTo(340, 60);
-      orbitCtx.moveTo(170, 0); orbitCtx.lineTo(170, 120);
+      orbitCtx.moveTo(0, 55); orbitCtx.lineTo(340, 55);
+      orbitCtx.moveTo(170, 0); orbitCtx.lineTo(170, 110);
       orbitCtx.stroke();
 
       if (orbitHistory.length < 2) return;
@@ -804,60 +1126,35 @@
       for (let i = 1; i < orbitHistory.length; i++) {
         const q0 = orbitHistory[i - 1];
         const q1 = orbitHistory[i];
-        const qDot = (q1 - q0) * 15; // numerical velocity
+        const qDot = (q1 - q0) * 15;
 
         const x = 170 + q1 * 4;
-        const y = 60 - qDot * 0.8;
+        const y = 55 - qDot * 0.8;
         if (i === 1) orbitCtx.moveTo(x, y);
         else orbitCtx.lineTo(x, y);
       }
       orbitCtx.stroke();
     }
 
-    const gyroCanvas = document.getElementById('gyroCanvas');
-    const gyroCtx = gyroCanvas.getContext('2d');
+    // Camera preset states
+    let camMode = 'follow';
+    function setCamPreset(mode) {
+      camMode = mode;
+      document.querySelectorAll('.cam-controls .hud-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
 
-    function drawArtificialHorizon(pitchDeg, rollDeg) {
-      gyroCtx.save();
-      gyroCtx.clearRect(0, 0, 100, 100);
-
-      // Clip circular dial
-      gyroCtx.beginPath();
-      gyroCtx.arc(50, 50, 48, 0, Math.PI * 2);
-      gyroCtx.clip();
-
-      // Pitch translation & Roll rotation
-      gyroCtx.translate(50, 50);
-      gyroCtx.rotate(-rollDeg * Math.PI / 180);
-      const pitchOffset = pitchDeg * 1.5;
-
-      // Sky (blue) and Ground (brown/dark)
-      gyroCtx.fillStyle = '#10304a';
-      gyroCtx.fillRect(-60, -60 + pitchOffset, 120, 60);
-      gyroCtx.fillStyle = '#261b12';
-      gyroCtx.fillRect(-60, pitchOffset, 120, 60);
-
-      // Horizon line
-      gyroCtx.strokeStyle = '#00e5ff';
-      gyroCtx.lineWidth = 2;
-      gyroCtx.beginPath();
-      gyroCtx.moveTo(-50, pitchOffset);
-      gyroCtx.lineTo(50, pitchOffset);
-      gyroCtx.stroke();
-
-      gyroCtx.restore();
-
-      // Center crosshair
-      gyroCtx.strokeStyle = '#ffb300';
-      gyroCtx.lineWidth = 2;
-      gyroCtx.beginPath();
-      gyroCtx.moveTo(40, 50); gyroCtx.lineTo(60, 50);
-      gyroCtx.moveTo(50, 42); gyroCtx.lineTo(50, 58);
-      gyroCtx.stroke();
+      if (mode === 'iso') {
+        camera.position.set(robotRoot.position.x + 1.2, robotRoot.position.y - 1.4, 0.9);
+      } else if (mode === 'front') {
+        camera.position.set(robotRoot.position.x, robotRoot.position.y - 1.1, 0.35);
+      } else if (mode === 'zmp') {
+        camera.position.set(robotRoot.position.x, robotRoot.position.y, 1.4);
+      }
+      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z);
     }
 
     // -------------------------------------------------------------------------
-    // Telemetry Sync Loop (50 Hz / 100ms fetch)
+    // 50 Hz Telemetry Sync Loop
     // -------------------------------------------------------------------------
     const ACTUATOR_KEYS = [
       "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
@@ -865,14 +1162,13 @@
       "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle"
     ];
 
-    // Build Joint Table HTML
     const jointMatrixEl = document.getElementById('jointMatrix');
     jointMatrixEl.innerHTML = ACTUATOR_KEYS.map(k => `
       <div class="joint-row" id="row_${k}">
         <span class="joint-name">${k}</span>
         <span class="joint-val" id="val_${k}">0.0°</span>
         <div class="joint-bar-bg"><div class="joint-bar-fill" id="bar_${k}"></div></div>
-        <span class="joint-tau" id="tau_${k}">0.0Nm</span>
+        <span class="joint-tau" id="tau_${k}">0.0N</span>
       </div>
     `).join('');
 
@@ -882,9 +1178,13 @@
         if (!res.ok) return;
         const data = await res.json();
 
-        // 1. Update Badges
+        // 1. Update Badges & Odometry
         document.getElementById('badgeLatency').textContent = `${data.system.onnx_latency_ms} ms`;
         document.getElementById('badgeBattery').textContent = `${data.power.voltage_v} V`;
+        if (data.world_pos) {
+          document.getElementById('badgeOdom').textContent = `X: ${data.world_pos.x.toFixed(2)}m | Y: ${data.world_pos.y.toFixed(2)}m`;
+        }
+
         const stateEl = document.getElementById('badgeState');
         stateEl.textContent = data.state_mode;
         stateEl.className = 'badge-val ' + (
@@ -896,24 +1196,27 @@
         const j = data.joints_deg;
         const toRad = deg => deg * Math.PI / 180;
 
-        // Base Attitude
+        // Base Position & Yaw Odometry
+        if (data.world_pos) {
+          robotRoot.position.x = data.world_pos.x;
+          robotRoot.position.y = data.world_pos.y;
+        }
+        robotRoot.rotation.z = toRad(data.attitude.yaw);
         robotRoot.rotation.x = toRad(data.attitude.roll);
         robotRoot.rotation.y = toRad(data.attitude.pitch);
         robotRoot.position.z = data.com.z;
 
-        // Left Leg Articulation
+        // Legs Articulation
         legLeft.thigh.rotation.x = toRad(j.left_hip_pitch || 0);
         legLeft.root.rotation.y = toRad(j.left_hip_roll || 0);
         legLeft.knee.rotation.x = toRad(j.left_knee || 0);
         legLeft.ankle.rotation.x = toRad(j.left_ankle || 0);
 
-        // Right Leg Articulation
         legRight.thigh.rotation.x = toRad(j.right_hip_pitch || 0);
         legRight.root.rotation.y = toRad(j.right_hip_roll || 0);
         legRight.knee.rotation.x = toRad(j.right_knee || 0);
         legRight.ankle.rotation.x = toRad(j.right_ankle || 0);
 
-        // Head/Neck
         headGroup.rotation.x = toRad(j.neck_pitch || 0);
         headGroup.rotation.z = toRad(j.head_yaw || 0);
 
@@ -941,34 +1244,26 @@
         document.getElementById('forceRight').textContent = `${data.grf.right_n} N`;
 
         // 6. Metrics Grid
-        document.getElementById('valCurrent').textContent = `${data.power.current_a} A`;
         document.getElementById('valPower').textContent = `${data.power.power_w} W`;
         document.getElementById('valComX').textContent = `${(data.com.x * 1000).toFixed(1)} mm`;
 
-        // Follow Camera Tracking
+        // Follow Cam
         if (camMode === 'follow') {
+          camera.position.x = robotRoot.position.x + 0.65;
+          camera.position.y = robotRoot.position.y - 0.75;
           camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
         }
 
-      } catch (err) {
-        // Silently retry
-      }
+      } catch (err) {}
     }
 
     // -------------------------------------------------------------------------
     // User Action Commands
     // -------------------------------------------------------------------------
     async function updateVelocityCommand() {
-      const vx = parseFloat(document.getElementById('sliderVx').value);
-      const wz = parseFloat(document.getElementById('sliderWz').value);
-      document.getElementById('lblVx').textContent = `${vx.toFixed(2)} m/s`;
-      document.getElementById('lblWz').textContent = `${wz.toFixed(2)} rad/s`;
-
-      await fetch('/api/cmd_vel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vx, vy: 0.0, wz })
-      });
+      cmdVx = parseFloat(document.getElementById('sliderVx').value);
+      cmdWz = parseFloat(document.getElementById('sliderWz').value);
+      sendVelocityCommand();
     }
 
     async function triggerLateralPush() {
@@ -983,25 +1278,23 @@
       await fetch('/api/fall', { method: 'POST' });
     }
 
-    async function triggerEstop() {
-      await fetch('/api/estop', { method: 'POST' });
-    }
-
     async function triggerReset() {
+      cmdVx = 0.0; cmdVy = 0.0; cmdWz = 0.0;
       await fetch('/api/reset', { method: 'POST' });
+      resetBallPosition();
     }
 
     // Render loop
     function animate() {
       requestAnimationFrame(animate);
+      const dt = Math.min(0.033, clock.getDelta());
+      updateSimulationPhysics(dt);
       renderer.render(scene, camera);
     }
     animate();
 
-    // Start Telemetry Poll at 10 Hz (every 100ms)
     setInterval(pollTelemetry, 100);
 
-    // Responsive Canvas Resize
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
