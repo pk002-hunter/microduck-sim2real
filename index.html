@@ -17,9 +17,7 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-outer-from: #d946ef;
-      --bg-outer-via: #2563eb;
-      --bg-outer-to: #0f172a;
+      --bg-outer: radial-gradient(circle at 90% 10%, #ec4899 0%, #3b82f6 35%, #1d4ed8 65%, #0a0f1d 100%);
       --card-bg: #ffffff;
       --card-subtle: #f8fafc;
       --card-border: #e2e8f0;
@@ -27,6 +25,8 @@
       --accent-blue-dark: #1d4ed8;
       --accent-pink: #ec4899;
       --accent-pink-subtle: rgba(236, 72, 153, 0.08);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
       --text-dark: #0f172a;
       --text-muted: #64748b;
       --text-subtle: #94a3b8;
@@ -34,27 +34,32 @@
       --font-mono: 'JetBrains Mono', 'Consolas', monospace;
     }
 
-    body {
-      background: radial-gradient(circle at 90% 10%, #ec4899 0%, #3b82f6 35%, #1d4ed8 65%, #0a0f1d 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg-outer);
       font-family: var(--font-sans);
       color: var(--text-dark);
-      padding: 16px;
-      overflow-x: hidden;
       user-select: none;
     }
 
-    /* ── Main ORDIVA Design Container (From designs/ folder) ────────── */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    /* ── Main Full-Window Responsive ORDIVA Frame ────────────────────── */
     .ordiva-frame {
       width: 100%;
-      max-width: 1480px;
-      height: 95vh;
+      height: 100%;
       background: var(--card-bg);
-      border-radius: 28px;
-      box-shadow: 0 40px 100px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      box-shadow: 0 25px 80px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.25);
       display: flex;
       flex-direction: column;
       position: relative;
@@ -63,21 +68,21 @@
 
     /* ── Top Header Navigation Bar ───────────────────────────────────── */
     .top-nav {
-      height: 64px;
-      padding: 0 36px;
+      height: 56px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--card-border);
       flex-shrink: 0;
-      z-index: 30;
+      z-index: 40;
       background: #ffffff;
     }
 
     .nav-left {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 16px;
     }
 
     .lab-badge {
@@ -86,9 +91,9 @@
       gap: 8px;
       background: var(--accent-pink-subtle);
       border: 1px solid rgba(236, 72, 153, 0.35);
-      padding: 4px 12px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 0.72rem;
+      font-size: 0.70rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--accent-pink);
@@ -102,32 +107,48 @@
       background: var(--accent-pink);
     }
 
-    .nav-links {
+    .nav-tabs {
       display: flex;
-      gap: 20px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      gap: 6px;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      padding: 3px;
+      border-radius: 24px;
     }
 
-    .nav-links a {
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 14px;
+      border-radius: 18px;
+      font-size: 0.76rem;
+      font-weight: 700;
       color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.15s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
     }
 
-    .nav-links a:hover, .nav-links a.active {
+    .nav-tab-btn:hover {
       color: var(--accent-blue);
+    }
+
+    .nav-tab-btn.active {
+      background: var(--accent-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
     }
 
     .nav-right {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
     }
 
     .nav-meta-badge {
-      font-size: 0.78rem;
+      font-size: 0.74rem;
       font-family: var(--font-mono);
       font-weight: 600;
       color: var(--text-muted);
@@ -137,15 +158,15 @@
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       text-decoration: none;
     }
 
     .brand-icon {
-      width: 28px;
-      height: 18px;
+      width: 26px;
+      height: 16px;
       background: var(--accent-blue);
-      border-radius: 6px;
+      border-radius: 5px;
       position: relative;
       display: flex;
       align-items: center;
@@ -154,21 +175,38 @@
 
     .brand-icon::before {
       content: '';
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       background: #ffffff;
       border-radius: 50%;
     }
 
     .brand-name {
-      font-size: 1.22rem;
+      font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: 2px;
       color: var(--accent-blue);
     }
 
-    /* ── Main Content Area: Giant Typo & 3D Stage ───────────────────── */
-    .content-body {
+    /* ── Tab Views Container ─────────────────────────────────────────── */
+    .tab-view {
+      display: none;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tab-view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================================
+       TAB 1: 3D SIMULATION & OMNIDIRECTIONAL TELEOPERATION
+       ========================================================================= */
+    .sim-content-body {
       flex: 1;
       display: flex;
       position: relative;
@@ -178,19 +216,19 @@
     /* Left Architectural Typography Layer */
     .typo-layer {
       position: absolute;
-      top: 32px;
-      left: 44px;
-      bottom: 24px;
+      top: 24px;
+      left: 36px;
+      bottom: 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       z-index: 10;
       pointer-events: none;
-      max-width: 360px;
+      max-width: 340px;
     }
 
     .hero-title {
-      font-size: 4.6rem;
+      font-size: 4.2rem;
       font-weight: 800;
       line-height: 0.88;
       letter-spacing: -2px;
@@ -204,8 +242,8 @@
     }
 
     .hero-sub-meta {
-      font-size: 0.80rem;
-      line-height: 1.55;
+      font-size: 0.78rem;
+      line-height: 1.5;
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -215,47 +253,46 @@
     }
 
     .hero-step-num {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-subtle);
-      margin-top: 10px;
     }
 
     /* Right Architectural Typography */
     .typo-right {
       position: absolute;
-      top: 32px;
-      right: 44px;
+      top: 24px;
+      right: 36px;
       text-align: right;
       z-index: 10;
       pointer-events: none;
     }
 
     .word-robotics {
-      font-size: 4.4rem;
+      font-size: 3.8rem;
       font-weight: 800;
       letter-spacing: -1.5px;
       color: var(--text-dark);
       line-height: 1;
     }
 
-    /* Right Side Vertical Meta Status Strip (from ORDIVA reference design) */
+    /* Right Sidebar Meta Indicator List */
     .sidebar-meta {
       position: absolute;
-      right: 44px;
+      right: 36px;
       top: 48%;
       transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       z-index: 12;
       pointer-events: none;
       text-align: right;
     }
 
     .meta-item {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       font-family: var(--font-mono);
       font-weight: 700;
       letter-spacing: 0.8px;
@@ -264,7 +301,6 @@
       align-items: center;
       justify-content: flex-end;
       gap: 8px;
-      transition: all 0.2s;
     }
 
     .meta-item.active {
@@ -305,7 +341,7 @@
       display: block;
     }
 
-    /* ── Floating Architectural Callout Pins (From designs/ folder) ── */
+    /* Floating Architectural Callout Pins */
     .callout-pin {
       position: absolute;
       z-index: 20;
@@ -359,10 +395,10 @@
       background: var(--text-subtle);
     }
 
-    /* ── Floating Slo-Mo Kinematic Inspector Bar ───────────────────── */
+    /* Floating Slo-Mo Kinematic Inspector Bar */
     .slomo-dock {
       position: absolute;
-      top: 80px;
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255, 255, 255, 0.96);
@@ -370,13 +406,13 @@
       border: 1px solid var(--card-border);
       box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
       border-radius: 30px;
-      padding: 6px 16px;
+      padding: 5px 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       z-index: 25;
       font-family: var(--font-mono);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
     }
 
     .slomo-label {
@@ -399,9 +435,9 @@
     .slomo-rate-btn {
       background: transparent;
       border: none;
-      padding: 4px 10px;
+      padding: 4px 9px;
       border-radius: 16px;
-      font-size: 0.72rem;
+      font-size: 0.70rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-muted);
@@ -415,12 +451,12 @@
       box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
 
-    .slomo-play-btn {
+    .slomo-play-btn, .cad-mode-btn {
       background: #ffffff;
       border: 1px solid var(--card-border);
-      padding: 4px 12px;
+      padding: 4px 10px;
       border-radius: 16px;
-      font-size: 0.72rem;
+      font-size: 0.70rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--text-dark);
@@ -431,38 +467,91 @@
       transition: all 0.15s;
     }
 
-    .slomo-play-btn:hover {
+    .slomo-play-btn:hover, .cad-mode-btn:hover {
       border-color: var(--accent-blue);
       color: var(--accent-blue);
     }
 
-    .cad-mode-btn {
-      background: #ffffff;
+    /* ── Floating Omnidirectional Virtual Keypad / Controller Overlay ── */
+    .teleop-overlay {
+      position: absolute;
+      bottom: 124px;
+      right: 36px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--card-border);
-      padding: 4px 10px;
-      border-radius: 16px;
-      font-size: 0.72rem;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      border-radius: 18px;
+      padding: 12px;
+      z-index: 25;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .teleop-header {
+      font-size: 0.65rem;
       font-family: var(--font-mono);
       font-weight: 700;
+      letter-spacing: 0.5px;
       color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .dpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 34px);
+      grid-template-rows: repeat(3, 34px);
+      gap: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dpad-btn {
+      width: 34px;
+      height: 34px;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: all 0.15s;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      transition: all 0.1s;
+      user-select: none;
     }
 
-    .cad-mode-btn:hover {
-      color: var(--accent-pink);
-      border-color: var(--accent-pink);
+    .dpad-btn span.sub {
+      font-size: 0.52rem;
+      color: var(--text-subtle);
     }
 
-    /* ── Bottom Educational Gait Phase Strip (From designs/ image 3) ── */
+    .dpad-btn:hover, .dpad-btn.pressed {
+      background: var(--accent-blue);
+      color: #ffffff;
+      border-color: var(--accent-blue);
+      transform: translateY(1px);
+    }
+
+    .dpad-btn:hover span.sub, .dpad-btn.pressed span.sub {
+      color: #e0e7ff;
+    }
+
+    /* ── Bottom Educational Gait Phase Strip ── */
     .gait-process-strip {
-      height: 126px;
+      height: 110px;
       background: #ffffff;
       border-top: 1px solid var(--card-border);
-      padding: 14px 36px 10px 36px;
+      padding: 10px 32px 8px 32px;
       display: grid;
-      grid-template-columns: repeat(4, 1fr) 260px;
-      gap: 20px;
+      grid-template-columns: repeat(4, 1fr) 280px;
+      gap: 16px;
       align-items: center;
       z-index: 30;
       flex-shrink: 0;
@@ -471,9 +560,9 @@
     .phase-step {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
       border-left: 2px solid var(--card-border);
-      padding-left: 12px;
+      padding-left: 10px;
       transition: all 0.2s;
     }
 
@@ -482,14 +571,14 @@
     }
 
     .phase-num {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--accent-pink);
     }
 
     .phase-title {
-      font-size: 0.84rem;
+      font-size: 0.80rem;
       font-weight: 800;
       color: var(--text-dark);
       text-transform: uppercase;
@@ -497,37 +586,37 @@
     }
 
     .phase-desc {
-      font-size: 0.70rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
-      line-height: 1.35;
+      line-height: 1.3;
     }
 
     /* Action Controls in Bottom Right */
     .strip-actions {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .action-btn-row {
       display: flex;
-      gap: 6px;
+      gap: 5px;
     }
 
     .btn-ordiva {
       flex: 1;
       background: var(--card-subtle);
       border: 1px solid var(--card-border);
-      padding: 7px 8px;
+      padding: 6px 8px;
       border-radius: 8px;
-      font-size: 0.72rem;
+      font-size: 0.70rem;
       font-weight: 700;
       color: var(--text-dark);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       transition: all 0.15s;
     }
 
@@ -547,9 +636,8 @@
       border-color: var(--accent-pink);
     }
 
-    /* Keyboard Guide Hint */
     .keyboard-hint {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-family: var(--font-mono);
       color: var(--text-subtle);
       text-align: center;
@@ -563,25 +651,390 @@
       color: var(--text-dark);
       font-weight: 700;
     }
+
+    /* =========================================================================
+       TAB 2: NEURAL BRAIN & SYNAPTIC FIRING (BEFORE VS AFTER TOGGLE)
+       ========================================================================= */
+    .neural-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 36px;
+      overflow-y: auto;
+      gap: 20px;
+      background: #ffffff;
+    }
+
+    .neural-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+
+    .neural-header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .neural-header-title h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-dark);
+    }
+
+    .neural-header-title p {
+      font-size: 0.80rem;
+      color: var(--text-muted);
+    }
+
+    /* Policy Switcher Toggle */
+    .policy-toggle-box {
+      display: flex;
+      align-items: center;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .policy-toggle-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 18px;
+      border-radius: 24px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .policy-toggle-btn.active.before {
+      background: var(--accent-red);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    }
+
+    .policy-toggle-btn.active.after {
+      background: var(--accent-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Neural Canvas & Metrics Layout */
+    .neural-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      min-height: 440px;
+    }
+
+    .neural-canvas-card {
+      background: #fafafa;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .canvas-overlay-tag {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.70rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-dark);
+      z-index: 10;
+    }
+
+    #neuralCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Neural Metrics Sidebar */
+    .neural-metrics-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .metric-title {
+      font-size: 0.70rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .metric-num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -1px;
+    }
+
+    .metric-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .metric-badge.good { background: #ecfdf5; color: var(--accent-green); border: 1px solid #a7f3d0; }
+    .metric-badge.bad { background: #fef2f2; color: var(--accent-red); border: 1px solid #fecaca; }
+
+    .metric-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .metric-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* =========================================================================
+       TAB 3: VELSTAND RECOVERY & JOINT CONTACT PHYSICS
+       ========================================================================= */
+    .contact-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 36px;
+      overflow-y: auto;
+      gap: 18px;
+      background: #ffffff;
+    }
+
+    .contact-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 14px;
+    }
+
+    .contact-title h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .contact-title p {
+      font-size: 0.80rem;
+      color: var(--text-muted);
+    }
+
+    /* Scrubber Bar */
+    .scrubber-dock {
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .scrubber-slider {
+      flex: 1;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .scrubber-val {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--accent-blue);
+      min-width: 60px;
+    }
+
+    /* 5 Contact Stages Strip */
+    .contact-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .c-step-card {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .c-step-card.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+      background: #eff6ff;
+    }
+
+    .c-step-num {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-pink);
+    }
+
+    .c-step-title {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-transform: uppercase;
+    }
+
+    .c-step-desc {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Contact Physics Canvas & Table */
+    .contact-body-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      min-height: 320px;
+    }
+
+    .contact-canvas-card {
+      background: #fafafa;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #contactCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .joint-table-card {
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .joint-table-title {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .joint-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.70rem;
+      font-family: var(--font-mono);
+    }
+
+    .joint-table th {
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+
+    .joint-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+      color: var(--text-dark);
+    }
+
+    .torque-pill {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .torque-high { background: #fee2e2; color: #dc2626; }
+    .torque-med { background: #fef3c7; color: #d97706; }
+    .torque-low { background: #e0e7ff; color: #3730a3; }
   </style>
 </head>
 <body>
 
-  <!-- ── Main ORDIVA Application Frame ─────────────────────────────── -->
+  <!-- ── Main Full-Window Responsive ORDIVA Application Frame ────────── -->
   <div class="ordiva-frame">
     
-    <!-- Top Navigation (ORDIVA Brand Style) -->
+    <!-- Top Navigation -->
     <nav class="top-nav">
       <div class="nav-left">
         <div class="lab-badge">
           <div class="lab-dot"></div>
           <span>LAB / 001 · PHYSICAL AI</span>
         </div>
-        <div class="nav-links">
-          <a href="#" class="active">Technology</a>
-          <a href="#" onclick="setSloMo(0.2)">Kinematics</a>
-          <a href="#" onclick="toggleBlueprintMode()">CAD Blueprint</a>
-          <a href="http://192.168.1.15:8001/dashboard" target="_blank">Home Server</a>
+        
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+          <button class="nav-tab-btn active" id="tabBtn_sim" onclick="switchTab('sim')">
+            <span>🕹️</span> 3D Sim & Teleop
+          </button>
+          <button class="nav-tab-btn" id="tabBtn_neural" onclick="switchTab('neural')">
+            <span>🧠</span> Neural Brain (Before/After)
+          </button>
+          <button class="nav-tab-btn" id="tabBtn_contact" onclick="switchTab('contact')">
+            <span>📐</span> VelStand Contact Physics
+          </button>
         </div>
       </div>
 
@@ -589,6 +1042,9 @@
         <span class="nav-meta-badge">B.Tech CSE SCS-701</span>
         <span style="color:var(--text-subtle)">|</span>
         <span class="nav-meta-badge" style="color:var(--accent-blue)" id="liveHzBadge">50.0 Hz Active</span>
+        <a href="http://192.168.1.15:8001/dashboard" target="_blank" class="nav-meta-badge" style="text-decoration:none; color:var(--accent-pink);">
+          Home Server ↗
+        </a>
         
         <div class="brand-group">
           <div class="brand-icon"></div>
@@ -597,152 +1053,384 @@
       </div>
     </nav>
 
-    <!-- Floating Slo-Mo Kinematics Control Bar -->
-    <div class="slomo-dock">
-      <div class="slomo-label">
-        <span>⚡ KINEMATIC SPEED:</span>
+    <!-- ===================================================================
+         TAB 1: 3D SIMULATION & OMNIDIRECTIONAL TELEOPERATION
+         =================================================================== -->
+    <div class="tab-view active" id="view_sim">
+      
+      <!-- Main Content Stage -->
+      <div class="sim-content-body">
+        
+        <!-- Left Architectural Typo -->
+        <div class="typo-layer">
+          <div class="hero-title">
+            MEETS.
+            <span>AUTOMATION.</span>
+          </div>
+          <div class="hero-sub-meta">
+            Engineering the Sim-to-Real transfer gap on the <b>Microduck 14-DoF bipedal robot</b>. Utilizing <b>PPO neural policies</b> and <b>BAM actuator physics</b> to guarantee gait stability under mechanical backlash.
+          </div>
+          <div class="hero-step-num">01 / 04 · KINEMATIC CYCLE</div>
+        </div>
+
+        <!-- Right Architectural Typo -->
+        <div class="typo-right">
+          <div class="word-robotics">ROBOTICS.</div>
+        </div>
+
+        <!-- Right Sidebar Meta Indicator List -->
+        <div class="sidebar-meta">
+          <div class="meta-item active"><span class="meta-dot"></span>ONNX POLICY (50Hz)</div>
+          <div class="meta-item"><span class="meta-dot"></span>BAM BACKLASH MODEL</div>
+          <div class="meta-item"><span class="meta-dot"></span>14-DOF KINEMATICS</div>
+          <div class="meta-item"><span class="meta-dot"></span>VELSTAND SELF-RIGHT</div>
+          <div class="meta-item"><span class="meta-dot"></span>BASE STATION SINK</div>
+        </div>
+
+        <!-- Floating Slo-Mo Kinematics Control Bar -->
+        <div class="slomo-dock">
+          <div class="slomo-label">
+            <span>⚡ KINEMATIC SPEED:</span>
+          </div>
+          <div class="slomo-btn-group">
+            <button class="slomo-rate-btn active" id="btn_1x" onclick="setSloMo(1.0)">1.0x Real</button>
+            <button class="slomo-rate-btn" id="btn_05x" onclick="setSloMo(0.5)">0.5x</button>
+            <button class="slomo-rate-btn" id="btn_02x" onclick="setSloMo(0.2)">0.2x Slo-Mo</button>
+            <button class="slomo-rate-btn" id="btn_005x" onclick="setSloMo(0.05)">0.05x Ultra</button>
+          </div>
+          <button class="slomo-play-btn" id="btn_pause" onclick="togglePause()">
+            <span id="playIcon">⏸️</span> <span id="playText">Freeze Frame</span>
+          </button>
+          <button class="cad-mode-btn" onclick="toggleBlueprintMode()">📐 Wireframe CAD</button>
+        </div>
+
+        <!-- 3D WebGL Canvas Layer -->
+        <div class="canvas-stage" id="stageContainer" title="Drag to Orbit · Scroll to Zoom">
+          <canvas id="stageCanvas"></canvas>
+        </div>
+
+        <!-- Dynamic Floating Callouts -->
+        <div class="callout-pin" id="pinHip">
+          <div class="pin-badge blue">
+            <div class="pin-dot"></div>
+            <span id="txtHip">HIP ROLL: -5.0°</span>
+          </div>
+          <div class="pin-line"></div>
+        </div>
+
+        <div class="callout-pin" id="pinKnee">
+          <div class="pin-badge pink">
+            <div class="pin-dot"></div>
+            <span id="txtKnee">KNEE SERVO: 19.2°</span>
+          </div>
+          <div class="pin-line"></div>
+        </div>
+
+        <div class="callout-pin" id="pinFoot">
+          <div class="pin-badge blue">
+            <div class="pin-dot"></div>
+            <span id="txtFoot">STANCE: 4.2 N</span>
+          </div>
+          <div class="pin-line"></div>
+        </div>
+
+        <!-- Floating Omnidirectional Virtual Keypad / Controller Overlay -->
+        <div class="teleop-overlay">
+          <div class="teleop-header">Omnidirectional Drive</div>
+          <div class="dpad-grid">
+            <button class="dpad-btn" id="key_q" onmousedown="setTurn(1)" onmouseup="setTurn(0)" title="Turn Left (Q)">
+              <span>↺</span><span class="sub">Q</span>
+            </button>
+            <button class="dpad-btn" id="key_w" onmousedown="setDrive(0.25)" onmouseup="setDrive(0)" title="Walk Forward (W)">
+              <span>▲</span><span class="sub">W</span>
+            </button>
+            <button class="dpad-btn" id="key_e" onmousedown="setTurn(-1)" onmouseup="setTurn(0)" title="Turn Right (E)">
+              <span>↻</span><span class="sub">E</span>
+            </button>
+
+            <button class="dpad-btn" id="key_a" onmousedown="setStrafe(0.20)" onmouseup="setStrafe(0)" title="Strafe Left (A)">
+              <span>◄</span><span class="sub">A</span>
+            </button>
+            <button class="dpad-btn" onclick="triggerReset()" title="Stop / Center Pose">
+              <span>●</span><span class="sub">STOP</span>
+            </button>
+            <button class="dpad-btn" id="key_d" onmousedown="setStrafe(-0.20)" onmouseup="setStrafe(0)" title="Strafe Right (D)">
+              <span>►</span><span class="sub">D</span>
+            </button>
+
+            <div></div>
+            <button class="dpad-btn" id="key_s" onmousedown="setDrive(-0.18)" onmouseup="setDrive(0)" title="Walk Backward (S)">
+              <span>▼</span><span class="sub">S</span>
+            </button>
+            <div></div>
+          </div>
+        </div>
+
       </div>
-      <div class="slomo-btn-group">
-        <button class="slomo-rate-btn active" id="btn_1x" onclick="setSloMo(1.0)">1.0x Real</button>
-        <button class="slomo-rate-btn" id="btn_05x" onclick="setSloMo(0.5)">0.5x</button>
-        <button class="slomo-rate-btn" id="btn_02x" onclick="setSloMo(0.2)">0.2x Slo-Mo</button>
-        <button class="slomo-rate-btn" id="btn_005x" onclick="setSloMo(0.05)">0.05x Ultra</button>
+
+      <!-- Bottom Educational Gait Phase Strip -->
+      <div class="gait-process-strip">
+        <div class="phase-step active" id="step1">
+          <div class="phase-num">01</div>
+          <div class="phase-title">STANCE & WEIGHT SHIFT</div>
+          <div class="phase-desc">Center of Mass shifts laterally over the left support foot; ground reaction force stabilizes body.</div>
+        </div>
+
+        <div class="phase-step" id="step2">
+          <div class="phase-num">02</div>
+          <div class="phase-title">SWING & KNEE LIFT</div>
+          <div class="phase-desc">Right hip flexes upward and knee contracts to lift the foot clear of obstacles in forward flight.</div>
+        </div>
+
+        <div class="phase-step" id="step3">
+          <div class="phase-num">03</div>
+          <div class="phase-title">FORWARD EXTENSION</div>
+          <div class="phase-desc">Lower shin extends forward; ankle aligns parallel to ground plane prior to heel contact.</div>
+        </div>
+
+        <div class="phase-step" id="step4">
+          <div class="phase-num">04</div>
+          <div class="phase-title">HEEL STRIKE & TRANSFER</div>
+          <div class="phase-desc">Right foot impacts floor; load cell detects touchdown and initiates double-support transition.</div>
+        </div>
+
+        <div class="strip-actions">
+          <div class="action-btn-row">
+            <button class="btn-ordiva" onclick="triggerLateralPush()">
+              <span>⚡</span> Push (14N)
+            </button>
+            <button class="btn-ordiva pink" onclick="triggerHardFall()">
+              <span>⚠️</span> VelStand Fall
+            </button>
+          </div>
+          <div class="action-btn-row">
+            <button class="btn-ordiva" onclick="resetBall()">
+              <span>⚽</span> Reset Ball
+            </button>
+            <button class="btn-ordiva" onclick="triggerReset()">
+              <span>🔄</span> Reset Pose
+            </button>
+          </div>
+          <div class="keyboard-hint">
+            <span>W</span><span>A</span><span>S</span><span>D</span> Strafe | <span>Q</span><span>E</span> Turn | <span>Space</span> Push | <span>F</span> Fall
+          </div>
+        </div>
       </div>
-      <button class="slomo-play-btn" id="btn_pause" onclick="togglePause()">
-        <span id="playIcon">⏸️</span> <span id="playText">Freeze Frame</span>
-      </button>
-      <button class="cad-mode-btn" onclick="toggleBlueprintMode()">📐 Wireframe CAD</button>
+
     </div>
 
-    <!-- Main Content Stage -->
-    <div class="content-body">
-      
-      <!-- Left Architectural Typo (ORDIVA Style) -->
-      <div class="typo-layer">
-        <div class="hero-title">
-          MEETS.
-          <span>AUTOMATION.</span>
+    <!-- ===================================================================
+         TAB 2: NEURAL BRAIN & SYNAPTIC FIRING (BEFORE VS AFTER TOGGLE)
+         =================================================================== -->
+    <div class="tab-view" id="view_neural">
+      <div class="neural-container">
+        
+        <div class="neural-header">
+          <div class="neural-header-title">
+            <h2>Neural Policy & Synaptic Firing Inspector</h2>
+            <p>Comparing PPO Neural Firing Dynamics: Naive Baseline vs. Our BAM-Compensated Policy</p>
+          </div>
+
+          <!-- Policy Toggle Switcher -->
+          <div class="policy-toggle-box">
+            <button class="policy-toggle-btn active before" id="btnPolicy_before" onclick="setBrainMode('before')">
+              <span>⚠️</span> Baseline RL (Before)
+            </button>
+            <button class="policy-toggle-btn after" id="btnPolicy_after" onclick="setBrainMode('after')">
+              <span>🚀</span> Our Trained Policy (After)
+            </button>
+          </div>
         </div>
-        <div class="hero-sub-meta">
-          Engineering the Sim-to-Real transfer gap on the <b>Microduck 14-DoF bipedal robot</b>. Utilizing <b>PPO neural policies</b> and <b>BAM actuator physics</b> to guarantee gait stability under mechanical backlash.
+
+        <div class="neural-body">
+          
+          <!-- Animated Neural Canvas -->
+          <div class="neural-canvas-card">
+            <div class="canvas-overlay-tag" id="neuralPolicyTag">
+              MODE: BASELINE RL (UNCOMPENSATED BACKLASH)
+            </div>
+            <canvas id="neuralCanvas"></canvas>
+          </div>
+
+          <!-- Live Metrics Comparison Column -->
+          <div class="neural-metrics-col">
+            
+            <div class="metric-card">
+              <div class="metric-title">Actuator Backlash Error</div>
+              <div class="metric-value-row">
+                <span class="metric-num" id="val_backlash">18.6°</span>
+                <span class="metric-badge bad" id="badge_backlash">High Flutter</span>
+              </div>
+              <div class="metric-bar-bg">
+                <div class="metric-bar-fill" id="bar_backlash" style="width: 85%; background: var(--accent-red);"></div>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Joint Velocity Jitter</div>
+              <div class="metric-value-row">
+                <span class="metric-num" id="val_jitter">34.2 <span style="font-size:0.9rem">rad/s²</span></span>
+                <span class="metric-badge bad" id="badge_jitter">Severe Noise</span>
+              </div>
+              <div class="metric-bar-bg">
+                <div class="metric-bar-fill" id="bar_jitter" style="width: 78%; background: var(--accent-red);"></div>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Sim-to-Real Transfer Gap</div>
+              <div class="metric-value-row">
+                <span class="metric-num" id="val_gap">42.5%</span>
+                <span class="metric-badge bad" id="badge_gap">Unstable Real</span>
+              </div>
+              <div class="metric-bar-bg">
+                <div class="metric-bar-fill" id="bar_gap" style="width: 68%; background: var(--accent-red);"></div>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-title">Synaptic Policy Efficiency</div>
+              <div class="metric-value-row">
+                <span class="metric-num" id="val_eff">58.4%</span>
+                <span class="metric-badge bad" id="badge_eff">Choppy Output</span>
+              </div>
+              <div class="metric-bar-bg">
+                <div class="metric-bar-fill" id="bar_eff" style="width: 58%; background: var(--accent-red);"></div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
-        <div class="hero-step-num">01 / 04 · KINEMATIC CYCLE</div>
-      </div>
 
-      <!-- Right Architectural Typo -->
-      <div class="typo-right">
-        <div class="word-robotics">ROBOTICS.</div>
       </div>
-
-      <!-- Right Sidebar Meta Indicator List -->
-      <div class="sidebar-meta">
-        <div class="meta-item active"><span class="meta-dot"></span>ONNX POLICY (50Hz)</div>
-        <div class="meta-item"><span class="meta-dot"></span>BAM BACKLASH MODEL</div>
-        <div class="meta-item"><span class="meta-dot"></span>14-DOF KINEMATICS</div>
-        <div class="meta-item"><span class="meta-dot"></span>VELSTAND SELF-RIGHT</div>
-        <div class="meta-item"><span class="meta-dot"></span>BASE STATION SINK</div>
-      </div>
-
-      <!-- 3D WebGL Canvas Layer -->
-      <div class="canvas-stage" id="stageContainer" title="Drag to Orbit · Scroll to Zoom">
-        <canvas id="stageCanvas"></canvas>
-      </div>
-
-      <!-- Floating Architectural Callouts (Dynamic 3D-to-2D tracking) -->
-      <div class="callout-pin" id="pinHip">
-        <div class="pin-badge blue">
-          <div class="pin-dot"></div>
-          <span id="txtHip">HIP ROLL: -5.0°</span>
-        </div>
-        <div class="pin-line"></div>
-      </div>
-
-      <div class="callout-pin" id="pinKnee">
-        <div class="pin-badge pink">
-          <div class="pin-dot"></div>
-          <span id="txtKnee">KNEE SERVO: 19.2°</span>
-        </div>
-        <div class="pin-line"></div>
-      </div>
-
-      <div class="callout-pin" id="pinFoot">
-        <div class="pin-badge blue">
-          <div class="pin-dot"></div>
-          <span id="txtFoot">STANCE: 4.2 N</span>
-        </div>
-        <div class="pin-line"></div>
-      </div>
-
     </div>
 
-    <!-- Bottom Educational Gait Phase Strip (From designs/ image 3) -->
-    <div class="gait-process-strip">
-      
-      <div class="phase-step active" id="step1">
-        <div class="phase-num">01</div>
-        <div class="phase-title">STANCE & WEIGHT SHIFT</div>
-        <div class="phase-desc">Center of Mass shifts laterally over the left support foot; ground reaction force stabilizes body.</div>
-      </div>
+    <!-- ===================================================================
+         TAB 3: VELSTAND RECOVERY & JOINT CONTACT PHYSICS
+         =================================================================== -->
+    <div class="tab-view" id="view_contact">
+      <div class="contact-container">
+        
+        <div class="contact-header">
+          <div class="contact-title">
+            <h2>VelStand Autonomous Fall Recovery & Contact Kinematics</h2>
+            <p>Visualizing Ground Contact Points, Normal Forces ($F_N$), and 14-DoF Joint Lever Torque during Self-Righting</p>
+          </div>
 
-      <div class="phase-step" id="step2">
-        <div class="phase-num">02</div>
-        <div class="phase-title">SWING & KNEE LIFT</div>
-        <div class="phase-desc">Right hip flexes upward and knee contracts to lift the foot clear of obstacles in forward flight.</div>
-      </div>
-
-      <div class="phase-step" id="step3">
-        <div class="phase-num">03</div>
-        <div class="phase-title">FORWARD EXTENSION</div>
-        <div class="phase-desc">Lower shin extends forward; ankle aligns parallel to ground plane prior to heel contact.</div>
-      </div>
-
-      <div class="phase-step" id="step4">
-        <div class="phase-num">04</div>
-        <div class="phase-title">HEEL STRIKE & TRANSFER</div>
-        <div class="phase-desc">Right foot impacts floor; load cell detects touchdown and initiates double-support transition.</div>
-      </div>
-
-      <div class="strip-actions">
-        <div class="action-btn-row">
-          <button class="btn-ordiva" onclick="triggerLateralPush()">
-            <span>⚡</span> Push (14N)
-          </button>
-          <button class="btn-ordiva pink" onclick="triggerHardFall()">
-            <span>⚠️</span> VelStand Fall
+          <button class="btn-ordiva" onclick="playRecoveryAnimation()" style="max-width:160px;">
+            <span>▶️</span> Play Recovery Loop
           </button>
         </div>
-        <div class="action-btn-row">
-          <button class="btn-ordiva" onclick="resetBall()">
-            <span>⚽</span> Reset Ball
-          </button>
-          <button class="btn-ordiva" onclick="triggerReset()">
-            <span>🔄</span> Reset Pose
-          </button>
-        </div>
-        <div class="keyboard-hint">
-          <span>W</span> <span>A</span> <span>S</span> <span>D</span> Walk | Drag: Orbit | Space: Push
-        </div>
-      </div>
 
+        <!-- Scrubber Bar -->
+        <div class="scrubber-dock">
+          <span style="font-size:0.75rem; font-family:var(--font-mono); font-weight:700;">RECOVERY SCRUBBER:</span>
+          <input type="range" min="0" max="100" value="0" class="scrubber-slider" id="scrubberInput" oninput="onScrubChange(this.value)">
+          <span class="scrubber-val" id="scrubberLabel">0%</span>
+        </div>
+
+        <!-- 5 Contact Stages Strip -->
+        <div class="contact-steps-grid">
+          <div class="c-step-card active" id="cStep0" onclick="setContactStep(0)">
+            <div class="c-step-num">STAGE 01 · 0-20%</div>
+            <div class="c-step-title">Ground Impact</div>
+            <div class="c-step-desc">Torso skid plate contacts floor; load cells register tilt &gt; 50°.</div>
+          </div>
+
+          <div class="c-step-card" id="cStep1" onclick="setContactStep(25)">
+            <div class="c-step-num">STAGE 02 · 20-40%</div>
+            <div class="c-step-title">Leg Tuck</div>
+            <div class="c-step-desc">Hips flex upward and knees contract to bring CoM close to contact pivot.</div>
+          </div>
+
+          <div class="c-step-card" id="cStep2" onclick="setContactStep(50)">
+            <div class="c-step-num">STAGE 03 · 40-60%</div>
+            <div class="c-step-title">Knee Lever Push</div>
+            <div class="c-step-desc">Anodized knee brackets push against floor; normal force Fn = 18.4 N.</div>
+          </div>
+
+          <div class="c-step-card" id="cStep3" onclick="setContactStep(75)">
+            <div class="c-step-num">STAGE 04 · 60-80%</div>
+            <div class="c-step-title">Ankle Boot Plant</div>
+            <div class="c-step-desc">Ankles roll inward to catch ground; wide foot sole establishes stance base.</div>
+          </div>
+
+          <div class="c-step-card" id="cStep4" onclick="setContactStep(100)">
+            <div class="c-step-num">STAGE 05 · 80-100%</div>
+            <div class="c-step-title">Vertical Extension</div>
+            <div class="c-step-desc">Quadriceps extend torso upright; robot returns to stable 50Hz walking stance.</div>
+          </div>
+        </div>
+
+        <!-- Contact Physics Canvas & Table -->
+        <div class="contact-body-grid">
+          
+          <div class="contact-canvas-card">
+            <canvas id="contactCanvas"></canvas>
+          </div>
+
+          <div class="joint-table-card">
+            <div class="joint-table-title">Real-Time Joint Torques & Contact Reactions</div>
+            <table class="joint-table">
+              <thead>
+                <tr>
+                  <th>Joint Name</th>
+                  <th>Angle (deg)</th>
+                  <th>Torque Load</th>
+                  <th>Contact Status</th>
+                </tr>
+              </thead>
+              <tbody id="jointTableBody">
+                <!-- Dynamically populated based on scrubber -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
     </div>
 
   </div>
 
-  <!-- ── 3D Engine, Slo-Mo Kinematics & Interactive Physics ─────────── -->
+  <!-- ── Application Logic, Three.js & Animated Canvases ────────────── -->
   <script>
+    // -------------------------------------------------------------------------
+    // Tab Navigation Switcher
+    // -------------------------------------------------------------------------
+    let currentTab = 'sim';
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+
+      document.getElementById(`tabBtn_${tabId}`).classList.add('active');
+      document.getElementById(`view_${tabId}`).classList.add('active');
+
+      if (tabId === 'sim') {
+        onSimResize();
+      } else if (tabId === 'neural') {
+        initNeuralCanvas();
+      } else if (tabId === 'contact') {
+        initContactCanvas();
+        updateContactKinematics(currentScrubPhase);
+      }
+    }
+
+    // =========================================================================
+    // TAB 1: 3D SIMULATION ENGINE & OMNIDIRECTIONAL CONTROLS
+    // =========================================================================
     const canvas = document.getElementById('stageCanvas');
     const container = document.getElementById('stageContainer');
 
-    // 1. Scene & Clean Studio Lighting Setup (ORDIVA Style)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xfbfcfd);
     scene.fog = new THREE.FogExp2(0xfbfcfd, 0.05);
 
-    // Camera positioned for prominent, high-impact CAD robot view
-    const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 50);
+    const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
     camera.up.set(0, 0, 1);
 
-    // Smooth Orbit & Zoom Controls
     const spherical = { radius: 1.18, theta: 0.75, phi: 1.22 };
     function updateCameraView() {
       camera.position.x = robotRoot.position.x + spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
@@ -752,49 +1440,48 @@
     }
 
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Studio Lights
+    function onSimResize() {
+      if (!container || !renderer) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onSimResize);
+    setTimeout(onSimResize, 50);
+
+    // Lights
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 1.2);
     scene.add(hemiLight);
-
     const keyLight = new THREE.DirectionalLight(0x2563eb, 0.9);
     keyLight.position.set(2, -2, 3);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 2048;
-    keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.camera.near = 0.2;
-    keyLight.shadow.camera.far = 10;
-    keyLight.shadow.bias = -0.0005;
     scene.add(keyLight);
-
     const fillLight = new THREE.DirectionalLight(0xffffff, 1.1);
     fillLight.position.set(-2, -2, 2.5);
     scene.add(fillLight);
 
-    // Clean Studio Shadow Floor
+    // Floor & Grid
     const floorGeo = new THREE.PlaneGeometry(40, 40);
     const floorMat = new THREE.ShadowMaterial({ opacity: 0.14 });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.receiveShadow = true;
     scene.add(floorMesh);
 
-    // Subtle Precision Blueprint Grid (ORDIVA Style)
     const grid = new THREE.GridHelper(12, 48, 0x2563eb, 0xe2e8f0);
     grid.rotation.x = Math.PI / 2;
     grid.position.z = -0.001;
     scene.add(grid);
 
-    // -------------------------------------------------------------------------
-    // High-Precision 3D Microduck CAD Model (Anodized Blue & Silver Rail Style)
-    // -------------------------------------------------------------------------
+    // 3D Robot CAD Model
     const robotRoot = new THREE.Group();
     scene.add(robotRoot);
 
-    // Clean Industrial Materials (Matches designs/ folder)
     const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
     const matBlueAnodized = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.80, roughness: 0.22 });
     const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.25, roughness: 0.25 });
@@ -802,16 +1489,13 @@
     const matPinkAccent = new THREE.MeshStandardMaterial({ color: 0xec4899, metalness: 0.4, roughness: 0.3 });
     const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
 
-    // Torso Frame
     const torsoGroup = new THREE.Group();
     robotRoot.add(torsoGroup);
-
     const torsoGeo = new THREE.BoxGeometry(0.085, 0.076, 0.098);
     const torsoMesh = new THREE.Mesh(torsoGeo, matSilverRail);
     torsoMesh.castShadow = true;
     torsoGroup.add(torsoMesh);
 
-    // Blue Anodized Bracket Side Plates
     const plateGeo = new THREE.BoxGeometry(0.006, 0.068, 0.084);
     const plateL = new THREE.Mesh(plateGeo, matBlueAnodized);
     plateL.position.x = -0.045;
@@ -820,17 +1504,14 @@
     plateR.position.x = 0.045;
     torsoMesh.add(plateR);
 
-    // Head Unit (Duck Visor)
     const headGroup = new THREE.Group();
     headGroup.position.set(0, 0.015, 0.080);
     torsoMesh.add(headGroup);
-
     const headGeo = new THREE.SphereGeometry(0.046, 32, 32);
     const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
     headMesh.castShadow = true;
     headGroup.add(headMesh);
 
-    // Duck Beak
     const beakGeo = new THREE.CylinderGeometry(0.012, 0.028, 0.050, 20);
     const beakMesh = new THREE.Mesh(beakGeo, matBeakOrange);
     beakMesh.rotation.x = Math.PI / 2;
@@ -838,7 +1519,6 @@
     beakMesh.scale.set(1.3, 0.65, 1);
     headGroup.add(beakMesh);
 
-    // Eyes
     const eyeGeo = new THREE.SphereGeometry(0.0065, 16, 16);
     const eyeL = new THREE.Mesh(eyeGeo, matEye);
     eyeL.position.set(-0.022, 0.032, 0.014);
@@ -847,19 +1527,16 @@
     eyeR.position.set(0.022, 0.032, 0.014);
     headGroup.add(eyeR);
 
-    // 6-DoF Legs with Anodized Hinges
     function createCADLeg(isLeft) {
       const legRoot = new THREE.Group();
       const sign = isLeft ? -1 : 1;
       legRoot.position.set(sign * 0.039, 0, -0.049);
 
-      // Anodized Hip Pivot
       const hipGeo = new THREE.CylinderGeometry(0.013, 0.013, 0.026, 16);
       const hipMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
       hipMesh.rotation.z = Math.PI / 2;
       legRoot.add(hipMesh);
 
-      // Thigh Extrusion
       const thighGroup = new THREE.Group();
       legRoot.add(thighGroup);
       const thighGeo = new THREE.BoxGeometry(0.018, 0.024, 0.070);
@@ -868,11 +1545,9 @@
       thighMesh.castShadow = true;
       thighGroup.add(thighMesh);
 
-      // Knee Joint with Pink Pin (from ORDIVA design)
       const kneeGroup = new THREE.Group();
       kneeGroup.position.set(0, 0, -0.070);
       thighGroup.add(kneeGroup);
-
       const kneeMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
       kneeMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(kneeMesh);
@@ -882,7 +1557,6 @@
       pinMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(pinMesh);
 
-      // Lower Shin
       const shinGroup = new THREE.Group();
       kneeGroup.add(shinGroup);
       const shinGeo = new THREE.BoxGeometry(0.016, 0.022, 0.070);
@@ -891,50 +1565,34 @@
       shinMesh.castShadow = true;
       shinGroup.add(shinMesh);
 
-      // Ankle & Boot
       const ankleGroup = new THREE.Group();
       ankleGroup.position.set(0, 0, -0.070);
       shinGroup.add(ankleGroup);
-
       const bootGeo = new THREE.BoxGeometry(0.044, 0.084, 0.015);
       const bootMesh = new THREE.Mesh(bootGeo, matBlueAnodized);
       bootMesh.position.set(0, 0.018, -0.0075);
       bootMesh.castShadow = true;
       ankleGroup.add(bootMesh);
 
-      return {
-        root: legRoot,
-        thigh: thighGroup,
-        knee: kneeGroup,
-        shin: shinGroup,
-        ankle: ankleGroup,
-        foot: bootMesh
-      };
+      return { root: legRoot, thigh: thighGroup, knee: kneeGroup, shin: shinGroup, ankle: ankleGroup, foot: bootMesh };
     }
 
     const legLeft = createCADLeg(true);
     const legRight = createCADLeg(false);
     torsoMesh.add(legLeft.root);
     torsoMesh.add(legRight.root);
-
     robotRoot.position.set(0, 0, 0.22);
     updateCameraView();
 
-    // -------------------------------------------------------------------------
-    // Mouse Drag-to-Orbit & Wheel Zoom
-    // -------------------------------------------------------------------------
+    // Mouse Drag-to-Orbit
     let isDragging = false;
-    let prevMouseX = 0;
-    let prevMouseY = 0;
-
+    let prevMouseX = 0, prevMouseY = 0;
     container.addEventListener('mousedown', (e) => {
       isDragging = true;
       prevMouseX = e.clientX;
       prevMouseY = e.clientY;
     });
-
     window.addEventListener('mouseup', () => isDragging = false);
-
     window.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const dx = e.clientX - prevMouseX;
@@ -945,16 +1603,13 @@
       prevMouseY = e.clientY;
       updateCameraView();
     });
-
     container.addEventListener('wheel', (e) => {
-      spherical.radius = Math.max(0.45, Math.min(2.2, spherical.radius + e.deltaY * 0.001));
+      spherical.radius = Math.max(0.45, Math.min(2.5, spherical.radius + e.deltaY * 0.001));
       updateCameraView();
       e.preventDefault();
     }, { passive: false });
 
-    // -------------------------------------------------------------------------
-    // Foot Trajectory Ribbon (Traces foot arc in 3D for Slo-Mo learning)
-    // -------------------------------------------------------------------------
+    // Foot Trail Ribbon
     const maxTrailPoints = 80;
     const trailPositions = new Float32Array(maxTrailPoints * 3);
     const trailGeo = new THREE.BufferGeometry();
@@ -962,7 +1617,6 @@
     const trailMat = new THREE.LineBasicMaterial({ color: 0xec4899, linewidth: 2 });
     const trailLine = new THREE.Line(trailGeo, trailMat);
     scene.add(trailLine);
-
     let trailIdx = 0;
     function recordFootTrail(pos) {
       trailPositions[trailIdx * 3] = pos.x;
@@ -972,23 +1626,15 @@
       trailGeo.attributes.position.needsUpdate = true;
     }
 
-    // -------------------------------------------------------------------------
-    // Interactive 70mm Physics Kick Ball (BallKick Task)
-    // -------------------------------------------------------------------------
+    // 70mm Physics Ball
     const ballRadius = 0.038;
     const ballGeo = new THREE.SphereGeometry(ballRadius, 32, 32);
     const ballMat = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
     const ballMesh = new THREE.Mesh(ballGeo, ballMat);
     ballMesh.castShadow = true;
     scene.add(ballMesh);
-
-    const ball = {
-      pos: new THREE.Vector3(0.35, 0.0, ballRadius),
-      vel: new THREE.Vector3(0, 0, 0),
-      friction: 0.97
-    };
+    const ball = { pos: new THREE.Vector3(0.35, 0.0, ballRadius), vel: new THREE.Vector3(0, 0, 0), friction: 0.97 };
     ballMesh.position.copy(ball.pos);
-
     function resetBall() {
       ball.pos.set(robotRoot.position.x + 0.35, robotRoot.position.y, ballRadius);
       ball.vel.set(0, 0, 0);
@@ -996,7 +1642,7 @@
     }
 
     // -------------------------------------------------------------------------
-    // Slo-Mo Speed Controls & Kinematic Inspector
+    // Slo-Mo Settings & Smooth Push/Fall State Machine
     // -------------------------------------------------------------------------
     let slomoScale = 1.0;
     let isPaused = false;
@@ -1023,63 +1669,112 @@
       matDuckYellow.wireframe = !isWire;
     }
 
-    // -------------------------------------------------------------------------
-    // Guaranteed Built-in Physics Engine (Always runs offline & syncs with API)
-    // -------------------------------------------------------------------------
+    // Kinematics & Omnidirectional Variables
     let simTime = 0.0;
-    let cmdVx = 0.15;
+    let cmdVx = 0.0;
     let cmdVy = 0.0;
     let cmdWz = 0.0;
-    let robotX = 0.0;
-    let robotY = 0.0;
-    let robotYaw = 0.0;
-    let robotRoll = 0.0;
-    let robotPitch = 0.0;
+    let robotX = 0.0, robotY = 0.0, robotZ = 0.22;
+    let robotYaw = 0.0, robotRoll = 0.0, robotPitch = 0.0;
 
-    // Keyboard bindings
-    window.addEventListener('keydown', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'w' || k === 'arrowup') cmdVx = 0.25;
-      if (k === 's' || k === 'arrowdown') cmdVx = -0.15;
-      if (k === 'a' || k === 'arrowleft') cmdWz = 0.85;
-      if (k === 'd' || k === 'arrowright') cmdWz = -0.85;
-      if (k === ' ') triggerLateralPush();
-      if (k === 'f') triggerHardFall();
-      if (k === 'r') triggerReset();
-    });
-
-    window.addEventListener('keyup', (e) => {
-      const k = e.key.toLowerCase();
-      if (k === 'w' || k === 's' || k === 'arrowup' || k === 'arrowdown') cmdVx = 0.0;
-      if (k === 'a' || k === 'd' || k === 'arrowleft' || k === 'arrowright') cmdWz = 0.0;
-    });
+    // Smooth Push & Fall States (Honors Slo-Mo!)
+    let pushDisturbanceTime = 0.0;
+    let fallSimulationPhase = 0.0; // 0 = not falling, >0 = progressive fall & standup
+    let isFallActive = false;
 
     function triggerLateralPush() {
-      robotRoll = 16.0;
+      pushDisturbanceTime = 1.2; // 1.2 seconds of smooth lateral disturbance
       try { fetch('/api/push', { method: 'POST', body: JSON.stringify({ magnitude_n: 14.0 }) }); } catch(e){}
     }
 
     function triggerHardFall() {
-      robotRoll = 72.0;
-      robotPitch = -35.0;
+      if (isFallActive) return;
+      isFallActive = true;
+      fallSimulationPhase = 0.01;
       try { fetch('/api/fall', { method: 'POST' }); } catch(e){}
     }
 
     function triggerReset() {
-      robotX = 0; robotY = 0; robotYaw = 0; robotRoll = 0; robotPitch = 0;
-      cmdVx = 0; cmdWz = 0;
+      isFallActive = false;
+      fallSimulationPhase = 0.0;
+      pushDisturbanceTime = 0.0;
+      robotX = 0; robotY = 0; robotZ = 0.22;
+      robotYaw = 0; robotRoll = 0; robotPitch = 0;
+      cmdVx = 0; cmdVy = 0; cmdWz = 0;
       resetBall();
       try { fetch('/api/reset', { method: 'POST' }); } catch(e){}
     }
 
-    // -------------------------------------------------------------------------
+    // Omnidirectional Direct Teleop Functions
+    function setDrive(val) { cmdVx = val; syncBackendCmd(); }
+    function setStrafe(val) { cmdVy = val; syncBackendCmd(); }
+    function setTurn(val) { cmdWz = val * 0.9; syncBackendCmd(); }
+
+    function syncBackendCmd() {
+      try {
+        fetch('/api/cmd_vel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vx: cmdVx, vy: cmdVy, wz: cmdWz })
+        });
+      } catch(e){}
+    }
+
+    // Keyboard bindings for Omnidirectional Drive
+    const activeKeys = {};
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      activeKeys[k] = true;
+      updateKeyStates();
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      activeKeys[k] = false;
+      updateKeyStates();
+    });
+
+    function updateKeyStates() {
+      // Forward / Back
+      if (activeKeys['w'] || activeKeys['arrowup']) cmdVx = 0.25;
+      else if (activeKeys['s'] || activeKeys['arrowdown']) cmdVx = -0.18;
+      else cmdVx = 0.0;
+
+      // Strafe Left / Right
+      if (activeKeys['a']) cmdVy = 0.20;
+      else if (activeKeys['d']) cmdVy = -0.20;
+      else cmdVy = 0.0;
+
+      // Rotate Left / Right
+      if (activeKeys['q'] || activeKeys['arrowleft']) cmdWz = 0.90;
+      else if (activeKeys['e'] || activeKeys['arrowright']) cmdWz = -0.90;
+      else cmdWz = 0.0;
+
+      if (activeKeys[' ']) triggerLateralPush();
+      if (activeKeys['f']) triggerHardFall();
+      if (activeKeys['r']) triggerReset();
+
+      // Reflect on virtual D-Pad buttons
+      highlightKey('key_w', cmdVx > 0);
+      highlightKey('key_s', cmdVx < 0);
+      highlightKey('key_a', cmdVy > 0);
+      highlightKey('key_d', cmdVy < 0);
+      highlightKey('key_q', cmdWz > 0);
+      highlightKey('key_e', cmdWz < 0);
+    }
+
+    function highlightKey(id, isPressed) {
+      const el = document.getElementById(id);
+      if (el) {
+        if (isPressed) el.classList.add('pressed');
+        else el.classList.remove('pressed');
+      }
+    }
+
     // 3D-to-2D Callout Pin Tracking
-    // -------------------------------------------------------------------------
     function updateCalloutPin(object3D, pinElementId, textElementId, labelText) {
       const worldPos = new THREE.Vector3();
       object3D.getWorldPosition(worldPos);
-
-      // Project 3D coordinate to 2D screen coordinate
       worldPos.project(camera);
       const halfW = container.clientWidth / 2;
       const halfH = container.clientHeight / 2;
@@ -1097,9 +1792,7 @@
       }
     }
 
-    // -------------------------------------------------------------------------
-    // Main Render & Slo-Mo Kinematic Loop
-    // -------------------------------------------------------------------------
+    // Main 3D Render & Slow-Motion Physics Loop
     const clock = new THREE.Clock();
 
     function renderLoop() {
@@ -1108,41 +1801,74 @@
       const rawDt = Math.min(0.05, clock.getDelta());
       const effectiveDt = isPaused ? 0.0 : (rawDt * slomoScale);
 
-      if (!isPaused) {
+      if (!isPaused && currentTab === 'sim') {
         simTime += effectiveDt;
 
-        // Kinematics calculations
+        // 1. Slow-Motion Push Disturbance Dynamics
+        if (pushDisturbanceTime > 0) {
+          pushDisturbanceTime -= effectiveDt;
+          // Smooth sinusoidal lateral roll impulse
+          robotRoll = Math.sin(pushDisturbanceTime * 4.0) * 18.0;
+        } else if (!isFallActive) {
+          robotRoll *= 0.94; // Smooth return to upright
+          robotPitch *= 0.94;
+        }
+
+        // 2. Slow-Motion Fall & VelStand Recovery Dynamics
+        if (isFallActive) {
+          fallSimulationPhase += effectiveDt * 0.45; // ~2.2s total sequence (slowed further by slomoScale!)
+
+          if (fallSimulationPhase < 0.6) {
+            // Progressive topple to floor
+            const tFall = fallSimulationPhase / 0.6;
+            robotPitch = -tFall * 65.0;
+            robotRoll = tFall * 20.0;
+            robotZ = 0.22 - tFall * (0.22 - 0.075);
+          } else if (fallSimulationPhase < 1.6) {
+            // VelStand recovery: knee push, foot plant, torso erect
+            const tStand = (fallSimulationPhase - 0.6) / 1.0;
+            robotPitch = -65.0 * (1.0 - tStand);
+            robotRoll = 20.0 * (1.0 - tStand);
+            robotZ = 0.075 + tStand * (0.22 - 0.075);
+          } else {
+            // Recovered!
+            isFallActive = false;
+            fallSimulationPhase = 0;
+            robotZ = 0.22;
+            robotPitch = 0;
+            robotRoll = 0;
+          }
+        }
+
+        // 3. Omnidirectional Kinematics & Walking
+        const isWalking = (Math.hypot(cmdVx, cmdVy) > 0.02 || Math.abs(cmdWz) > 0.05);
         const omega = 2.0 * Math.PI * 1.5;
-        const gaitPhase = (simTime * 1.5) % 1.0;
-        
-        // Highlight active phase in bottom educational strip
-        const stepNum = Math.floor(gaitPhase * 4) + 1;
+        const gaitPhase = isWalking ? (simTime * 1.5) % 1.0 : 0.0;
+
+        // Highlight active phase in bottom strip
+        const stepNum = isWalking ? Math.floor(gaitPhase * 4) + 1 : 1;
         document.querySelectorAll('.phase-step').forEach((el, i) => {
           if (i + 1 === stepNum) el.classList.add('active');
           else el.classList.remove('active');
         });
 
-        // Bipedal oscillation
-        const lSwing = Math.sin(omega * simTime);
-        const rSwing = Math.sin(omega * simTime + Math.PI);
+        // Bipedal oscillations
+        const lSwing = isWalking ? Math.sin(omega * simTime) : 0;
+        const rSwing = isWalking ? Math.sin(omega * simTime + Math.PI) : 0;
 
-        // Turn & planar movement
+        // Omnidirectional coordinate integration (Heading + Strafe)
         robotYaw += cmdWz * effectiveDt;
         const radYaw = robotYaw;
         robotX += (cmdVx * Math.cos(radYaw) - cmdVy * Math.sin(radYaw)) * effectiveDt;
         robotY += (cmdVx * Math.sin(radYaw) + cmdVy * Math.cos(radYaw)) * effectiveDt;
 
-        // Balance recovery attenuation
-        robotRoll *= 0.96;
-        robotPitch *= 0.96;
-
         // Apply to 3D Robot
-        robotRoot.position.set(robotX, robotY, 0.22);
+        robotRoot.position.set(robotX, robotY, robotZ);
         robotRoot.rotation.z = robotYaw;
         robotRoot.rotation.x = robotRoll * Math.PI / 180;
         robotRoot.rotation.y = robotPitch * Math.PI / 180;
 
-        // Articulate Legs (Kinematic Angles in Degrees)
+        // Articulate Legs
         const leftHipPitchDeg = lSwing * 22;
         const rightHipPitchDeg = rSwing * 22;
         const leftKneeDeg = Math.max(0, -lSwing) * 38;
@@ -1156,10 +1882,10 @@
         legRight.knee.rotation.x = -rightKneeDeg * Math.PI / 180;
         legRight.ankle.rotation.x = -rightHipPitchDeg * 0.7 * Math.PI / 180;
 
-        // Record trailing foot arc
+        // Foot trail
         const footRPos = new THREE.Vector3();
         legRight.foot.getWorldPosition(footRPos);
-        recordFootTrail(footRPos);
+        if (isWalking) recordFootTrail(footRPos);
 
         // Physics Ball update
         ball.pos.x += ball.vel.x * effectiveDt;
@@ -1167,7 +1893,6 @@
         ball.vel.x *= ball.friction;
         ball.vel.y *= ball.friction;
 
-        // Foot strike collision with ball
         const distToBall = Math.hypot(ball.pos.x - footRPos.x, ball.pos.y - footRPos.y);
         if (distToBall < (ballRadius + 0.04)) {
           const kickDirX = (ball.pos.x - footRPos.x) / (distToBall + 0.001);
@@ -1182,17 +1907,17 @@
       // Update Callout Pins
       updateCalloutPin(legLeft.thigh, 'pinHip', 'txtHip', `HIP: ${(legLeft.thigh.rotation.x * 180 / Math.PI).toFixed(1)}°`);
       updateCalloutPin(legRight.knee, 'pinKnee', 'txtKnee', `KNEE: ${(legRight.knee.rotation.x * 180 / Math.PI).toFixed(1)}°`);
-      updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.abs(cmdVx) * 12 + 3.2).toFixed(1)} N`);
+      updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.hypot(cmdVx, cmdVy) * 12 + 3.2).toFixed(1)} N`);
 
       // Update Camera & Render
       updateCameraView();
-      renderer.render(scene, camera);
+      if (currentTab === 'sim') {
+        renderer.render(scene, camera);
+      }
     }
     renderLoop();
 
-    // -------------------------------------------------------------------------
-    // Telemetry Sync with Backend (If online, syncs; if offline, runs client)
-    // -------------------------------------------------------------------------
+    // Telemetry Sync with Backend
     async function syncBackendTelemetry() {
       try {
         const res = await fetch('/api/telemetry');
@@ -1203,12 +1928,397 @@
     }
     setInterval(syncBackendTelemetry, 250);
 
-    // Responsive window resize
-    window.addEventListener('resize', () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+    // =========================================================================
+    // TAB 2: NEURAL BRAIN & SYNAPTIC FIRING (BEFORE VS AFTER)
+    // =========================================================================
+    let brainMode = 'before'; // 'before' or 'after'
+    const neuralCanvas = document.getElementById('neuralCanvas');
+    const nCtx = neuralCanvas.getContext('2d');
+    let neuralAnimFrame = null;
+    let synapticPulses = [];
+
+    function setBrainMode(mode) {
+      brainMode = mode;
+      document.getElementById('btnPolicy_before').classList.toggle('active', mode === 'before');
+      document.getElementById('btnPolicy_after').classList.toggle('active', mode === 'after');
+
+      const tag = document.getElementById('neuralPolicyTag');
+      const valBacklash = document.getElementById('val_backlash');
+      const badgeBacklash = document.getElementById('badge_backlash');
+      const barBacklash = document.getElementById('bar_backlash');
+
+      const valJitter = document.getElementById('val_jitter');
+      const badgeJitter = document.getElementById('badge_jitter');
+      const barJitter = document.getElementById('bar_jitter');
+
+      const valGap = document.getElementById('val_gap');
+      const badgeGap = document.getElementById('badge_gap');
+      const barGap = document.getElementById('bar_gap');
+
+      const valEff = document.getElementById('val_eff');
+      const badgeEff = document.getElementById('badge_eff');
+      const barEff = document.getElementById('bar_eff');
+
+      if (mode === 'before') {
+        tag.textContent = 'MODE: BASELINE RL (UNCOMPENSATED BACKLASH & CHATTER)';
+        tag.style.borderColor = 'var(--accent-red)';
+        tag.style.color = 'var(--accent-red)';
+
+        valBacklash.textContent = '18.6°';
+        badgeBacklash.textContent = 'High Flutter';
+        badgeBacklash.className = 'metric-badge bad';
+        barBacklash.style.width = '85%';
+        barBacklash.style.background = 'var(--accent-red)';
+
+        valJitter.innerHTML = '34.2 <span style="font-size:0.9rem">rad/s²</span>';
+        badgeJitter.textContent = 'Severe Noise';
+        badgeJitter.className = 'metric-badge bad';
+        barJitter.style.width = '78%';
+        barJitter.style.background = 'var(--accent-red)';
+
+        valGap.textContent = '42.5%';
+        badgeGap.textContent = 'Unstable Real';
+        badgeGap.className = 'metric-badge bad';
+        barGap.style.width = '68%';
+        barGap.style.background = 'var(--accent-red)';
+
+        valEff.textContent = '58.4%';
+        badgeEff.textContent = 'Choppy Output';
+        badgeEff.className = 'metric-badge bad';
+        barEff.style.width = '58%';
+        barEff.style.background = 'var(--accent-red)';
+      } else {
+        tag.textContent = 'MODE: OUR TRAINED POLICY (BAM BACKLASH COMPENSATED)';
+        tag.style.borderColor = 'var(--accent-blue)';
+        tag.style.color = 'var(--accent-blue)';
+
+        valBacklash.textContent = '0.8°';
+        badgeBacklash.textContent = 'Compensated';
+        badgeBacklash.className = 'metric-badge good';
+        barBacklash.style.width = '12%';
+        barBacklash.style.background = 'var(--accent-green)';
+
+        valJitter.innerHTML = '2.1 <span style="font-size:0.9rem">rad/s²</span>';
+        badgeJitter.textContent = 'Smooth Torque';
+        badgeJitter.className = 'metric-badge good';
+        barJitter.style.width = '15%';
+        barJitter.style.background = 'var(--accent-green)';
+
+        valGap.textContent = '4.1%';
+        badgeGap.textContent = 'Real-Ready';
+        badgeGap.className = 'metric-badge good';
+        barGap.style.width = '10%';
+        barGap.style.background = 'var(--accent-green)';
+
+        valEff.textContent = '96.2%';
+        badgeEff.textContent = 'Optimal PPO';
+        badgeEff.className = 'metric-badge good';
+        barEff.style.width = '96%';
+        barEff.style.background = 'var(--accent-green)';
+      }
+    }
+
+    function initNeuralCanvas() {
+      const rect = neuralCanvas.parentElement.getBoundingClientRect();
+      neuralCanvas.width = rect.width;
+      neuralCanvas.height = rect.height;
+
+      // Spawn initial synaptic firing pulses
+      synapticPulses = [];
+      for (let i = 0; i < 24; i++) {
+        synapticPulses.push({
+          layer: Math.floor(Math.random() * 4),
+          progress: Math.random(),
+          fromIdx: Math.floor(Math.random() * 8),
+          toIdx: Math.floor(Math.random() * 8),
+          speed: 0.008 + Math.random() * 0.015
+        });
+      }
+
+      if (!neuralAnimFrame) animateNeuralNetwork();
+    }
+
+    function animateNeuralNetwork() {
+      if (currentTab !== 'neural') {
+        neuralAnimFrame = null;
+        return;
+      }
+      neuralAnimFrame = requestAnimationFrame(animateNeuralNetwork);
+
+      const w = neuralCanvas.width;
+      const h = neuralCanvas.height;
+      nCtx.clearRect(0, 0, w, h);
+
+      // Define 5 Layers: Inputs (61D) -> Dense1 (256) -> Dense2 (128) -> Dense3 (64) -> Actions (14D)
+      const layers = [
+        { name: '61D Inputs\n(IMU, Joints, Cmds)', count: 9, x: w * 0.12 },
+        { name: 'Dense 1 (256)', count: 12, x: w * 0.32 },
+        { name: 'Dense 2 (128)', count: 10, x: w * 0.52 },
+        { name: 'Dense 3 (64)', count: 8, x: w * 0.72 },
+        { name: '14-DoF Torques\n(Dynamixel)', count: 7, x: w * 0.90 }
+      ];
+
+      // Draw Synaptic Connections
+      for (let l = 0; l < layers.length - 1; l++) {
+        const l1 = layers[l];
+        const l2 = layers[l + 1];
+
+        for (let i = 0; i < l1.count; i++) {
+          const y1 = h * 0.20 + (i / (l1.count - 1)) * (h * 0.65);
+          for (let j = 0; j < l2.count; j++) {
+            const y2 = h * 0.20 + (j / (l2.count - 1)) * (h * 0.65);
+
+            nCtx.beginPath();
+            nCtx.moveTo(l1.x, y1);
+            nCtx.lineTo(l2.x, y2);
+            if (brainMode === 'before') {
+              // Red/orange chatter noise
+              nCtx.strokeStyle = 'rgba(239, 68, 68, 0.04)';
+            } else {
+              // Smooth blue harmonic connections
+              nCtx.strokeStyle = 'rgba(37, 99, 235, 0.05)';
+            }
+            nCtx.stroke();
+          }
+        }
+      }
+
+      // Draw Firing Pulses (Synaptic Action Potentials)
+      synapticPulses.forEach(p => {
+        p.progress += p.speed;
+        if (p.progress >= 1.0) {
+          p.progress = 0.0;
+          p.layer = Math.floor(Math.random() * (layers.length - 1));
+          p.fromIdx = Math.floor(Math.random() * layers[p.layer].count);
+          p.toIdx = Math.floor(Math.random() * layers[p.layer + 1].count);
+        }
+
+        const l1 = layers[p.layer];
+        const l2 = layers[p.layer + 1];
+        const y1 = h * 0.20 + (p.fromIdx / (l1.count - 1)) * (h * 0.65);
+        const y2 = h * 0.20 + (p.toIdx / (l2.count - 1)) * (h * 0.65);
+
+        const curX = l1.x + (l2.x - l1.x) * p.progress;
+        const curY = y1 + (y2 - y1) * p.progress;
+
+        nCtx.beginPath();
+        nCtx.arc(curX, curY, brainMode === 'before' ? 3.5 : 2.5, 0, Math.PI * 2);
+        if (brainMode === 'before') {
+          // Jittery stutter
+          const jitter = (Math.random() - 0.5) * 4;
+          nCtx.fillStyle = '#ef4444';
+        } else {
+          nCtx.fillStyle = '#2563eb';
+        }
+        nCtx.fill();
+      });
+
+      // Draw Layer Nodes
+      layers.forEach((l, lIdx) => {
+        // Label
+        nCtx.fillStyle = '#64748b';
+        nCtx.font = '600 11px JetBrains Mono';
+        nCtx.textAlign = 'center';
+        const lines = l.name.split('\n');
+        lines.forEach((line, li) => {
+          nCtx.fillText(line, l.x, h * 0.12 + li * 14);
+        });
+
+        // Nodes
+        for (let i = 0; i < l.count; i++) {
+          const y = h * 0.20 + (i / (l.count - 1)) * (h * 0.65);
+
+          nCtx.beginPath();
+          nCtx.arc(l.x, y, 7, 0, Math.PI * 2);
+
+          if (brainMode === 'before') {
+            nCtx.fillStyle = (i % 2 === 0) ? '#fee2e2' : '#ffffff';
+            nCtx.strokeStyle = '#ef4444';
+          } else {
+            nCtx.fillStyle = (i % 2 === 0) ? '#eff6ff' : '#ffffff';
+            nCtx.strokeStyle = '#2563eb';
+          }
+          nCtx.lineWidth = 2;
+          nCtx.fill();
+          nCtx.stroke();
+        }
+      });
+    }
+
+    // =========================================================================
+    // TAB 3: VELSTAND RECOVERY & JOINT CONTACT PHYSICS
+    // =========================================================================
+    let currentScrubPhase = 0; // 0 to 100%
+    let recoveryLoopTimer = null;
+    const contactCanvas = document.getElementById('contactCanvas');
+    const cCtx = contactCanvas.getContext('2d');
+
+    function initContactCanvas() {
+      const rect = contactCanvas.parentElement.getBoundingClientRect();
+      contactCanvas.width = rect.width;
+      contactCanvas.height = rect.height;
+      drawContactSchematic(currentScrubPhase);
+    }
+
+    function onScrubChange(val) {
+      currentScrubPhase = parseInt(val);
+      document.getElementById('scrubberLabel').textContent = `${val}%`;
+      updateContactStepHighlight(currentScrubPhase);
+      drawContactSchematic(currentScrubPhase);
+      updateContactKinematics(currentScrubPhase);
+    }
+
+    function setContactStep(pct) {
+      document.getElementById('scrubberInput').value = pct;
+      onScrubChange(pct);
+    }
+
+    function updateContactStepHighlight(pct) {
+      document.querySelectorAll('.c-step-card').forEach(c => c.classList.remove('active'));
+      if (pct < 20) document.getElementById('cStep0').classList.add('active');
+      else if (pct < 40) document.getElementById('cStep1').classList.add('active');
+      else if (pct < 60) document.getElementById('cStep2').classList.add('active');
+      else if (pct < 80) document.getElementById('cStep3').classList.add('active');
+      else document.getElementById('cStep4').classList.add('active');
+    }
+
+    function playRecoveryAnimation() {
+      let p = 0;
+      clearInterval(recoveryLoopTimer);
+      recoveryLoopTimer = setInterval(() => {
+        p += 2;
+        if (p > 100) {
+          clearInterval(recoveryLoopTimer);
+          p = 100;
+        }
+        setContactStep(p);
+      }, 40);
+    }
+
+    // Draw 2D Vector Schematic of Contact Physics & Normal Forces
+    function drawContactSchematic(pct) {
+      const w = contactCanvas.width;
+      const h = contactCanvas.height;
+      cCtx.clearRect(0, 0, w, h);
+
+      const floorY = h * 0.72;
+
+      // Draw Floor line
+      cCtx.beginPath();
+      cCtx.moveTo(w * 0.08, floorY);
+      cCtx.lineTo(w * 0.92, floorY);
+      cCtx.strokeStyle = '#cbd5e1';
+      cCtx.lineWidth = 3;
+      cCtx.stroke();
+
+      // Ground hatching
+      cCtx.strokeStyle = '#e2e8f0';
+      cCtx.lineWidth = 1;
+      for (let x = w * 0.10; x < w * 0.90; x += 16) {
+        cCtx.beginPath();
+        cCtx.moveTo(x, floorY);
+        cCtx.lineTo(x - 8, floorY + 12);
+        cCtx.stroke();
+      }
+
+      // Robot Center of Mass and Contact Geometry based on Scrub Percentage
+      const progress = pct / 100.0;
+      const torsoAngle = -Math.PI / 2.5 * (1.0 - progress);
+      const torsoY = (floorY - 30) - progress * 110;
+      const torsoX = w * 0.45;
+
+      // Torso Box
+      cCtx.save();
+      cCtx.translate(torsoX, torsoY);
+      cCtx.rotate(torsoAngle);
+      cCtx.fillStyle = '#2563eb';
+      cCtx.fillRect(-22, -35, 44, 70);
+      // Head
+      cCtx.beginPath();
+      cCtx.arc(0, -48, 16, 0, Math.PI * 2);
+      cCtx.fillStyle = '#ffcc00';
+      cCtx.fill();
+      cCtx.restore();
+
+      // Contact Normal Force Vectors (Arrows pointing up from ground)
+      const kneeX = torsoX + 28;
+      const footX = torsoX - 18;
+
+      if (pct < 60) {
+        // Torso / Knee Contact Point (Red/Pink arrow spaced cleanly)
+        drawForceVector(torsoX - 35, floorY, 18.4 * (1.0 - progress), 'Fn = 18.4 N (Torso Skid)');
+        drawForceVector(kneeX + 35, floorY, 14.2 * (1.0 - progress), 'Fn = 14.2 N (Knee Lever)');
+      } else {
+        // Boot Sole Contact (Blue arrow spaced cleanly)
+        drawForceVector(footX - 25, floorY, 24.5 * progress, 'Fn = 24.5 N (Left Boot)');
+        drawForceVector(footX + 45, floorY, 24.5 * progress, 'Fn = 24.5 N (Right Boot)');
+      }
+    }
+
+    function drawForceVector(x, y, magN, label) {
+      const len = Math.max(15, magN * 2.2);
+      cCtx.beginPath();
+      cCtx.moveTo(x, y);
+      cCtx.lineTo(x, y - len);
+      cCtx.strokeStyle = '#ec4899';
+      cCtx.lineWidth = 3;
+      cCtx.stroke();
+
+      // Arrow head
+      cCtx.beginPath();
+      cCtx.moveTo(x - 5, y - len + 8);
+      cCtx.lineTo(x, y - len);
+      cCtx.lineTo(x + 5, y - len + 8);
+      cCtx.fillStyle = '#ec4899';
+      cCtx.fill();
+
+      // Label
+      cCtx.fillStyle = '#0f172a';
+      cCtx.font = '700 10px JetBrains Mono';
+      cCtx.textAlign = 'center';
+      cCtx.fillText(label, x, y - len - 6);
+    }
+
+    // Update Joint Torque Table dynamically
+    const jointNames = [
+      'left_hip_pitch', 'left_knee', 'left_ankle_pitch',
+      'right_hip_pitch', 'right_knee', 'right_ankle_pitch'
+    ];
+
+    function updateContactKinematics(pct) {
+      const tbody = document.getElementById('jointTableBody');
+      tbody.innerHTML = '';
+
+      const p = pct / 100.0;
+      jointNames.forEach((jName, idx) => {
+        let ang = 0;
+        let torquePct = 0;
+        let status = 'Ground Contact';
+
+        if (jName.includes('knee')) {
+          ang = (65.0 * (1.0 - p) + 5.0 * p).toFixed(1);
+          torquePct = Math.round(92 * (1.0 - p) + 20 * p);
+        } else if (jName.includes('hip')) {
+          ang = (-45.0 * (1.0 - p) + 0.0 * p).toFixed(1);
+          torquePct = Math.round(75 * (1.0 - p) + 18 * p);
+        } else {
+          ang = (35.0 * (1.0 - p) + 0.0 * p).toFixed(1);
+          torquePct = Math.round(80 * (1.0 - p) + 25 * p);
+        }
+
+        const pillClass = torquePct > 70 ? 'torque-high' : (torquePct > 40 ? 'torque-med' : 'torque-low');
+        const contactTxt = (pct < 60 && jName.includes('knee')) ? 'Floor Lever' : ((pct >= 60 && jName.includes('ankle')) ? 'Boot Plant' : 'Free Kinematic');
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><b>${jName}</b></td>
+          <td>${ang}°</td>
+          <td><span class="torque-pill ${pillClass}">${torquePct}% Max Torque</span></td>
+          <td>${contactTxt}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
   </script>
 </body>
 </html>
