@@ -9,11 +9,58 @@
 
 A high-fidelity **Physical AI Ground Control Station (GCS) and Simulation Pipeline** for the open-source **Microduck** bipedal robot (~800 g, ~25 cm, 14 Dynamixel XL-330 degrees of freedom), developed for the **Industrial Training Seminar (SCS-701)** at **Graphic Era Hill University, Bhimtal**.
 
-The project directly addresses the **Sim-to-Real Domain Gap** in low-cost robotics: mitigating mechanical backlash ($\pm 2.5^\circ$), handling battery voltage sag ($6.5\text{ V} - 8.2\text{ V}$), and deploying the state-of-the-art **`VelStand` deep reinforcement learning policy** for continuous omnidirectional locomotion with **autonomous fall self-righting recovery**.
+The project directly solves the **Sim-to-Real Domain Gap** in low-cost bipedal robots: mitigating mechanical gear backlash ($\pm 2.0^\circ$), handling battery voltage sag ($6.5\text{ V} - 8.2\text{ V}$), and deploying the state-of-the-art **`VelStand` deep reinforcement learning policy** for omnidirectional locomotion with **autonomous fall self-righting recovery**.
 
 ---
 
-## 📸 System Architecture & Features
+## 📸 Ground Control Station & Simulation Interface
+
+![Microduck 3D Teleoperation & Ground Control Station](docs/images/01_sim_teleop_dashboard.png)
+*Figure 1: Ground Control Station (GCS) featuring high-fidelity Microduck CAD model, omnidirectional D-pad teleoperation dock, 14-DoF joint encoder glass dock, 4-phase gait indicators, and live motor audio synthesizer.*
+
+---
+
+## 🚀 Key Engineering Highlights
+
+### 1. Dynamic Walking & Autonomous Fall Recovery (`VelStand`)
+The robot achieves stable dynamic walking via 50 Hz closed-loop control and recovers autonomously from severe falls without human intervention.
+
+| 50Hz Dynamic Stride Gait | 5-Phase Autonomous Fall Recovery (Stage 3 Knee Lever) |
+| :---: | :---: |
+| ![Microduck Dynamic Walking Gait](docs/images/02_motory_walking_gait.png) | ![Microduck Fall Recovery](docs/images/03_velstand_fall_recovery.png) |
+| *Figure 2: 50Hz dynamic bipedal walking gait with real-time joint HUD callouts and limit-cycle phase portrait.* | *Figure 3: VelStand Stage 3 knee-lever push exerting 18.4 N normal reaction force to lift Center of Mass.* |
+
+---
+
+### 2. Neural Policy & Synaptic Firing Inspector
+Directly compare the **Naive Baseline RL policy** against our **BAM Backlash-Compensated Policy** under live sensory perturbations.
+
+| Trained Policy (BAM Compensated) | Baseline RL (Uncompensated Chatter) |
+| :---: | :---: |
+| ![Trained Policy with Smooth Torque](docs/images/04_neural_actor_policy.png) | ![Baseline RL with 28Hz Noise Chatter](docs/images/05_neural_baseline_chatter.png) |
+| *Figure 4: BAM-compensated policy exhibiting coherent harmonic synaptic waves and smooth knee torque ($<0.32\text{ N}\cdot\text{m}$).* | *Figure 5: Naive RL exhibiting severe 28 Hz control chatter and high gear deadband flutter ($18.6^\circ$).* |
+
+#### Dual Actor-Critic Architecture & 61D Input Tensor Inspector
+| Critic Value Function $V(s)$ Evaluation | 61D Observation Input Tensor Inspector |
+| :---: | :---: |
+| ![Critic Value Function](docs/images/06_neural_critic_value.png) | ![61D Input Inspector Tooltip](docs/images/07_61d_tensor_inspector.png) |
+| *Figure 6: Critic network $[61 \rightarrow 256 \rightarrow 128 \rightarrow 64 \rightarrow 1]$ evaluating expected discounted state return ($V = +48.6$).* | *Figure 7: Interactive hover inspector detailing 61D observation vector (Input Group #8: BAM Backlash State $\Delta_{\text{bam}}$).* |
+
+---
+
+### 3. Contact Physics & Technical Kinematic Schematic
+![VelStand Contact Physics Schematic](docs/images/08_contact_physics_schematic.png)
+*Figure 8: Microduck 2D technical orthographic drawing illustrating multi-contact ground reaction forces ($18.4\text{ N}$ knee contact vs. $24.8\text{ N}$ sole plant) across the 5 VelStand stages.*
+
+---
+
+### 4. Sim-to-Real Problem Statement & Academic Solution
+![Sim-to-Real Problem & Solution](docs/images/09_sim2real_problem_solution.png)
+*Figure 9: Comprehensive breakdown of the Backlash Actuator Model (BAM M6), motor impedance equations, and GEHU SCS-701 seminar specifications.*
+
+---
+
+## 🏗️ Distributed System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -70,7 +117,7 @@ The robot's degrees of freedom match the official Microduck specification:
 ### 1. Installation
 Clone the repository and install requirements:
 ```bash
-git clone https://github.com/PiyushKarnatak/microduck-sim2real.git
+git clone https://github.com/pk002-hunter/microduck-sim2real.git
 cd microduck-sim2real
 pip install -r requirements.txt
 ```
@@ -86,7 +133,13 @@ python app.py
 ```
 Open **`http://localhost:8000`** in your browser.
 
-### 3. Distributed Home Server Deployment
+### 3. Graceful Shutdown (One-Click)
+To safely stop the simulation server, backend processes, and clean up ports:
+```bash
+stop.bat
+```
+
+### 4. Distributed Home Server Deployment
 1. **On your Home Server (or second PC):**
    ```bash
    python telemetry_server.py
@@ -98,7 +151,7 @@ Open **`http://localhost:8000`** in your browser.
    ```
 3. Open `http://<HOME_SERVER_IP>:8001/dashboard` to view live telemetry logs streaming across the LAN.
 
-### 4. Docker Deployment
+### 5. Docker Deployment
 ```bash
 docker compose up -d
 ```
@@ -117,7 +170,7 @@ docker compose up -d
 
 ---
 
-## 📚 References & Acknowledgments
+## 📚 References & Academic Details
 * **Pollen Robotics:** [microduck](https://github.com/pollen-robotics/microduck) & [microduck_rl](https://github.com/pollen-robotics/microduck_rl)
 * **Hugging Face Hub:** [pollen-robotics/microduck-policies](https://huggingface.co/pollen-robotics/microduck-policies)
 * **MuJoCo / DeepMind:** Physics engine contact dynamics & multi-body simulation
