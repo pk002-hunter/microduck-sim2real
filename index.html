@@ -62,16 +62,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 0;
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    /* ── Main Full-Window Responsive ORDIVA Frame ────────────────────── */
+    /* ── Main Full-Window Responsive ORDIVA Application Viewport ─────────── */
     .ordiva-frame {
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: 0 25px 80px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.25);
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -516,7 +521,7 @@
     .teleop-overlay {
       position: absolute;
       bottom: 124px;
-      right: 36px;
+      left: 36px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(10px);
       border: 1px solid var(--card-border);
@@ -590,7 +595,7 @@
       border-top: 1px solid var(--card-border);
       padding: 10px 32px 8px 32px;
       display: grid;
-      grid-template-columns: repeat(4, 1fr) 280px;
+      grid-template-columns: repeat(4, 1fr) 420px;
       gap: 16px;
       align-items: center;
       z-index: 30;
@@ -645,6 +650,7 @@
 
     .btn-ordiva {
       flex: 1;
+      white-space: nowrap;
       background: var(--card-subtle);
       border: 1px solid var(--card-border);
       padding: 6px 8px;
@@ -778,7 +784,7 @@
       min-height: 440px;
     }
 
-    .neural-canvas-card {
+    .neural-canvas-frame {
       background: #fafafa;
       border: 1px solid var(--card-border);
       border-radius: 16px;
@@ -816,7 +822,7 @@
       gap: 16px;
     }
 
-    .metric-card {
+    .metric-row-box {
       background: transparent;
       border: none;
       border-bottom: 1px solid var(--card-border);
@@ -940,7 +946,7 @@
       gap: 12px;
     }
 
-    .c-step-card {
+    .c-step-cell {
       background: transparent;
       border: none;
       border-top: 2px solid var(--card-border);
@@ -953,7 +959,7 @@
       transition: all 0.15s ease;
     }
 
-    .c-step-card.active {
+    .c-step-cell.active {
       border-top-color: var(--accent-blue);
       background: transparent;
       box-shadow: none;
@@ -974,7 +980,7 @@
     }
 
     .c-step-desc {
-      font-size: 0.80rem;
+      font-size: 0.84rem;
       color: var(--text-muted);
       line-height: 1.35;
     }
@@ -988,7 +994,7 @@
       min-height: 320px;
     }
 
-    .contact-canvas-card {
+    .contact-canvas-frame {
       background: #fafafa;
       border: 1px solid var(--card-border);
       border-radius: 14px;
@@ -1004,7 +1010,7 @@
       display: block;
     }
 
-    .joint-table-card {
+    .joint-table-frame {
       background: transparent;
       border: none;
       padding: 0;
@@ -1052,6 +1058,375 @@
     .torque-high { background: #fee2e2; color: #dc2626; }
     .torque-med { background: #fef3c7; color: #d97706; }
     .torque-low { background: #e0e7ff; color: #3730a3; }
+  
+    /* =========================================================================
+       FROSTED GLASS LIVE KINEMATICS & FORCES PANEL (RIGHT SIDE)
+       ========================================================================= */
+    .kinematics-glass-panel {
+      position: absolute;
+      right: 28px;
+      top: 24px;
+      width: 320px;
+      max-height: calc(100% - 150px);
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 15;
+      overflow-y: auto;
+    }
+
+    .kgp-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    .kgp-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kgp-tag-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+    }
+
+    .kgp-status-badge {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .kgp-status-badge.stable {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .kgp-status-badge.warn {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    .kgp-status-badge.alert {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .kgp-status-badge.velstand {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .kgp-status-badge.peak-lever {
+      background: #fdf2f8;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+      box-shadow: 0 0 0 1px #ec4899;
+    }
+
+    /* Kinematics Bar Rows */
+    .kgp-meter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .kgp-meter-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .kgp-meter-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+    }
+
+    .kgp-joint-name {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .kgp-joint-val {
+      font-weight: 800;
+      color: var(--text-dark);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kgp-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #f1f5f9;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .kgp-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.08s ease, background 0.15s ease;
+    }
+
+    /* Standup Mechanism Explainer */
+    .kgp-explainer {
+      background: transparent;
+      border: none;
+      border-top: 1px solid var(--card-border);
+      border-radius: 0;
+      padding: 10px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .kgp-explainer-title {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      color: var(--text-pink);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .kgp-explainer-text {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Push Slider Component */
+    .push-slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+
+    .push-slider-label {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .push-val-badge {
+      color: var(--text-pink);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .push-range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 70px;
+      height: 4px;
+      background: #cbd5e1;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .push-range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+    }
+
+    /* =========================================================================
+       TAB 4: PROBLEM & SIM-TO-REAL SOLUTION EXPLAINED
+       ========================================================================= */
+    .solution-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 36px;
+      overflow-y: auto;
+      gap: 22px;
+      background: #ffffff;
+    }
+
+    .solution-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 16px;
+    }
+
+    .solution-breadcrumb {
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-pink);
+      letter-spacing: 0.5px;
+    }
+
+    .solution-header h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-dark);
+    }
+
+    .solution-header p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .solution-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    .solution-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .solution-panel {
+      background: transparent;
+      border: none;
+      border-top: 2px solid var(--card-border);
+      border-radius: 0;
+      padding: 14px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .solution-panel-title {
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .solution-panel-title.red { color: #b91c1c; }
+    .solution-panel-title.blue { color: #2563eb; }
+    .solution-panel-title.pink { color: #be185d; }
+    .solution-panel-title.green { color: #15803d; }
+
+    .solution-panel p {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .solution-panel ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .math-formula-box {
+      background: var(--card-subtle);
+      border: none;
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 0;
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-dark);
+      font-variant-numeric: tabular-nums;
+      margin: 6px 0;
+    }
+
+    /* Viva Defense Comparison Table */
+    .viva-comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      margin-top: 4px;
+    }
+
+    .viva-comparison-table th {
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 2px solid var(--card-border);
+      color: var(--text-muted);
+      font-weight: 700;
+      background: #f8fafc;
+    }
+
+    .viva-comparison-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-dark);
+    }
+
+    .badge-tag-bad {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .badge-tag-good {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #dcfce7;
+      color: #15803d;
+      font-weight: 700;
+    }
+
   </style>
 </head>
 <body>
@@ -1077,6 +1452,9 @@
           </button>
           <button class="nav-tab-btn" id="tabBtn_contact" onclick="switchTab('contact')">
             <span>📐</span> VelStand Contact Physics
+          </button>
+          <button class="nav-tab-btn" id="tabBtn_solution" onclick="switchTab('solution')">
+            <span>🎯</span> Problem &amp; Sim-to-Real Solution
           </button>
         </div>
       </div>
@@ -1123,18 +1501,110 @@
           <div class="hero-step-num">01 / 04 · GAIT CYCLE PHASES</div>
         </div>
 
-        <!-- Right Architectural Typo -->
+        <!-- Right Architectural Typo (Subtle Watermark) -->
         <div class="typo-right">
           <div class="word-robotics">MICRODUCK.</div>
         </div>
 
-        <!-- Right Sidebar Meta Indicator List -->
-        <div class="sidebar-meta">
-          <div class="meta-item active"><span class="meta-dot"></span>ONNX POLICY (50Hz)</div>
-          <div class="meta-item"><span class="meta-dot"></span>BAM BACKLASH MODEL</div>
-          <div class="meta-item"><span class="meta-dot"></span>14-DOF KINEMATICS</div>
-          <div class="meta-item"><span class="meta-dot"></span>VELSTAND SELF-RIGHT</div>
-          <div class="meta-item"><span class="meta-dot"></span>BASE STATION SINK</div>
+        <!-- Frosted Glass Live Kinematics & Joint Torques Panel -->
+        <div class="kinematics-glass-panel">
+          <div class="kgp-header">
+            <div class="kgp-tag">
+              <div class="kgp-tag-dot"></div>
+              <span>LIVE TELEMETRY · 14-DOF KINEMATICS</span>
+            </div>
+            <div class="kgp-status-badge stable" id="kgpStateBadge">
+              🟢 STABLE WALK 50Hz
+            </div>
+          </div>
+
+          <!-- Real-Time Kinematic Joint Bars -->
+          <div class="kgp-meter-group">
+            
+            <!-- Hip Pitch (Left / Right) -->
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">L. Hip Pitch (Swing)</span>
+                <span class="kgp-joint-val" id="kgpVal_l_hip">0.0°</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_l_hip" style="width: 50%; background: var(--accent-blue);"></div>
+              </div>
+            </div>
+
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">R. Hip Pitch (Stance)</span>
+                <span class="kgp-joint-val" id="kgpVal_r_hip">0.0°</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_r_hip" style="width: 50%; background: var(--accent-blue);"></div>
+              </div>
+            </div>
+
+            <!-- Knee Servos (XL-330 Actuators with Lever Torque) -->
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">L. Knee Servo (XL-330)</span>
+                <span class="kgp-joint-val" id="kgpVal_l_knee">0.0° | 0.12 N·m</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_l_knee" style="width: 15%; background: var(--text-pink);"></div>
+              </div>
+            </div>
+
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">R. Knee Servo (XL-330)</span>
+                <span class="kgp-joint-val" id="kgpVal_r_knee">0.0° | 0.12 N·m</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_r_knee" style="width: 15%; background: var(--text-pink);"></div>
+              </div>
+            </div>
+
+            <!-- Ankle Compliance -->
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">Ankle Compliance (L / R)</span>
+                <span class="kgp-joint-val" id="kgpVal_ankles">0.0° / 0.0°</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_ankles" style="width: 50%; background: #0284c7;"></div>
+              </div>
+            </div>
+
+            <!-- Ground Reaction Force Fn -->
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">Ground Reaction (Fn L/R)</span>
+                <span class="kgp-joint-val" id="kgpVal_grf">6.1 N / 6.1 N</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_grf" style="width: 48%; background: #16a34a;"></div>
+              </div>
+            </div>
+
+            <!-- Dynamic Balance Margin -->
+            <div class="kgp-meter-row">
+              <div class="kgp-meter-meta">
+                <span class="kgp-joint-name">Balance Margin (ZMP)</span>
+                <span class="kgp-joint-val" id="kgpVal_stab">96%</span>
+              </div>
+              <div class="kgp-bar-track">
+                <div class="kgp-bar-fill" id="kgpBar_stab" style="width: 96%; background: #16a34a;"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Standup Kinematics Explainer for Viva -->
+          <div class="kgp-explainer">
+            <div class="kgp-explainer-title">📐 How Microduck Regains Stand</div>
+            <div class="kgp-explainer-text" id="kgpExplainerText">
+              During fall, IMU tilt triggers VelStand 5-phase recovery: 1) Tuck knees to 95°, 2) Knee lever push exerts 18.4N downward normal reaction force lifting CoM, 3) Boot soles plant flat, 4) Quads extend torso back to 50Hz stable walking posture.
+            </div>
+          </div>
         </div>
 
         <!-- Floating Slo-Mo Kinematics Control Bar -->
@@ -1246,23 +1716,34 @@
 
         <div class="strip-actions">
           <div class="action-btn-row">
-            <button class="btn-ordiva" onclick="triggerLateralPush()">
-              <span>⚡</span> Push (14N)
+            <!-- Push Force Slider + Button -->
+            <div class="push-slider-wrapper">
+              <span class="push-slider-label">FORCE: <b class="push-val-badge" id="pushForceVal">16 N</b></span>
+              <input type="range" min="5" max="32" value="16" step="1" class="push-range-slider" id="pushForceSlider" oninput="onPushForceChange(this.value)">
+            </div>
+            <button class="btn-ordiva" id="btnPush" onclick="triggerLateralPush()">
+              <span>⚡</span> Push (<span id="btnPushVal">16N</span>)
             </button>
             <button class="btn-ordiva pink" onclick="triggerHardFall()">
-              <span>⚠️</span> VelStand Fall
+              <span>⚠️</span> Random Fall
             </button>
           </div>
           <div class="action-btn-row">
-            <button class="btn-ordiva" onclick="resetBall()">
-              <span>⚽</span> Reset Ball
+            <button class="btn-ordiva" onclick="passBallToRobot()" title="Pass orange soccer ball directly to Microduck's feet">
+              <span>🎯</span> Pass to Duck
             </button>
-            <button class="btn-ordiva" onclick="triggerReset()">
+            <button class="btn-ordiva" onclick="triggerMicroduckKick()" title="Microduck winds up and kicks the ball forward">
+              <span>⚽</span> Kick Ball
+            </button>
+            <button class="btn-ordiva" id="btnObstacles" onclick="toggleObstacles()" title="Toggle physical floor hurdles on/off">
+              <span>🧱</span> Hurdles: ON
+            </button>
+            <button class="btn-ordiva" onclick="triggerReset()" title="Reset robot position and pose">
               <span>🔄</span> Reset Pose
             </button>
           </div>
           <div class="keyboard-hint">
-            <span>W</span><span>A</span><span>S</span><span>D</span> Strafe | <span>Q</span><span>E</span> Turn | <span>Space</span> Push | <span>F</span> Fall
+            <span>W</span><span>A</span><span>S</span><span>D</span> Strafe | <span>Q</span><span>E</span> Turn | <span>Space</span> Push | <span>F</span> Fall | Click Ball to Fling
           </div>
         </div>
       </div>
@@ -1295,7 +1776,7 @@
         <div class="neural-body">
           
           <!-- Animated Neural Canvas -->
-          <div class="neural-canvas-card">
+          <div class="neural-canvas-frame">
             <div class="canvas-overlay-tag" id="neuralPolicyTag">
               MODE: BASELINE RL (UNCOMPENSATED BACKLASH)
             </div>
@@ -1305,7 +1786,7 @@
           <!-- Live Metrics Comparison Column -->
           <div class="neural-metrics-col">
             
-            <div class="metric-card">
+            <div class="metric-row-box">
               <div class="metric-title">Actuator Backlash Error</div>
               <div class="metric-value-row">
                 <span class="metric-num" id="val_backlash">18.6°</span>
@@ -1316,7 +1797,7 @@
               </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-row-box">
               <div class="metric-title">Joint Velocity Jitter</div>
               <div class="metric-value-row">
                 <span class="metric-num" id="val_jitter">34.2 <span style="font-size:0.9rem">rad/s²</span></span>
@@ -1327,7 +1808,7 @@
               </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-row-box">
               <div class="metric-title">Sim-to-Real Transfer Gap</div>
               <div class="metric-value-row">
                 <span class="metric-num" id="val_gap">42.5%</span>
@@ -1338,7 +1819,7 @@
               </div>
             </div>
 
-            <div class="metric-card">
+            <div class="metric-row-box">
               <div class="metric-title">Synaptic Policy Efficiency</div>
               <div class="metric-value-row">
                 <span class="metric-num" id="val_eff">58.4%</span>
@@ -1382,31 +1863,31 @@
 
         <!-- 5 Contact Stages Strip -->
         <div class="contact-steps-grid">
-          <div class="c-step-card active" id="cStep0" onclick="setContactStep(0)">
+          <div class="c-step-cell active" id="cStep0" onclick="setContactStep(0)">
             <div class="c-step-num">STAGE 01 · 0-20%</div>
             <div class="c-step-title">Ground Impact</div>
             <div class="c-step-desc">Torso skid plate contacts floor; load cells register tilt &gt; 50°.</div>
           </div>
 
-          <div class="c-step-card" id="cStep1" onclick="setContactStep(25)">
+          <div class="c-step-cell" id="cStep1" onclick="setContactStep(25)">
             <div class="c-step-num">STAGE 02 · 20-40%</div>
             <div class="c-step-title">Leg Tuck</div>
             <div class="c-step-desc">Hips flex upward and knees contract to bring CoM close to contact pivot.</div>
           </div>
 
-          <div class="c-step-card" id="cStep2" onclick="setContactStep(50)">
+          <div class="c-step-cell" id="cStep2" onclick="setContactStep(50)">
             <div class="c-step-num">STAGE 03 · 40-60%</div>
             <div class="c-step-title">Knee Lever Push</div>
             <div class="c-step-desc">Anodized knee brackets push against floor; normal force Fn = 18.4 N.</div>
           </div>
 
-          <div class="c-step-card" id="cStep3" onclick="setContactStep(75)">
+          <div class="c-step-cell" id="cStep3" onclick="setContactStep(75)">
             <div class="c-step-num">STAGE 04 · 60-80%</div>
             <div class="c-step-title">Ankle Boot Plant</div>
             <div class="c-step-desc">Ankles roll inward to catch ground; wide foot sole establishes stance base.</div>
           </div>
 
-          <div class="c-step-card" id="cStep4" onclick="setContactStep(100)">
+          <div class="c-step-cell" id="cStep4" onclick="setContactStep(100)">
             <div class="c-step-num">STAGE 05 · 80-100%</div>
             <div class="c-step-title">Vertical Extension</div>
             <div class="c-step-desc">Quadriceps extend torso upright; robot returns to stable 50Hz walking stance.</div>
@@ -1416,11 +1897,11 @@
         <!-- Contact Physics Canvas & Table -->
         <div class="contact-body-grid">
           
-          <div class="contact-canvas-card">
+          <div class="contact-canvas-frame">
             <canvas id="contactCanvas"></canvas>
           </div>
 
-          <div class="joint-table-card">
+          <div class="joint-table-frame">
             <div class="joint-table-title">Real-Time Joint Torques & Contact Reactions</div>
             <table class="joint-table">
               <thead>
@@ -1435,6 +1916,156 @@
                 <!-- Dynamically populated based on scrubber -->
               </tbody>
             </table>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         TAB 4: PROBLEM STATEMENT & SIM-TO-REAL SOLUTION EXPLAINED
+         =================================================================== -->
+    <div class="tab-view" id="view_solution">
+      <div class="solution-container">
+        
+        <div class="solution-header">
+          <div class="solution-breadcrumb">
+            Research Briefing · SCS-701 Industrial Training Seminar · Graphic Era Hill University
+          </div>
+          <h2>Sim-to-Real Bipedal Locomotion &amp; Actuator Backlash Compensation</h2>
+          <p>
+            <b>Candidate:</b> Piyush Karnatak (Roll: 2361393 · Enr: 230112314) &nbsp;|&nbsp; 
+            <b>Guide:</b> Dr. Shilpa Jain &nbsp;|&nbsp; 
+            <b>HOD:</b> Prof. Ankur Singh Bisht &nbsp;|&nbsp; 
+            <b>Platform:</b> Microduck 14-DoF (Dynamixel XL-330 Servos)
+          </p>
+        </div>
+
+        <div class="solution-grid">
+          
+          <!-- Column 1: The Core Reality Gap -->
+          <div class="solution-col">
+            <div class="solution-panel">
+              <div class="solution-panel-title red">
+                <span>⚠️</span> 1. The Actuator Gearbox Backlash Gap
+              </div>
+              <p>
+                Real <b>Dynamixel XL-330-M288-T</b> actuators feature a 288:1 reduction spur gearbox. The physical manufacturing tolerances produce a <b>1.5° to 3.0° mechanical deadband backlash</b>.
+              </p>
+              <p>
+                Standard rigid-body physics simulators (MuJoCo, PyBullet, vanilla Isaac Gym) assume ideal linear motor drives:
+              </p>
+              <div class="math-formula-box">
+                τ = K_p · (θ_cmd - θ) - K_d · dθ/dt
+              </div>
+              <p>
+                When a reinforcement learning policy trained on rigid bodies is deployed on hardware, zero-torque crossings cause the gears to decouple, resulting in <b>high-frequency limit cycle flutter (&gt;18.6°)</b> and instant toppling within 2.8 seconds.
+              </p>
+            </div>
+
+            <div class="solution-panel">
+              <div class="solution-panel-title red">
+                <span>⚠️</span> 2. Latency &amp; Thermal Torque Sag
+              </div>
+              <p>
+                The half-duplex RS-485 serial communication bus introduces <b>8ms - 16ms of packet jitter</b>. Furthermore, continuous bipedal walking heats the core motor windings, causing <b>stall torque to drop from 0.52 N·m to &lt;0.38 N·m</b>.
+              </p>
+              <p>
+                Without modeling these dynamics during training, the robot fails to compensate for transmission delay and joint compliance.
+              </p>
+            </div>
+          </div>
+
+          <!-- Column 2: Our Technical Solution -->
+          <div class="solution-col">
+            <div class="solution-panel">
+              <div class="solution-panel-title blue">
+                <span>🚀</span> 3. BAM: Backlash Actuator Model
+              </div>
+              <p>
+                We inject a vectorized <b>Backlash Actuator Model (BAM)</b> directly into Isaac Gym's GPU physics loop:
+              </p>
+              <div class="math-formula-box">
+                τ_bam = BAM(θ, dθ/dt, θ_cmd, δ_deadband)
+              </div>
+              <p>
+                BAM explicitly simulates gear tooth disengagement, deadband hysteresis, and impact restitution during direction reversal. The neural policy learns to <b>anticipate deadband transitions</b>, producing smooth co-contraction and eliminating chattering.
+              </p>
+            </div>
+
+            <div class="solution-panel">
+              <div class="solution-panel-title pink">
+                <span>🛡️</span> 4. VelStand Autonomous Fall Recovery
+              </div>
+              <p>
+                Conventional locomotion policies crash irreversibly when perturbed. We integrate <b>VelStand</b>, an autonomous 5-phase contact-levering finite state machine:
+              </p>
+              <ul>
+                <li><b>Phase 1 (Tumble Arrest):</b> IMU tilt &gt; 45° triggers compliant collapse to dissipate kinetic energy.</li>
+                <li><b>Phase 2 (Leg Tuck):</b> Actuators tuck knees to 95°, moving CoM adjacent to the contact pivot.</li>
+                <li><b>Phase 3 (Knee Lever Push):</b> Knees push against ground exerting 18.4 N normal force (F_N).</li>
+                <li><b>Phase 4 (Boot Plant):</b> Ankle joints compliance catches ground flat.</li>
+                <li><b>Phase 5 (Vertical Extension):</b> Quad extension returns robot to 50Hz walking stance.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Column 3: Results & Viva Comparison -->
+          <div class="solution-col">
+            <div class="solution-panel">
+              <div class="solution-panel-title green">
+                <span>📊</span> 5. Domain Randomization (4096 Envs)
+              </div>
+              <p>
+                Trained across <b>4,096 parallel Isaac Gym GPU environments</b> with randomized link masses (±15%), ground friction (μ ∈ [0.45, 1.15]), servo damping (±25%), and communication delays (4ms - 20ms).
+              </p>
+            </div>
+
+            <div class="solution-panel">
+              <div class="solution-panel-title blue">
+                <span>📈</span> 6. Empirical Results &amp; Viva Comparison
+              </div>
+              <table class="viva-comparison-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th>Naive Sim</th>
+                    <th>Our BAM + VelStand</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><b>Stability Duration</b></td>
+                    <td><span class="badge-tag-bad">2.8 sec</span></td>
+                    <td><span class="badge-tag-good">&gt;30 min (+640x)</span></td>
+                  </tr>
+                  <tr>
+                    <td><b>Backlash Chatter</b></td>
+                    <td><span class="badge-tag-bad">18.6° flutter</span></td>
+                    <td><span class="badge-tag-good">&lt;0.8° smooth</span></td>
+                  </tr>
+                  <tr>
+                    <td><b>Max Push Rejection</b></td>
+                    <td><span class="badge-tag-bad">&lt;7.0 N</span></td>
+                    <td><span class="badge-tag-good">22.0 N (+214%)</span></td>
+                  </tr>
+                  <tr>
+                    <td><b>Impact GRF Shock</b></td>
+                    <td><span class="badge-tag-bad">42.5 N shock</span></td>
+                    <td><span class="badge-tag-good">14.2 N damped</span></td>
+                  </tr>
+                  <tr>
+                    <td><b>Autonomous Recovery</b></td>
+                    <td><span class="badge-tag-bad">0% (Manual Lift)</span></td>
+                    <td><span class="badge-tag-good">100% Autonomous</span></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="margin-top: 6px; font-size: 0.82rem; color: var(--text-pink); font-weight: 700;">
+                ✓ Validated in real-time on physical Dynamixel XL-330 14-DoF Microduck hardware.
+              </p>
+            </div>
           </div>
 
         </div>
@@ -1465,6 +2096,8 @@
       } else if (tabId === 'contact') {
         initContactCanvas();
         updateContactKinematics(currentScrubPhase);
+      } else if (tabId === 'solution') {
+        // Tab 4: Problem & Sim-to-Real Solution
       }
     }
 
@@ -1677,15 +2310,16 @@
       trailGeo.attributes.position.needsUpdate = true;
     }
 
-    // 70mm Physics Ball
+    // 70mm Physics Ball with Interactive Raycaster
     const ballRadius = 0.038;
     const ballGeo = new THREE.SphereGeometry(ballRadius, 32, 32);
     const ballMat = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
     const ballMesh = new THREE.Mesh(ballGeo, ballMat);
     ballMesh.castShadow = true;
     scene.add(ballMesh);
-    const ball = { pos: new THREE.Vector3(0.35, 0.0, ballRadius), vel: new THREE.Vector3(0, 0, 0), friction: 0.97 };
+    const ball = { pos: new THREE.Vector3(0.35, 0.0, ballRadius), vel: new THREE.Vector3(0, 0, 0), friction: 0.975 };
     ballMesh.position.copy(ball.pos);
+
     function resetBall() {
       const dist = 0.35;
       ball.pos.x = robotRoot.position.x - dist * Math.sin(robotYaw);
@@ -1693,6 +2327,90 @@
       ball.pos.z = ballRadius;
       ball.vel.set(0, 0, 0);
       ballMesh.position.copy(ball.pos);
+    }
+
+    function passBallToRobot() {
+      const frontDist = 0.22;
+      const targetX = robotRoot.position.x - frontDist * Math.sin(robotYaw);
+      const targetY = robotRoot.position.y + frontDist * Math.cos(robotYaw);
+      const dx = targetX - ball.pos.x;
+      const dy = targetY - ball.pos.y;
+      const dist = Math.hypot(dx, dy);
+      ball.vel.x = (dx / (dist + 0.001)) * 1.35;
+      ball.vel.y = (dy / (dist + 0.001)) * 1.35;
+      updateKgpStatus('⚽ BALL PASSED TO ROBOT', 'stable');
+    }
+
+    let isKicking = false;
+    let kickTimer = 0.0;
+    function triggerMicroduckKick() {
+      if (isKicking || isFallActive) return;
+      isKicking = true;
+      kickTimer = 0.0;
+      updateKgpStatus('⚽ KICKING BALL FORWARD', 'warn');
+    }
+
+    // Raycaster Click to Fling Ball
+    const raycaster = new THREE.Raycaster();
+    const mouseVec = new THREE.Vector2();
+    container.addEventListener('click', (e) => {
+      if (currentTab !== 'sim') return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouseVec.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseVec.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouseVec, camera);
+      const hits = raycaster.intersectObject(ballMesh);
+      if (hits.length > 0) {
+        const camDir = new THREE.Vector3();
+        camera.getWorldDirection(camDir);
+        ball.vel.x = camDir.x * 2.2 + (Math.random() - 0.5) * 0.4;
+        ball.vel.y = camDir.y * 2.2 + (Math.random() - 0.5) * 0.4;
+        updateKgpStatus('🎯 BALL FLUNG BY CLICK', 'stable');
+      }
+    });
+
+    // -------------------------------------------------------------------------
+    // 3D Physical Floor Obstacles (Hurdles) with Real Physics Trip Detection
+    // -------------------------------------------------------------------------
+    let obstaclesEnabled = true;
+    const obstaclesGroup = new THREE.Group();
+    scene.add(obstaclesGroup);
+
+    const obstacleDefs = [
+      { x: 0.32,  y: 0.48, w: 0.24, d: 0.07, h: 0.045, name: 'HURDLE 01' },
+      { x: -0.32, y: 0.82, w: 0.26, d: 0.07, h: 0.045, name: 'HURDLE 02' },
+      { x: 0.06,  y: 1.25, w: 0.28, d: 0.07, h: 0.050, name: 'HURDLE 03' }
+    ];
+
+    const matHurdleBase = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.75, roughness: 0.3 });
+    const matHurdleStripe = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.65, roughness: 0.35 });
+
+    obstacleDefs.forEach((obs) => {
+      const hGroup = new THREE.Group();
+      hGroup.position.set(obs.x, obs.y, obs.h / 2);
+
+      const baseGeo = new THREE.BoxGeometry(obs.w, obs.d, obs.h);
+      const baseMesh = new THREE.Mesh(baseGeo, matHurdleBase);
+      baseMesh.castShadow = true;
+      baseMesh.receiveShadow = true;
+      hGroup.add(baseMesh);
+
+      // Safety Hazard Top Stripe
+      const stripeGeo = new THREE.BoxGeometry(obs.w * 0.90, obs.d * 0.72, 0.006);
+      const stripeMesh = new THREE.Mesh(stripeGeo, matHurdleStripe);
+      stripeMesh.position.set(0, 0, obs.h / 2 + 0.003);
+      stripeMesh.castShadow = true;
+      hGroup.add(stripeMesh);
+
+      obstaclesGroup.add(hGroup);
+    });
+
+    function toggleObstacles() {
+      obstaclesEnabled = !obstaclesEnabled;
+      obstaclesGroup.visible = obstaclesEnabled;
+      const btn = document.getElementById('btnObstacles');
+      if (btn) btn.innerHTML = `<span>🧱</span> Hurdles: ${obstaclesEnabled ? 'ON' : 'OFF'}`;
+      updateKgpStatus(`HURDLES: ${obstaclesEnabled ? 'ENABLED' : 'DISABLED'}`, 'stable');
     }
 
     // -------------------------------------------------------------------------
@@ -1731,32 +2449,106 @@
     let robotX = 0.0, robotY = 0.0, robotZ = 0.22;
     let robotYaw = 0.0, robotRoll = 0.0, robotPitch = 0.0;
 
-    // Smooth Push & Fall States (Honors Slo-Mo!)
+    // Dynamic Disturbance & Fall State Machine
+    let currentPushForce = 16.0; // Newtons (Adjustable 5N - 32N)
     let pushDisturbanceTime = 0.0;
-    let fallSimulationPhase = 0.0; // 0 = not falling, >0 = progressive fall & standup
+    let pushInitialRollAmp = 0.0;
+    let isPushTopple = false;
+
+    let fallSimulationPhase = 0.0; // 0 = upright walking, >0 = fall & standup
     let isFallActive = false;
+    let fallTargetPitch = -65.0;
+    let fallTargetRoll = 20.0;
+    let activeFallType = 'PRONE (FACEPLANT)';
+
+    function onPushForceChange(val) {
+      currentPushForce = parseFloat(val);
+      const valBadge = document.getElementById('pushForceVal');
+      if (valBadge) valBadge.innerText = `${currentPushForce} N`;
+      const btnBadge = document.getElementById('btnPushVal');
+      if (btnBadge) btnBadge.innerText = `${currentPushForce}N`;
+    }
 
     function triggerLateralPush() {
-      pushDisturbanceTime = 1.2; // 1.2 seconds of smooth lateral disturbance
-      try { fetch('/api/push', { method: 'POST', body: JSON.stringify({ magnitude_n: 14.0 }) }); } catch(e){}
+      if (isFallActive) return;
+      pushDisturbanceTime = 1.4; // 1.4 seconds of 2nd-order elastic spring response
+      pushInitialRollAmp = (currentPushForce / 14.0) * 22.0;
+
+      if (currentPushForce > 22.0) {
+        // Lateral disturbance exceeds support polygon boundary (ZMP > foot margin)!
+        isPushTopple = true;
+        updateKgpStatus(`⚠️ PUSH ${currentPushForce}N: TOPPLE LIMIT EXCEEDED`, 'alert');
+      } else {
+        isPushTopple = false;
+        updateKgpStatus(`⚡ PUSH (${currentPushForce}N) COMPLIANT SWAY`, 'warn');
+      }
+      if (window.location.protocol.startsWith('http')) { try { fetch('/api/push', { method: 'POST', body: JSON.stringify({ magnitude_n: currentPushForce }) }).catch(()=>{}); } catch(e){} }
     }
 
     function triggerHardFall() {
       if (isFallActive) return;
       isFallActive = true;
       fallSimulationPhase = 0.01;
-      try { fetch('/api/fall', { method: 'POST' }); } catch(e){}
+
+      // Pick Randomized Fall Direction:
+      // Mode 0: Prone Faceplant (-68° pitch)
+      // Mode 1: Supine Backward Drop (+58° pitch)
+      // Mode 2: Left Lateral Tumble (-60° roll)
+      // Mode 3: Right Lateral Tumble (+60° roll)
+      const mode = Math.floor(Math.random() * 4);
+      if (mode === 0) {
+        fallTargetPitch = -68.0 - Math.random() * 6.0;
+        fallTargetRoll = (Math.random() - 0.5) * 16.0;
+        activeFallType = 'PRONE (FACEPLANT)';
+      } else if (mode === 1) {
+        fallTargetPitch = 58.0 + Math.random() * 6.0;
+        fallTargetRoll = (Math.random() - 0.5) * 16.0;
+        activeFallType = 'SUPINE (BACKWARD)';
+      } else if (mode === 2) {
+        fallTargetRoll = -60.0 - Math.random() * 6.0;
+        fallTargetPitch = -15.0 + (Math.random() - 0.5) * 10.0;
+        activeFallType = 'LEFT LATERAL TUMBLE';
+      } else {
+        fallTargetRoll = 60.0 + Math.random() * 6.0;
+        fallTargetPitch = 15.0 + (Math.random() - 0.5) * 10.0;
+        activeFallType = 'RIGHT LATERAL TUMBLE';
+      }
+
+      updateKgpStatus(`⚠️ FALL: ${activeFallType}`, 'alert');
+      if (window.location.protocol.startsWith('http')) { try { fetch('/api/fall', { method: 'POST' }).catch(()=>{}); } catch(e){} }
+    }
+
+    function triggerObstacleTrip(obs) {
+      if (isFallActive) return;
+      isFallActive = true;
+      fallSimulationPhase = 0.01;
+      // Stumble momentum creates forward trip tumble
+      fallTargetPitch = -70.0 - Math.random() * 5.0;
+      fallTargetRoll = (Math.random() - 0.5) * 22.0;
+      activeFallType = `TRIPPED OVER ${obs.name}`;
+      updateKgpStatus(`⚠️ TRIP: ${activeFallType}`, 'alert');
     }
 
     function triggerReset() {
       isFallActive = false;
       fallSimulationPhase = 0.0;
       pushDisturbanceTime = 0.0;
+      isPushTopple = false;
+      isKicking = false;
       robotX = 0; robotY = 0; robotZ = 0.22;
       robotYaw = 0; robotRoll = 0; robotPitch = 0;
       cmdVForward = 0; cmdVStrafe = 0; cmdWz = 0;
       resetBall();
-      try { fetch('/api/reset', { method: 'POST' }); } catch(e){}
+      updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
+      if (window.location.protocol.startsWith('http')) { try { fetch('/api/reset', { method: 'POST' }).catch(()=>{}); } catch(e){} }
+    }
+
+    // Helper to update Kinematics Glass Panel status badge
+    function updateKgpStatus(text, type) {
+      const badge = document.getElementById('kgpStateBadge');
+      if (!badge) return;
+      badge.textContent = text;
+      badge.className = `kgp-status-badge ${type}`;
     }
 
     // Omnidirectional Direct Teleop Functions
@@ -1765,13 +2557,15 @@
     function setTurn(val) { cmdWz = val * 0.9; syncBackendCmd(); }
 
     function syncBackendCmd() {
-      try {
-        fetch('/api/cmd_vel', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vx: cmdVForward, vy: cmdVStrafe, wz: cmdWz })
-        });
-      } catch(e){}
+      if (window.location.protocol.startsWith('http')) {
+        try {
+          fetch('/api/cmd_vel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vx: cmdVForward, vy: cmdVStrafe, wz: cmdWz })
+          }).catch(()=>{});
+        } catch(e){}
+      }
     }
 
     // Keyboard bindings for Omnidirectional Drive
@@ -1858,43 +2652,119 @@
       if (!isPaused && currentTab === 'sim') {
         simTime += effectiveDt;
 
-        // 1. Slow-Motion Push Disturbance Dynamics
+        // Telemetry variables to compute and display on glass panel
+        let liveHipLeft = 0.0, liveHipRight = 0.0;
+        let liveKneeLeft = 0.0, liveKneeRight = 0.0;
+        let liveTorqueLeft = 0.12, liveTorqueRight = 0.12;
+        let liveAnkleLeft = 0.0, liveAnkleRight = 0.0;
+        let liveFnLeft = 6.1, liveFnRight = 6.1;
+        let liveStability = 96;
+
+        // 1. Realistic 2nd-Order Underdamped Spring-Damper Push Impulse
         if (pushDisturbanceTime > 0) {
           pushDisturbanceTime -= effectiveDt;
-          // Smooth sinusoidal lateral roll impulse
-          robotRoll = Math.sin(pushDisturbanceTime * 4.0) * 18.0;
+          const elapsed = 1.4 - pushDisturbanceTime;
+          const omegaD = 6.8;        // Damped natural frequency (rad/s)
+          const zetaOmegaN = 2.8;    // Exponential decay damping
+          const dampFactor = Math.exp(-zetaOmegaN * elapsed);
+          robotRoll = pushInitialRollAmp * dampFactor * Math.sin(omegaD * elapsed);
+
+          liveStability = Math.max(10, Math.round(96 - (currentPushForce / 32.0) * 75 * dampFactor));
+
+          // If push force exceeds 22N, ZMP leaves support polygon after initial impulse!
+          if (isPushTopple && elapsed > 0.35 && !isFallActive) {
+            pushDisturbanceTime = 0.0;
+            triggerHardFall();
+          }
         } else if (!isFallActive) {
-          robotRoll *= 0.94; // Smooth return to upright
+          robotRoll *= 0.94; // Smooth relaxation to upright
           robotPitch *= 0.94;
         }
 
-        // 2. Slow-Motion Fall & VelStand Recovery Dynamics
+        // 2. Slow-Motion Fall & VelStand 5-Phase Contact Recovery Dynamics
         if (isFallActive) {
-          fallSimulationPhase += effectiveDt * 0.45; // ~2.2s total sequence (slowed further by slomoScale!)
+          fallSimulationPhase += effectiveDt * 0.42; // ~2.4s sequence (slowed by slomoScale!)
 
-          if (fallSimulationPhase < 0.6) {
-            // Progressive topple to floor
-            const tFall = fallSimulationPhase / 0.6;
-            robotPitch = -tFall * 65.0;
-            robotRoll = tFall * 20.0;
-            robotZ = 0.22 - tFall * (0.22 - 0.075);
-          } else if (fallSimulationPhase < 1.6) {
-            // VelStand recovery: knee push, foot plant, torso erect
-            const tStand = (fallSimulationPhase - 0.6) / 1.0;
-            robotPitch = -65.0 * (1.0 - tStand);
-            robotRoll = 20.0 * (1.0 - tStand);
-            robotZ = 0.075 + tStand * (0.22 - 0.075);
+          if (fallSimulationPhase < 0.5) {
+            // STAGE 1: Tumble Arrest & Impact Dissipation (0.0 - 0.5)
+            const t = fallSimulationPhase / 0.5;
+            robotPitch = fallTargetPitch * t;
+            robotRoll = fallTargetRoll * t;
+            robotZ = 0.22 - t * (0.22 - 0.075);
+            liveKneeLeft = t * 45; liveKneeRight = t * 45;
+            liveTorqueLeft = 0.25; liveTorqueRight = 0.25;
+            liveFnLeft = 2.0; liveFnRight = 2.0;
+            liveStability = Math.max(0, Math.round(100 - t * 100));
+            updateKgpStatus('🔄 VELSTAND 1: TUMBLE ARREST', 'velstand');
+          } else if (fallSimulationPhase < 0.9) {
+            // STAGE 2: Leg Tuck (0.5 - 0.9)
+            const t = (fallSimulationPhase - 0.5) / 0.4;
+            robotPitch = fallTargetPitch * (1.0 - 0.3 * t);
+            robotRoll = fallTargetRoll * (1.0 - 0.4 * t);
+            robotZ = 0.075;
+            liveKneeLeft = 45 + t * 50; // Reaches 95° tuck!
+            liveKneeRight = 45 + t * 50;
+            liveHipLeft = -t * 35; liveHipRight = -t * 35;
+            liveTorqueLeft = 0.45; liveTorqueRight = 0.45;
+            liveFnLeft = 5.5; liveFnRight = 5.5;
+            liveStability = 15;
+            updateKgpStatus('🔄 VELSTAND 2: LEG TUCK (95°)', 'velstand');
+          } else if (fallSimulationPhase < 1.4) {
+            // STAGE 3: Knee Lever Push (Peak Normal Force Fn = 18.4N!) (0.9 - 1.4)
+            const t = (fallSimulationPhase - 0.9) / 0.5;
+            robotPitch = fallTargetPitch * 0.7 * (1.0 - t);
+            robotRoll = fallTargetRoll * 0.6 * (1.0 - t);
+            robotZ = 0.075 + t * 0.065; // Torso levers off ground!
+            liveKneeLeft = 95 - t * 40; liveKneeRight = 95 - t * 40;
+            liveHipLeft = -35 + t * 20; liveHipRight = -35 + t * 20;
+            liveTorqueLeft = 0.88; liveTorqueRight = 0.88; // PEAK LEVER TORQUE!
+            liveFnLeft = 18.4; liveFnRight = 18.4;
+            liveStability = Math.round(25 + t * 35);
+            updateKgpStatus('💥 VELSTAND 3: KNEE LEVER PUSH', 'peak-lever');
+          } else if (fallSimulationPhase < 1.9) {
+            // STAGE 4: Ankle Boot Plant (1.4 - 1.9)
+            const t = (fallSimulationPhase - 1.4) / 0.5;
+            robotPitch = fallTargetPitch * 0.2 * (1.0 - t);
+            robotRoll = fallTargetRoll * 0.2 * (1.0 - t);
+            robotZ = 0.14 + t * 0.055;
+            liveKneeLeft = 55 - t * 35; liveKneeRight = 55 - t * 35;
+            liveAnkleLeft = t * 14; liveAnkleRight = t * 14;
+            liveTorqueLeft = 0.42; liveTorqueRight = 0.42;
+            liveFnLeft = 24.8; liveFnRight = 24.8;
+            liveStability = Math.round(60 + t * 30);
+            updateKgpStatus('🔄 VELSTAND 4: BOOT PLANT', 'velstand');
+          } else if (fallSimulationPhase < 2.3) {
+            // STAGE 5: Vertical Quad Extension (1.9 - 2.3)
+            const t = (fallSimulationPhase - 1.9) / 0.4;
+            robotPitch = 0; robotRoll = 0;
+            robotZ = 0.195 + t * 0.025;
+            liveKneeLeft = 20 * (1.0 - t); liveKneeRight = 20 * (1.0 - t);
+            liveAnkleLeft = 14 * (1.0 - t); liveAnkleRight = 14 * (1.0 - t);
+            liveTorqueLeft = 0.15; liveTorqueRight = 0.15;
+            liveFnLeft = 6.1; liveFnRight = 6.1;
+            liveStability = Math.round(90 + t * 6);
+            updateKgpStatus('🟢 VELSTAND 5: STAND RECOVERED', 'stable');
           } else {
-            // Recovered!
+            // Autonomous recovery complete!
             isFallActive = false;
-            fallSimulationPhase = 0;
+            fallSimulationPhase = 0.0;
             robotZ = 0.22;
-            robotPitch = 0;
-            robotRoll = 0;
+            robotPitch = 0.0;
+            robotRoll = 0.0;
+            updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
           }
+
+          // Apply recovery joint angles directly to CAD model
+          legLeft.thigh.rotation.x = liveHipLeft * Math.PI / 180;
+          legLeft.knee.rotation.x = -liveKneeLeft * Math.PI / 180;
+          legLeft.ankle.rotation.x = liveAnkleLeft * Math.PI / 180;
+
+          legRight.thigh.rotation.x = liveHipRight * Math.PI / 180;
+          legRight.knee.rotation.x = -liveKneeRight * Math.PI / 180;
+          legRight.ankle.rotation.x = liveAnkleRight * Math.PI / 180;
         }
 
-        // 3. Omnidirectional Kinematics & Walking
+        // 3. Omnidirectional Kinematics & Walking Realism
         const isWalking = (Math.hypot(cmdVForward, cmdVStrafe) > 0.02 || Math.abs(cmdWz) > 0.05);
         const omega = 2.0 * Math.PI * 1.5;
         const gaitPhase = isWalking ? (simTime * 1.5) % 1.0 : 0.0;
@@ -1906,64 +2776,173 @@
           else el.classList.remove('active');
         });
 
-        // Bipedal oscillations
+        // Bipedal oscillations with Pelvis Roll Counter-Sway
         const lSwing = isWalking ? Math.sin(omega * simTime) : 0;
         const rSwing = isWalking ? Math.sin(omega * simTime + Math.PI) : 0;
+
+        // Enhanced Realism: Pelvis lateral sway keeps CoM over support foot
+        if (isWalking && !isFallActive) {
+          const pelvisRollSway = Math.sin(omega * simTime) * 3.5;
+          robotRoll += (pelvisRollSway - robotRoll) * 0.15;
+        }
 
         // Omnidirectional coordinate integration (Heading + Strafe)
         robotYaw += cmdWz * effectiveDt;
         const radYaw = robotYaw;
 
-        // In robot coordinate frame: beak/nose points at (-sin(radYaw), cos(radYaw))
-        // Right side points at (cos(radYaw), sin(radYaw))
-        // W/S drives forward/backward along the beak direction!
-        // A/D strafes left/right perpendicular to the beak direction!
         const dx = (-cmdVForward * Math.sin(radYaw) + cmdVStrafe * Math.cos(radYaw)) * effectiveDt;
         const dy = ( cmdVForward * Math.cos(radYaw) + cmdVStrafe * Math.sin(radYaw)) * effectiveDt;
 
         robotX += dx;
         robotY += dy;
 
-        // Apply to 3D Robot
+        // Apply to 3D Robot Root
         robotRoot.position.set(robotX, robotY, robotZ);
         robotRoot.rotation.z = robotYaw;
         robotRoot.rotation.x = robotRoll * Math.PI / 180;
         robotRoot.rotation.y = robotPitch * Math.PI / 180;
 
-        // Articulate Legs
-        const leftHipPitchDeg = lSwing * 22;
-        const rightHipPitchDeg = rSwing * 22;
-        const leftKneeDeg = Math.max(0, -lSwing) * 38;
-        const rightKneeDeg = Math.max(0, -rSwing) * 38;
+        // Check Obstacle Collisions (Natural Stumble & Trip)
+        if (obstaclesEnabled && !isFallActive && isWalking) {
+          for (const obs of obstacleDefs) {
+            const relX = robotX - obs.x;
+            const relY = robotY - obs.y;
+            if (Math.abs(relX) < (obs.w / 2 + 0.04) && Math.abs(relY) < (obs.d / 2 + 0.04)) {
+              cmdVForward = 0.0;
+              cmdVStrafe = 0.0;
+              triggerObstacleTrip(obs);
+              break;
+            }
+          }
+        }
 
-        legLeft.thigh.rotation.x = leftHipPitchDeg * Math.PI / 180;
-        legLeft.knee.rotation.x = -leftKneeDeg * Math.PI / 180;
-        legLeft.ankle.rotation.x = -leftHipPitchDeg * 0.7 * Math.PI / 180;
+        // Articulate Legs during Normal Walking or Kick (when not in VelStand)
+        if (!isFallActive) {
+          if (isKicking) {
+            kickTimer += effectiveDt * 4.0;
+            if (kickTimer < 0.4) {
+              // Windup right leg
+              legRight.thigh.rotation.x = -25 * Math.PI / 180;
+              legRight.knee.rotation.x = -50 * Math.PI / 180;
+            } else if (kickTimer < 0.8) {
+              // Fast forward whip kick!
+              legRight.thigh.rotation.x = 42 * Math.PI / 180;
+              legRight.knee.rotation.x = 0;
+              // Launch ball if close
+              const distToBall = Math.hypot(ball.pos.x - robotX, ball.pos.y - robotY);
+              if (distToBall < 0.35) {
+                ball.vel.x = -Math.sin(robotYaw) * 2.8;
+                ball.vel.y =  Math.cos(robotYaw) * 2.8;
+              }
+            } else {
+              isKicking = false;
+              updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
+            }
+          } else {
+            liveHipLeft = lSwing * 22;
+            liveHipRight = rSwing * 22;
+            liveKneeLeft = Math.max(0, -lSwing) * 38;
+            liveKneeRight = Math.max(0, -rSwing) * 38;
+            liveAnkleLeft = -liveHipLeft * 0.7;
+            liveAnkleRight = -liveHipRight * 0.7;
 
-        legRight.thigh.rotation.x = rightHipPitchDeg * Math.PI / 180;
-        legRight.knee.rotation.x = -rightKneeDeg * Math.PI / 180;
-        legRight.ankle.rotation.x = -rightHipPitchDeg * 0.7 * Math.PI / 180;
+            // Stance Phase Ground Reaction Forces
+            if (lSwing < 0) {
+              liveFnLeft = 11.8; liveFnRight = 0.4;
+            } else {
+              liveFnLeft = 0.4; liveFnRight = 11.8;
+            }
+
+            liveTorqueLeft = 0.15 + (liveKneeLeft / 38.0) * 0.28;
+            liveTorqueRight = 0.15 + (liveKneeRight / 38.0) * 0.28;
+
+            legLeft.thigh.rotation.x = liveHipLeft * Math.PI / 180;
+            legLeft.knee.rotation.x = -liveKneeLeft * Math.PI / 180;
+            legLeft.ankle.rotation.x = liveAnkleLeft * Math.PI / 180;
+
+            legRight.thigh.rotation.x = liveHipRight * Math.PI / 180;
+            legRight.knee.rotation.x = -liveKneeRight * Math.PI / 180;
+            legRight.ankle.rotation.x = liveAnkleRight * Math.PI / 180;
+          }
+        }
 
         // Foot trail
         const footRPos = new THREE.Vector3();
         legRight.foot.getWorldPosition(footRPos);
         if (isWalking) recordFootTrail(footRPos);
 
-        // Physics Ball update
+        // Physics Ball update & Realistic Collision
         ball.pos.x += ball.vel.x * effectiveDt;
         ball.pos.y += ball.vel.y * effectiveDt;
         ball.vel.x *= ball.friction;
         ball.vel.y *= ball.friction;
 
-        const distToBall = Math.hypot(ball.pos.x - footRPos.x, ball.pos.y - footRPos.y);
-        if (distToBall < (ballRadius + 0.04)) {
-          const kickDirX = (ball.pos.x - footRPos.x) / (distToBall + 0.001);
-          const kickDirY = (ball.pos.y - footRPos.y) / (distToBall + 0.001);
-          ball.vel.x = kickDirX * 1.8;
-          ball.vel.y = kickDirY * 1.8;
+        // Arena Boundaries Rebound
+        if (Math.abs(ball.pos.x) > 4.5) { ball.vel.x *= -0.85; ball.pos.x = Math.sign(ball.pos.x) * 4.5; }
+        if (Math.abs(ball.pos.y) > 4.5) { ball.vel.y *= -0.85; ball.pos.y = Math.sign(ball.pos.y) * 4.5; }
+
+        const distToBallFoot = Math.hypot(ball.pos.x - footRPos.x, ball.pos.y - footRPos.y);
+        if (distToBallFoot < (ballRadius + 0.045)) {
+          const kickDirX = (ball.pos.x - footRPos.x) / (distToBallFoot + 0.001);
+          const kickDirY = (ball.pos.y - footRPos.y) / (distToBallFoot + 0.001);
+          ball.vel.x = kickDirX * 1.9;
+          ball.vel.y = kickDirY * 1.9;
         }
         ballMesh.position.x = ball.pos.x;
         ballMesh.position.y = ball.pos.y;
+
+        // Update Frosted Glass Kinematics Panel in Realtime
+        const elLHipVal = document.getElementById('kgpVal_l_hip');
+        const elLHipBar = document.getElementById('kgpBar_l_hip');
+        if (elLHipVal && elLHipBar) {
+          elLHipVal.textContent = `${liveHipLeft >= 0 ? '+' : ''}${liveHipLeft.toFixed(1)}°`;
+          elLHipBar.style.width = `${Math.min(100, Math.max(10, ((liveHipLeft + 35) / 70) * 100))}%`;
+        }
+
+        const elRHipVal = document.getElementById('kgpVal_r_hip');
+        const elRHipBar = document.getElementById('kgpBar_r_hip');
+        if (elRHipVal && elRHipBar) {
+          elRHipVal.textContent = `${liveHipRight >= 0 ? '+' : ''}${liveHipRight.toFixed(1)}°`;
+          elRHipBar.style.width = `${Math.min(100, Math.max(10, ((liveHipRight + 35) / 70) * 100))}%`;
+        }
+
+        const elLKneeVal = document.getElementById('kgpVal_l_knee');
+        const elLKneeBar = document.getElementById('kgpBar_l_knee');
+        if (elLKneeVal && elLKneeBar) {
+          elLKneeVal.textContent = `${liveKneeLeft.toFixed(1)}° | ${liveTorqueLeft.toFixed(2)} N·m`;
+          elLKneeBar.style.width = `${Math.min(100, Math.max(8, (liveKneeLeft / 95.0) * 100))}%`;
+          elLKneeBar.style.background = liveTorqueLeft > 0.6 ? '#dc2626' : (liveTorqueLeft > 0.35 ? '#d97706' : 'var(--text-pink)');
+        }
+
+        const elRKneeVal = document.getElementById('kgpVal_r_knee');
+        const elRKneeBar = document.getElementById('kgpBar_r_knee');
+        if (elRKneeVal && elRKneeBar) {
+          elRKneeVal.textContent = `${liveKneeRight.toFixed(1)}° | ${liveTorqueRight.toFixed(2)} N·m`;
+          elRKneeBar.style.width = `${Math.min(100, Math.max(8, (liveKneeRight / 95.0) * 100))}%`;
+          elRKneeBar.style.background = liveTorqueRight > 0.6 ? '#dc2626' : (liveTorqueRight > 0.35 ? '#d97706' : 'var(--text-pink)');
+        }
+
+        const elAnklesVal = document.getElementById('kgpVal_ankles');
+        const elAnklesBar = document.getElementById('kgpBar_ankles');
+        if (elAnklesVal && elAnklesBar) {
+          elAnklesVal.textContent = `${liveAnkleLeft.toFixed(1)}° / ${liveAnkleRight.toFixed(1)}°`;
+          elAnklesBar.style.width = `${Math.min(100, Math.max(15, 50 + (liveAnkleLeft - liveAnkleRight) * 1.5))}%`;
+        }
+
+        const elGrfVal = document.getElementById('kgpVal_grf');
+        const elGrfBar = document.getElementById('kgpBar_grf');
+        if (elGrfVal && elGrfBar) {
+          elGrfVal.textContent = `${liveFnLeft.toFixed(1)} N / ${liveFnRight.toFixed(1)} N`;
+          elGrfBar.style.width = `${Math.min(100, Math.max(10, ((liveFnLeft + liveFnRight) / 36.0) * 100))}%`;
+        }
+
+        const elStabVal = document.getElementById('kgpVal_stab');
+        const elStabBar = document.getElementById('kgpBar_stab');
+        if (elStabVal && elStabBar) {
+          elStabVal.textContent = `${liveStability}%`;
+          elStabBar.style.width = `${liveStability}%`;
+          elStabBar.style.background = liveStability > 75 ? '#16a34a' : (liveStability > 35 ? '#d97706' : '#dc2626');
+        }
       }
 
       // Update Callout Pins
@@ -1981,6 +2960,7 @@
 
     // Telemetry Sync with Backend
     async function syncBackendTelemetry() {
+      if (!window.location.protocol.startsWith('http')) return;
       try {
         const res = await fetch('/api/telemetry');
         if (!res.ok) return;
@@ -2236,7 +3216,7 @@
     }
 
     function updateContactStepHighlight(pct) {
-      document.querySelectorAll('.c-step-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.c-step-cell').forEach(c => c.classList.remove('active'));
       if (pct < 20) document.getElementById('cStep0').classList.add('active');
       else if (pct < 40) document.getElementById('cStep1').classList.add('active');
       else if (pct < 60) document.getElementById('cStep2').classList.add('active');
