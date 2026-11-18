@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MicroDuck GCS | Sim-to-Real Robotics Telemetry Console</title>
+  
+  <!-- Offline bundled libraries (fallback to local static) -->
+  <script src="/static/three.min.js"></script>
+  <script src="/static/chart.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #07090e;
+      --panel: #0d1118;
+      --panel-border: #1b2332;
+      --panel-header: #121824;
+      --accent-cyan: #00e5ff;
+      --accent-amber: #ffb300;
+      --accent-green: #00ff88;
+      --accent-crimson: #ff3366;
+      --text-bright: #f0f6fc;
+      --text-muted: #8b949e;
+      --font-mono: 'Consolas', 'JetBrains Mono', 'Fira Code', monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-bright);
+      font-family: var(--font-ui);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── Top Header / Mission Control Bar ────────────────────────────── */
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--panel-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 54px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 1.6rem;
+      filter: drop-shadow(0 0 8px rgba(255, 179, 0, 0.4));
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-bright);
+    }
+
+    .brand-title span {
+      color: var(--accent-cyan);
+    }
+
+    .brand-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .sys-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: #161e2e;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
+    }
+
+    .badge-label { color: var(--text-muted); }
+    .badge-val { font-weight: 700; color: var(--accent-cyan); }
+    .badge-val.mode-walk { color: var(--accent-green); }
+    .badge-val.mode-fall { color: var(--accent-crimson); animation: blink 0.8s infinite; }
+    .badge-val.mode-rec { color: var(--accent-amber); animation: blink 1.2s infinite; }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* ── Main Workspace ──────────────────────────────────────────────── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 54px - 85px);
+      position: relative;
+    }
+
+    /* Left 3D Viewport */
+    .viewport-container {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #101622 0%, #07090e 100%);
+      overflow: hidden;
+    }
+
+    #viewport {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Viewport Floating Overlays */
+    .overlay-hud {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .cam-controls {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .hud-btn {
+      background: rgba(13, 17, 24, 0.85);
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.15s;
+    }
+
+    .hud-btn:hover, .hud-btn.active {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    /* Attitude Gyro (Artificial Horizon) */
+    .gyro-card {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(13, 17, 24, 0.90);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
+    }
+
+    .gyro-title {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    #gyroCanvas {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 1px solid #253347;
+      background: #090d14;
+    }
+
+    .gyro-readout {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-bright);
+    }
+
+    /* Foot Contacts & GRF */
+    .grf-card {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(13, 17, 24, 0.90);
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 16px;
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
+    }
+
+    .foot-sole {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sole-box {
+      width: 24px;
+      height: 48px;
+      border: 2px solid var(--panel-border);
+      border-radius: 6px;
+      background: #090d14;
+      transition: all 0.1s;
+      position: relative;
+    }
+
+    .sole-box.contact {
+      border-color: var(--accent-green);
+      background: rgba(0, 255, 136, 0.25);
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+    }
+
+    .foot-lbl { font-size: 0.65rem; font-family: var(--font-mono); color: var(--text-muted); }
+    .foot-force { font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--text-bright); }
+
+    /* Right Telemetry Column */
+    .telemetry-col {
+      width: 380px;
+      background: var(--panel);
+      border-left: 1px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-sec {
+      border-bottom: 1px solid var(--panel-border);
+      padding: 12px 16px;
+    }
+
+    .panel-hdr {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-hdr span.highlight {
+      color: var(--accent-cyan);
+    }
+
+    /* Joint Matrix Table */
+    .joint-matrix {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .joint-row {
+      display: grid;
+      grid-template-columns: 110px 50px 1fr 40px;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+    }
+
+    .joint-name { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .joint-val { color: var(--text-bright); text-align: right; }
+    .joint-bar-bg { background: #161e2e; height: 6px; border-radius: 3px; overflow: hidden; position: relative; }
+    .joint-bar-fill { background: var(--accent-cyan); height: 100%; width: 50%; border-radius: 3px; transition: width 0.08s; }
+    .joint-tau { color: var(--text-muted); text-align: right; font-size: 0.68rem; }
+
+    /* Phase Orbit Canvas */
+    #orbitCanvas {
+      width: 100%;
+      height: 120px;
+      background: #090d14;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      display: block;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .metric-cell {
+      background: #111722;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+
+    .metric-lbl { font-size: 0.65rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .metric-val { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); font-family: var(--font-mono); margin-top: 2px; }
+
+    /* ── Bottom Command Console ──────────────────────────────────────── */
+    footer {
+      background: var(--panel-header);
+      border-top: 1px solid var(--panel-border);
+      height: 85px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .cmd-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .cmd-slider-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 130px;
+    }
+
+    .cmd-slider-wrap label {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: #1d2738;
+      height: 5px;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-act {
+      background: #162030;
+      border: 1px solid #26354d;
+      color: var(--text-bright);
+      padding: 10px 16px;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .btn-act:hover {
+      background: #202d44;
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    .btn-act.btn-push {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+
+    .btn-act.btn-push:hover {
+      background: rgba(255, 179, 0, 0.15);
+    }
+
+    .btn-act.btn-fall {
+      border-color: var(--accent-crimson);
+      color: var(--accent-crimson);
+    }
+
+    .btn-act.btn-fall:hover {
+      background: rgba(255, 51, 102, 0.15);
+    }
+
+    .btn-act.btn-estop {
+      background: #2a1017;
+      border-color: #5c1827;
+      color: #ff5c7c;
+    }
+
+    .btn-act.btn-estop:hover {
+      background: #40121e;
+      border-color: var(--accent-crimson);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top Mission Control Bar ───────────────────────────────────── -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🦆</div>
+      <div>
+        <div class="brand-title">MICRODUCK <span>GCS</span></div>
+        <div class="brand-sub">Sim-to-Real Telemetry & Policy Evaluation Console</div>
+      </div>
+    </div>
+
+    <div class="sys-badges">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        <span class="badge-label">NODE:</span>
+        <span class="badge-val">50.0 Hz</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">POLICY:</span>
+        <span class="badge-val" id="badgePolicy">velstand.onnx</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">ONNX LATENCY:</span>
+        <span class="badge-val" id="badgeLatency">0.05 ms</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">BATTERY:</span>
+        <span class="badge-val" id="badgeBattery">7.92 V</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">STATE:</span>
+        <span class="badge-val mode-walk" id="badgeState">WALK</span>
+      </div>
+      <div class="badge">
+        <span class="badge-label">HOME SERVER:</span>
+        <span class="badge-val" style="color:var(--accent-green);">PORT 8001 (LAN)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main Workspace ────────────────────────────────────────────── -->
+  <div class="workspace">
+    
+    <!-- 3D Viewport Container -->
+    <div class="viewport-container">
+      <canvas id="viewport"></canvas>
+
+      <!-- Camera Presets -->
+      <div class="cam-controls">
+        <button class="hud-btn active" onclick="setCamPreset('follow')">Follow Cam</button>
+        <button class="hud-btn" onclick="setCamPreset('iso')">Isometric</button>
+        <button class="hud-btn" onclick="setCamPreset('front')">Front View</button>
+        <button class="hud-btn" onclick="setCamPreset('zmp')">Top-Down ZMP</button>
+      </div>
+
+      <!-- Attitude Artificial Horizon -->
+      <div class="gyro-card">
+        <div class="gyro-title">IMU ATTITUDE (HORIZON)</div>
+        <canvas id="gyroCanvas" width="100" height="100"></canvas>
+        <div class="gyro-readout" id="gyroReadout">P: 0.0° | R: 0.0°</div>
+      </div>
+
+      <!-- Ground Reaction Forces (GRF) -->
+      <div class="grf-card">
+        <div class="foot-sole">
+          <div class="foot-lbl">LEFT SOLE</div>
+          <div class="sole-box" id="soleLeft"></div>
+          <div class="foot-force" id="forceLeft">4.2 N</div>
+        </div>
+        <div class="foot-sole">
+          <div class="foot-lbl">RIGHT SOLE</div>
+          <div class="sole-box" id="soleRight"></div>
+          <div class="foot-force" id="forceRight">0.0 N</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Telemetry Sidebar -->
+    <div class="telemetry-col">
+      
+      <!-- 14-DoF Actuator Matrix -->
+      <div class="panel-sec">
+        <div class="panel-hdr">
+          <span>14-DoF Dynamixel XL-330 Matrix</span>
+          <span class="highlight">ENCODERS</span>
+        </div>
+        <div class="joint-matrix" id="jointMatrix">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Phase Plane Limit Cycle -->
+      <div class="panel-sec">
+        <div class="panel-hdr">
+          <span>Phase-Plane Orbit (q vs q̇)</span>
+          <span class="highlight">KNEE LIMIT CYCLE</span>
+        </div>
+        <canvas id="orbitCanvas" width="340" height="120"></canvas>
+      </div>
+
+      <!-- System Health Metrics -->
+      <div class="panel-sec" style="border-bottom:none;">
+        <div class="panel-hdr">
+          <span>Electrical & Kinematic Health</span>
+          <span class="highlight">BAM M6</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-cell">
+            <div class="metric-lbl">BUS CURRENT</div>
+            <div class="metric-val" id="valCurrent">0.85 A</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-lbl">TOTAL POWER</div>
+            <div class="metric-val" id="valPower">6.7 W</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-lbl">COM LATERAL DRIFT</div>
+            <div class="metric-val" id="valComX">0.00 mm</div>
+          </div>
+          <div class="metric-cell">
+            <div class="metric-lbl">SIM BACKLASH</div>
+            <div class="metric-val" id="valBacklash">±2.0°</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ── Bottom Command Console ────────────────────────────────────── -->
+  <footer>
+    <div class="cmd-group">
+      <div class="cmd-slider-wrap">
+        <label><span>VELOCITY Vx</span><span id="lblVx">0.20 m/s</span></label>
+        <input type="range" id="sliderVx" min="-0.2" max="0.5" step="0.05" value="0.20" oninput="updateVelocityCommand()" />
+      </div>
+      <div class="cmd-slider-wrap">
+        <label><span>YAW RATE Wz</span><span id="lblWz">0.00 rad/s</span></label>
+        <input type="range" id="sliderWz" min="-1.0" max="1.0" step="0.1" value="0.0" oninput="updateVelocityCommand()" />
+      </div>
+    </div>
+
+    <div class="action-btn-group">
+      <button class="btn-act btn-push" onclick="triggerLateralPush()">
+        <span>⚡</span> APPLY LATERAL PUSH (14 N)
+      </button>
+      <button class="btn-act btn-fall" onclick="triggerHardFall()">
+        <span>⚠️</span> SIMULATE HARD TRIP (FALL RECOVERY)
+      </button>
+      <button class="btn-act btn-estop" onclick="triggerEstop()">
+        <span>🛑</span> E-STOP
+      </button>
+      <button class="btn-act" onclick="triggerReset()">
+        <span>🔄</span> RESET
+      </button>
+    </div>
+  </footer>
+
+  <!-- ── 3D Scene & Live Telemetry Logic ───────────────────────────── -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 3D Three.js High-Fidelity Microduck Setup
+    // -------------------------------------------------------------------------
+    const container = document.querySelector('.viewport-container');
+    const canvas = document.getElementById('viewport');
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x07090e, 0.25);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.05, 50);
+    camera.position.set(0.65, -0.75, 0.45);
+    camera.up.set(0, 0, 1);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0x00e5ff, 1.2);
+    keyLight.position.set(2, -2, 3);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffb300, 0.6);
+    fillLight.position.set(-2, 2, 2);
+    scene.add(fillLight);
+
+    // Infinite Engineering Grid Floor
+    const grid = new THREE.GridHelper(10, 50, 0x00e5ff, 0x1b2332);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.z = 0;
+    scene.add(grid);
+
+    // Coordinate Triad Axes
+    const axes = new THREE.AxesHelper(0.12);
+    axes.position.set(-0.35, -0.35, 0.01);
+    scene.add(axes);
+
+    // -------------------------------------------------------------------------
+    // Microduck 3D Procedural Robotic Anatomy
+    // -------------------------------------------------------------------------
+    const robotRoot = new THREE.Group();
+    scene.add(robotRoot);
+
+    const matBody = new THREE.MeshStandardMaterial({ color: 0x1e2638, roughness: 0.35, metalness: 0.6 });
+    const matJoint = new THREE.MeshStandardMaterial({ color: 0x00e5ff, roughness: 0.2, metalness: 0.8 });
+    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.3, metalness: 0.1 });
+    const matBeak = new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.4, metalness: 0.1 });
+    const matEye = new THREE.MeshBasicMaterial({ color: 0x050505 });
+    const matSole = new THREE.MeshStandardMaterial({ color: 0x111622, roughness: 0.9, metalness: 0.1 });
+
+    // Torso / Chassis
+    const torsoGeo = new THREE.BoxGeometry(0.08, 0.07, 0.09);
+    const torsoMesh = new THREE.Mesh(torsoGeo, matBody);
+    torsoMesh.castShadow = true;
+    robotRoot.add(torsoMesh);
+
+    // Duck Head Group
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.02, 0.07);
+    torsoMesh.add(headGroup);
+
+    const headGeo = new THREE.SphereGeometry(0.042, 24, 24);
+    const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
+    headMesh.castShadow = true;
+    headGroup.add(headMesh);
+
+    // Duck Bill / Beak
+    const beakGeo = new THREE.ConeGeometry(0.022, 0.048, 16);
+    const beakMesh = new THREE.Mesh(beakGeo, matBeak);
+    beakMesh.rotation.x = Math.PI / 2;
+    beakMesh.position.set(0, 0.045, -0.005);
+    headGroup.add(beakMesh);
+
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.006, 12, 12);
+    const eyeL = new THREE.Mesh(eyeGeo, matEye);
+    eyeL.position.set(-0.022, 0.025, 0.015);
+    headGroup.add(eyeL);
+    const eyeR = new THREE.Mesh(eyeGeo, matEye);
+    eyeR.position.set(0.022, 0.025, 0.015);
+    headGroup.add(eyeR);
+
+    // Build Articulated Legs (Left & Right)
+    function createLeg(isLeft) {
+      const legGroup = new THREE.Group();
+      const sign = isLeft ? -1 : 1;
+      legGroup.position.set(sign * 0.038, 0, -0.045);
+
+      // Hip Joint
+      const hipGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.02, 16);
+      const hipMesh = new THREE.Mesh(hipGeo, matJoint);
+      hipMesh.rotation.z = Math.PI / 2;
+      legGroup.add(hipMesh);
+
+      // Upper Leg
+      const thighGroup = new THREE.Group();
+      legGroup.add(thighGroup);
+      const thighGeo = new THREE.BoxGeometry(0.018, 0.022, 0.07);
+      const thighMesh = new THREE.Mesh(thighGeo, matBody);
+      thighMesh.position.set(0, 0, -0.035);
+      thighMesh.castShadow = true;
+      thighGroup.add(thighMesh);
+
+      // Knee Joint
+      const kneeGroup = new THREE.Group();
+      kneeGroup.position.set(0, 0, -0.07);
+      thighGroup.add(kneeGroup);
+      const kneeMesh = new THREE.Mesh(hipGeo, matJoint);
+      kneeMesh.rotation.z = Math.PI / 2;
+      kneeGroup.add(kneeMesh);
+
+      // Lower Shin
+      const shinGroup = new THREE.Group();
+      kneeGroup.add(shinGroup);
+      const shinGeo = new THREE.BoxGeometry(0.016, 0.02, 0.07);
+      const shinMesh = new THREE.Mesh(shinGeo, matBody);
+      shinMesh.position.set(0, 0, -0.035);
+      shinMesh.castShadow = true;
+      shinGroup.add(shinMesh);
+
+      // Ankle & Foot
+      const ankleGroup = new THREE.Group();
+      ankleGroup.position.set(0, 0, -0.07);
+      shinGroup.add(ankleGroup);
+
+      const footGeo = new THREE.BoxGeometry(0.042, 0.08, 0.012);
+      const footMesh = new THREE.Mesh(footGeo, matSole);
+      footMesh.position.set(0, 0.015, -0.006);
+      footMesh.castShadow = true;
+      ankleGroup.add(footMesh);
+
+      return {
+        root: legGroup,
+        thigh: thighGroup,
+        knee: kneeGroup,
+        shin: shinGroup,
+        ankle: ankleGroup
+      };
+    }
+
+    const legLeft = createLeg(true);
+    const legRight = createLeg(false);
+    torsoMesh.add(legLeft.root);
+    torsoMesh.add(legRight.root);
+
+    // Initial position
+    robotRoot.position.set(0, 0, 0.22);
+
+    // Camera preset states
+    let camMode = 'follow';
+    function setCamPreset(mode) {
+      camMode = mode;
+      document.querySelectorAll('.cam-controls .hud-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (mode === 'iso') {
+        camera.position.set(0.7, -0.7, 0.5);
+      } else if (mode === 'front') {
+        camera.position.set(0, -0.9, 0.25);
+      } else if (mode === 'zmp') {
+        camera.position.set(0, 0, 1.1);
+      }
+      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z);
+    }
+
+    // -------------------------------------------------------------------------
+    // Phase Plane Canvas (q vs q_dot) & Attitude Gyro Canvas
+    // -------------------------------------------------------------------------
+    const orbitCanvas = document.getElementById('orbitCanvas');
+    const orbitCtx = orbitCanvas.getContext('2d');
+    const orbitHistory = [];
+
+    function drawOrbitPlot(kneeAngleDeg) {
+      orbitHistory.push(kneeAngleDeg);
+      if (orbitHistory.length > 70) orbitHistory.shift();
+
+      orbitCtx.fillStyle = '#090d14';
+      orbitCtx.fillRect(0, 0, orbitCanvas.width, orbitCanvas.height);
+
+      // Crosshairs
+      orbitCtx.strokeStyle = '#1b2332';
+      orbitCtx.lineWidth = 1;
+      orbitCtx.beginPath();
+      orbitCtx.moveTo(0, 60); orbitCtx.lineTo(340, 60);
+      orbitCtx.moveTo(170, 0); orbitCtx.lineTo(170, 120);
+      orbitCtx.stroke();
+
+      if (orbitHistory.length < 2) return;
+
+      orbitCtx.strokeStyle = '#00e5ff';
+      orbitCtx.lineWidth = 2;
+      orbitCtx.beginPath();
+      for (let i = 1; i < orbitHistory.length; i++) {
+        const q0 = orbitHistory[i - 1];
+        const q1 = orbitHistory[i];
+        const qDot = (q1 - q0) * 15; // numerical velocity
+
+        const x = 170 + q1 * 4;
+        const y = 60 - qDot * 0.8;
+        if (i === 1) orbitCtx.moveTo(x, y);
+        else orbitCtx.lineTo(x, y);
+      }
+      orbitCtx.stroke();
+    }
+
+    const gyroCanvas = document.getElementById('gyroCanvas');
+    const gyroCtx = gyroCanvas.getContext('2d');
+
+    function drawArtificialHorizon(pitchDeg, rollDeg) {
+      gyroCtx.save();
+      gyroCtx.clearRect(0, 0, 100, 100);
+
+      // Clip circular dial
+      gyroCtx.beginPath();
+      gyroCtx.arc(50, 50, 48, 0, Math.PI * 2);
+      gyroCtx.clip();
+
+      // Pitch translation & Roll rotation
+      gyroCtx.translate(50, 50);
+      gyroCtx.rotate(-rollDeg * Math.PI / 180);
+      const pitchOffset = pitchDeg * 1.5;
+
+      // Sky (blue) and Ground (brown/dark)
+      gyroCtx.fillStyle = '#10304a';
+      gyroCtx.fillRect(-60, -60 + pitchOffset, 120, 60);
+      gyroCtx.fillStyle = '#261b12';
+      gyroCtx.fillRect(-60, pitchOffset, 120, 60);
+
+      // Horizon line
+      gyroCtx.strokeStyle = '#00e5ff';
+      gyroCtx.lineWidth = 2;
+      gyroCtx.beginPath();
+      gyroCtx.moveTo(-50, pitchOffset);
+      gyroCtx.lineTo(50, pitchOffset);
+      gyroCtx.stroke();
+
+      gyroCtx.restore();
+
+      // Center crosshair
+      gyroCtx.strokeStyle = '#ffb300';
+      gyroCtx.lineWidth = 2;
+      gyroCtx.beginPath();
+      gyroCtx.moveTo(40, 50); gyroCtx.lineTo(60, 50);
+      gyroCtx.moveTo(50, 42); gyroCtx.lineTo(50, 58);
+      gyroCtx.stroke();
+    }
+
+    // -------------------------------------------------------------------------
+    // Telemetry Sync Loop (50 Hz / 100ms fetch)
+    // -------------------------------------------------------------------------
+    const ACTUATOR_KEYS = [
+      "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
+      "neck_pitch", "head_pitch", "head_yaw", "head_roll",
+      "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle"
+    ];
+
+    // Build Joint Table HTML
+    const jointMatrixEl = document.getElementById('jointMatrix');
+    jointMatrixEl.innerHTML = ACTUATOR_KEYS.map(k => `
+      <div class="joint-row" id="row_${k}">
+        <span class="joint-name">${k}</span>
+        <span class="joint-val" id="val_${k}">0.0°</span>
+        <div class="joint-bar-bg"><div class="joint-bar-fill" id="bar_${k}"></div></div>
+        <span class="joint-tau" id="tau_${k}">0.0Nm</span>
+      </div>
+    `).join('');
+
+    async function pollTelemetry() {
+      try {
+        const res = await fetch('/api/telemetry');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // 1. Update Badges
+        document.getElementById('badgeLatency').textContent = `${data.system.onnx_latency_ms} ms`;
+        document.getElementById('badgeBattery').textContent = `${data.power.voltage_v} V`;
+        const stateEl = document.getElementById('badgeState');
+        stateEl.textContent = data.state_mode;
+        stateEl.className = 'badge-val ' + (
+          data.state_mode === 'WALK' ? 'mode-walk' :
+          data.state_mode === 'FALLEN' ? 'mode-fall' : 'mode-rec'
+        );
+
+        // 2. Animate 3D Robot
+        const j = data.joints_deg;
+        const toRad = deg => deg * Math.PI / 180;
+
+        // Base Attitude
+        robotRoot.rotation.x = toRad(data.attitude.roll);
+        robotRoot.rotation.y = toRad(data.attitude.pitch);
+        robotRoot.position.z = data.com.z;
+
+        // Left Leg Articulation
+        legLeft.thigh.rotation.x = toRad(j.left_hip_pitch || 0);
+        legLeft.root.rotation.y = toRad(j.left_hip_roll || 0);
+        legLeft.knee.rotation.x = toRad(j.left_knee || 0);
+        legLeft.ankle.rotation.x = toRad(j.left_ankle || 0);
+
+        // Right Leg Articulation
+        legRight.thigh.rotation.x = toRad(j.right_hip_pitch || 0);
+        legRight.root.rotation.y = toRad(j.right_hip_roll || 0);
+        legRight.knee.rotation.x = toRad(j.right_knee || 0);
+        legRight.ankle.rotation.x = toRad(j.right_ankle || 0);
+
+        // Head/Neck
+        headGroup.rotation.x = toRad(j.neck_pitch || 0);
+        headGroup.rotation.z = toRad(j.head_yaw || 0);
+
+        // 3. Update Joint Matrix UI
+        ACTUATOR_KEYS.forEach(k => {
+          const deg = j[k] || 0.0;
+          const tau = data.torques_nm[k] || 0.0;
+          document.getElementById(`val_${k}`).textContent = `${deg.toFixed(1)}°`;
+          document.getElementById(`tau_${k}`).textContent = `${Math.abs(tau).toFixed(2)}N`;
+          const pct = Math.min(100, Math.max(0, 50 + deg));
+          document.getElementById(`bar_${k}`).style.width = `${pct}%`;
+        });
+
+        // 4. Update Gauges
+        drawArtificialHorizon(data.attitude.pitch, data.attitude.roll);
+        document.getElementById('gyroReadout').textContent = `P: ${data.attitude.pitch}° | R: ${data.attitude.roll}°`;
+        drawOrbitPlot(j.left_knee || 0);
+
+        // 5. Foot Contacts & GRF
+        const soleL = document.getElementById('soleLeft');
+        const soleR = document.getElementById('soleRight');
+        if (data.contacts.left) soleL.classList.add('contact'); else soleL.classList.remove('contact');
+        if (data.contacts.right) soleR.classList.add('contact'); else soleR.classList.remove('contact');
+        document.getElementById('forceLeft').textContent = `${data.grf.left_n} N`;
+        document.getElementById('forceRight').textContent = `${data.grf.right_n} N`;
+
+        // 6. Metrics Grid
+        document.getElementById('valCurrent').textContent = `${data.power.current_a} A`;
+        document.getElementById('valPower').textContent = `${data.power.power_w} W`;
+        document.getElementById('valComX').textContent = `${(data.com.x * 1000).toFixed(1)} mm`;
+
+        // Follow Camera Tracking
+        if (camMode === 'follow') {
+          camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
+        }
+
+      } catch (err) {
+        // Silently retry
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // User Action Commands
+    // -------------------------------------------------------------------------
+    async function updateVelocityCommand() {
+      const vx = parseFloat(document.getElementById('sliderVx').value);
+      const wz = parseFloat(document.getElementById('sliderWz').value);
+      document.getElementById('lblVx').textContent = `${vx.toFixed(2)} m/s`;
+      document.getElementById('lblWz').textContent = `${wz.toFixed(2)} rad/s`;
+
+      await fetch('/api/cmd_vel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vx, vy: 0.0, wz })
+      });
+    }
+
+    async function triggerLateralPush() {
+      await fetch('/api/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ magnitude_n: 14.0 })
+      });
+    }
+
+    async function triggerHardFall() {
+      await fetch('/api/fall', { method: 'POST' });
+    }
+
+    async function triggerEstop() {
+      await fetch('/api/estop', { method: 'POST' });
+    }
+
+    async function triggerReset() {
+      await fetch('/api/reset', { method: 'POST' });
+    }
+
+    // Render loop
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Start Telemetry Poll at 10 Hz (every 100ms)
+    setInterval(pollTelemetry, 100);
+
+    // Responsive Canvas Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  </script>
+</body>
+</html>

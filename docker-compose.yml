@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  microduck-gcs:
+    build: .
+    container_name: microduck_gcs
+    restart: unless-stopped
+    ports:
+      - "8000:8000" # Ground Control Station UI & Sim Engine
+      - "8001:8001" # Telemetry Logger & Base Station Dashboard
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOME_SERVER_URL=http://localhost:8001
