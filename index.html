@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ORDIVA · MICRODUCK | Industrial Physical AI & Bipedal Kinematics</title>
 
-  <!-- Relative paths so it loads BOTH via http:// and directly via file:/// -->
+  <!-- Local Three.js with CDN fallback for 100% offline & online reliability -->
   <script src="static/three.min.js"></script>
-  <!-- CDN Fallback in case local script fails -->
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
@@ -18,8 +17,9 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-outer: #1e40af;
-      --bg-gradient: radial-gradient(circle at 85% 15%, #3b82f6 0%, #1d4ed8 45%, #0f172a 100%);
+      --bg-outer-from: #d946ef;
+      --bg-outer-via: #2563eb;
+      --bg-outer-to: #0f172a;
       --card-bg: #ffffff;
       --card-subtle: #f8fafc;
       --card-border: #e2e8f0;
@@ -35,14 +35,14 @@
     }
 
     body {
-      background: var(--bg-gradient);
+      background: radial-gradient(circle at 90% 10%, #ec4899 0%, #3b82f6 35%, #1d4ed8 65%, #0a0f1d 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-sans);
       color: var(--text-dark);
-      padding: 24px;
+      padding: 16px;
       overflow-x: hidden;
       user-select: none;
     }
@@ -50,11 +50,11 @@
     /* ── Main ORDIVA Design Container (From designs/ folder) ────────── */
     .ordiva-frame {
       width: 100%;
-      max-width: 1440px;
-      height: 94vh;
+      max-width: 1480px;
+      height: 95vh;
       background: var(--card-bg);
-      border-radius: 32px;
-      box-shadow: 0 35px 90px rgba(15, 23, 42, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      box-shadow: 0 40px 100px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25);
       display: flex;
       flex-direction: column;
       position: relative;
@@ -63,8 +63,8 @@
 
     /* ── Top Header Navigation Bar ───────────────────────────────────── */
     .top-nav {
-      height: 72px;
-      padding: 0 40px;
+      height: 64px;
+      padding: 0 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -77,7 +77,7 @@
     .nav-left {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
     }
 
     .lab-badge {
@@ -85,8 +85,8 @@
       align-items: center;
       gap: 8px;
       background: var(--accent-pink-subtle);
-      border: 1px solid rgba(236, 72, 153, 0.3);
-      padding: 5px 12px;
+      border: 1px solid rgba(236, 72, 153, 0.35);
+      padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.72rem;
       font-family: var(--font-mono);
@@ -104,8 +104,8 @@
 
     .nav-links {
       display: flex;
-      gap: 24px;
-      font-size: 0.85rem;
+      gap: 20px;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--text-muted);
     }
@@ -120,17 +120,28 @@
       color: var(--accent-blue);
     }
 
-    /* ORDIVA Brand Mark */
-    .brand-center {
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-meta-badge {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* ORDIVA Brand Logo in top right */
+    .brand-group {
       display: flex;
       align-items: center;
       gap: 10px;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+      text-decoration: none;
     }
 
-    .brand-logo-icon {
+    .brand-icon {
       width: 28px;
       height: 18px;
       background: var(--accent-blue);
@@ -141,7 +152,7 @@
       justify-content: center;
     }
 
-    .brand-logo-icon::before {
+    .brand-icon::before {
       content: '';
       width: 8px;
       height: 8px;
@@ -150,28 +161,11 @@
     }
 
     .brand-name {
-      font-size: 1.25rem;
+      font-size: 1.22rem;
       font-weight: 800;
       letter-spacing: 2px;
       color: var(--accent-blue);
     }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .nav-right a {
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-
-    .nav-right a:hover { color: var(--accent-blue); }
 
     /* ── Main Content Area: Giant Typo & 3D Stage ───────────────────── */
     .content-body {
@@ -184,20 +178,21 @@
     /* Left Architectural Typography Layer */
     .typo-layer {
       position: absolute;
-      top: 36px;
+      top: 32px;
       left: 44px;
-      bottom: 120px;
+      bottom: 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       z-index: 10;
       pointer-events: none;
+      max-width: 360px;
     }
 
     .hero-title {
-      font-size: 4.8rem;
+      font-size: 4.6rem;
       font-weight: 800;
-      line-height: 0.90;
+      line-height: 0.88;
       letter-spacing: -2px;
       color: var(--text-dark);
       text-transform: uppercase;
@@ -209,9 +204,8 @@
     }
 
     .hero-sub-meta {
-      max-width: 320px;
-      font-size: 0.82rem;
-      line-height: 1.5;
+      font-size: 0.80rem;
+      line-height: 1.55;
       color: var(--text-muted);
       font-weight: 500;
     }
@@ -220,22 +214,73 @@
       color: var(--text-dark);
     }
 
+    .hero-step-num {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-subtle);
+      margin-top: 10px;
+    }
+
     /* Right Architectural Typography */
     .typo-right {
       position: absolute;
-      top: 40px;
+      top: 32px;
       right: 44px;
       text-align: right;
       z-index: 10;
       pointer-events: none;
     }
 
-    .word-biology {
+    .word-robotics {
       font-size: 4.4rem;
       font-weight: 800;
       letter-spacing: -1.5px;
       color: var(--text-dark);
       line-height: 1;
+    }
+
+    /* Right Side Vertical Meta Status Strip (from ORDIVA reference design) */
+    .sidebar-meta {
+      position: absolute;
+      right: 44px;
+      top: 48%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 12;
+      pointer-events: none;
+      text-align: right;
+    }
+
+    .meta-item {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .meta-item.active {
+      color: var(--text-dark);
+    }
+
+    .meta-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-subtle);
+    }
+
+    .meta-item.active .meta-dot {
+      background: var(--accent-pink);
+      box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
     }
 
     /* 3D WebGL Canvas Layer */
@@ -247,6 +292,11 @@
       height: 100%;
       z-index: 2;
       background: radial-gradient(circle at 55% 45%, #ffffff 0%, #f1f5f9 100%);
+      cursor: grab;
+    }
+
+    .canvas-stage:active {
+      cursor: grabbing;
     }
 
     #stageCanvas {
@@ -263,7 +313,8 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.1s ease-out;
+      transition: all 0.08s ease-out;
+      transform: translate(-10px, -50%);
     }
 
     .pin-badge {
@@ -285,13 +336,13 @@
 
     .pin-badge.pink {
       color: var(--accent-pink);
-      border-color: rgba(236, 72, 153, 0.3);
+      border-color: rgba(236, 72, 153, 0.35);
       background: #fdf2f8;
     }
 
     .pin-badge.blue {
       color: var(--accent-blue);
-      border-color: rgba(37, 99, 235, 0.3);
+      border-color: rgba(37, 99, 235, 0.35);
       background: #eff6ff;
     }
 
@@ -303,7 +354,7 @@
     }
 
     .pin-line {
-      width: 32px;
+      width: 28px;
       height: 1px;
       background: var(--text-subtle);
     }
@@ -311,14 +362,15 @@
     /* ── Floating Slo-Mo Kinematic Inspector Bar ───────────────────── */
     .slomo-dock {
       position: absolute;
-      top: 100px;
+      top: 80px;
       left: 50%;
       transform: translateX(-50%);
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
       border: 1px solid var(--card-border);
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
       border-radius: 30px;
-      padding: 6px 14px;
+      padding: 6px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -329,7 +381,7 @@
 
     .slomo-label {
       color: var(--text-muted);
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -384,15 +436,33 @@
       color: var(--accent-blue);
     }
 
+    .cad-mode-btn {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .cad-mode-btn:hover {
+      color: var(--accent-pink);
+      border-color: var(--accent-pink);
+    }
+
     /* ── Bottom Educational Gait Phase Strip (From designs/ image 3) ── */
     .gait-process-strip {
-      height: 120px;
+      height: 126px;
       background: #ffffff;
       border-top: 1px solid var(--card-border);
-      padding: 16px 40px;
+      padding: 14px 36px 10px 36px;
       display: grid;
-      grid-template-columns: repeat(4, 1fr) 240px;
-      gap: 24px;
+      grid-template-columns: repeat(4, 1fr) 260px;
+      gap: 20px;
       align-items: center;
       z-index: 30;
       flex-shrink: 0;
@@ -401,9 +471,9 @@
     .phase-step {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       border-left: 2px solid var(--card-border);
-      padding-left: 14px;
+      padding-left: 12px;
       transition: all 0.2s;
     }
 
@@ -412,14 +482,14 @@
     }
 
     .phase-num {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-family: var(--font-mono);
       font-weight: 700;
       color: var(--accent-pink);
     }
 
     .phase-title {
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 800;
       color: var(--text-dark);
       text-transform: uppercase;
@@ -427,7 +497,7 @@
     }
 
     .phase-desc {
-      font-size: 0.72rem;
+      font-size: 0.70rem;
       color: var(--text-muted);
       line-height: 1.35;
     }
@@ -436,7 +506,7 @@
     .strip-actions {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .action-btn-row {
@@ -448,16 +518,16 @@
       flex: 1;
       background: var(--card-subtle);
       border: 1px solid var(--card-border);
-      padding: 8px 10px;
+      padding: 7px 8px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: var(--text-dark);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.15s;
     }
 
@@ -479,7 +549,7 @@
 
     /* Keyboard Guide Hint */
     .keyboard-hint {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-family: var(--font-mono);
       color: var(--text-subtle);
       text-align: center;
@@ -509,21 +579,21 @@
         </div>
         <div class="nav-links">
           <a href="#" class="active">Technology</a>
-          <a href="#" onclick="setSloMo(0.2)">Slo-Mo Kinematics</a>
+          <a href="#" onclick="setSloMo(0.2)">Kinematics</a>
           <a href="#" onclick="toggleBlueprintMode()">CAD Blueprint</a>
           <a href="http://192.168.1.15:8001/dashboard" target="_blank">Home Server</a>
         </div>
       </div>
 
-      <div class="brand-center">
-        <div class="brand-logo-icon"></div>
-        <div class="brand-name">ORDIVA</div>
-      </div>
-
       <div class="nav-right">
-        <span>B.Tech CSE SCS-701</span>
+        <span class="nav-meta-badge">B.Tech CSE SCS-701</span>
         <span style="color:var(--text-subtle)">|</span>
-        <span style="color:var(--accent-blue)" id="liveHzBadge">50.0 Hz Active</span>
+        <span class="nav-meta-badge" style="color:var(--accent-blue)" id="liveHzBadge">50.0 Hz Active</span>
+        
+        <div class="brand-group">
+          <div class="brand-icon"></div>
+          <div class="brand-name">ORDIVA</div>
+        </div>
       </div>
     </nav>
 
@@ -541,6 +611,7 @@
       <button class="slomo-play-btn" id="btn_pause" onclick="togglePause()">
         <span id="playIcon">⏸️</span> <span id="playText">Freeze Frame</span>
       </button>
+      <button class="cad-mode-btn" onclick="toggleBlueprintMode()">📐 Wireframe CAD</button>
     </div>
 
     <!-- Main Content Stage -->
@@ -553,17 +624,27 @@
           <span>AUTOMATION.</span>
         </div>
         <div class="hero-sub-meta">
-          Engineering the Sim-to-Real transfer gap on the <b>Microduck 14-DoF bipedal robot</b>. Utilizing <b>PPO reinforcement learning</b> and <b>BAM actuator physics</b> to guarantee gait stability under mechanical backlash.
+          Engineering the Sim-to-Real transfer gap on the <b>Microduck 14-DoF bipedal robot</b>. Utilizing <b>PPO neural policies</b> and <b>BAM actuator physics</b> to guarantee gait stability under mechanical backlash.
         </div>
+        <div class="hero-step-num">01 / 04 · KINEMATIC CYCLE</div>
       </div>
 
       <!-- Right Architectural Typo -->
       <div class="typo-right">
-        <div class="word-biology">ROBOTICS.</div>
+        <div class="word-robotics">ROBOTICS.</div>
+      </div>
+
+      <!-- Right Sidebar Meta Indicator List -->
+      <div class="sidebar-meta">
+        <div class="meta-item active"><span class="meta-dot"></span>ONNX POLICY (50Hz)</div>
+        <div class="meta-item"><span class="meta-dot"></span>BAM BACKLASH MODEL</div>
+        <div class="meta-item"><span class="meta-dot"></span>14-DOF KINEMATICS</div>
+        <div class="meta-item"><span class="meta-dot"></span>VELSTAND SELF-RIGHT</div>
+        <div class="meta-item"><span class="meta-dot"></span>BASE STATION SINK</div>
       </div>
 
       <!-- 3D WebGL Canvas Layer -->
-      <div class="canvas-stage">
+      <div class="canvas-stage" id="stageContainer" title="Drag to Orbit · Scroll to Zoom">
         <canvas id="stageCanvas"></canvas>
       </div>
 
@@ -639,7 +720,7 @@
           </button>
         </div>
         <div class="keyboard-hint">
-          Drive: <span>W</span> <span>A</span> <span>S</span> <span>D</span> | Space: <span>Push</span>
+          <span>W</span> <span>A</span> <span>S</span> <span>D</span> Walk | Drag: Orbit | Space: Push
         </div>
       </div>
 
@@ -650,16 +731,25 @@
   <!-- ── 3D Engine, Slo-Mo Kinematics & Interactive Physics ─────────── -->
   <script>
     const canvas = document.getElementById('stageCanvas');
-    const container = document.querySelector('.canvas-stage');
+    const container = document.getElementById('stageContainer');
 
     // 1. Scene & Clean Studio Lighting Setup (ORDIVA Style)
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xfbfcfd);
-    scene.fog = new THREE.FogExp2(0xfbfcfd, 0.08);
+    scene.fog = new THREE.FogExp2(0xfbfcfd, 0.05);
 
-    const camera = new THREE.PerspectiveCamera(38, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.set(1.4, -1.8, 1.1);
+    // Camera positioned for prominent, high-impact CAD robot view
+    const camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 50);
     camera.up.set(0, 0, 1);
+
+    // Smooth Orbit & Zoom Controls
+    const spherical = { radius: 1.18, theta: 0.75, phi: 1.22 };
+    function updateCameraView() {
+      camera.position.x = robotRoot.position.x + spherical.radius * Math.sin(spherical.phi) * Math.sin(spherical.theta);
+      camera.position.y = robotRoot.position.y - spherical.radius * Math.sin(spherical.phi) * Math.cos(spherical.theta);
+      camera.position.z = spherical.radius * Math.cos(spherical.phi) + 0.14;
+      camera.lookAt(robotRoot.position.x, robotRoot.position.y, 0.14);
+    }
 
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -668,32 +758,32 @@
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Studio Lights
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 1.1);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 1.2);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0x2563eb, 0.8);
-    keyLight.position.set(3, -3, 4);
+    const keyLight = new THREE.DirectionalLight(0x2563eb, 0.9);
+    keyLight.position.set(2, -2, 3);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
-    keyLight.shadow.camera.near = 0.5;
+    keyLight.shadow.camera.near = 0.2;
     keyLight.shadow.camera.far = 10;
     keyLight.shadow.bias = -0.0005;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
-    fillLight.position.set(-2, -2, 3);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 1.1);
+    fillLight.position.set(-2, -2, 2.5);
     scene.add(fillLight);
 
     // Clean Studio Shadow Floor
-    const floorGeo = new THREE.PlaneGeometry(30, 30);
-    const floorMat = new THREE.ShadowMaterial({ opacity: 0.12 });
+    const floorGeo = new THREE.PlaneGeometry(40, 40);
+    const floorMat = new THREE.ShadowMaterial({ opacity: 0.14 });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.receiveShadow = true;
     scene.add(floorMesh);
 
-    // Subtle Precision Blueprint Grid
-    const grid = new THREE.GridHelper(10, 40, 0x2563eb, 0xe2e8f0);
+    // Subtle Precision Blueprint Grid (ORDIVA Style)
+    const grid = new THREE.GridHelper(12, 48, 0x2563eb, 0xe2e8f0);
     grid.rotation.x = Math.PI / 2;
     grid.position.z = -0.001;
     scene.add(grid);
@@ -706,8 +796,8 @@
 
     // Clean Industrial Materials (Matches designs/ folder)
     const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
-    const matBlueAnodized = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.75, roughness: 0.25 });
-    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.2, roughness: 0.2 });
+    const matBlueAnodized = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.80, roughness: 0.22 });
+    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.25, roughness: 0.25 });
     const matBeakOrange = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
     const matPinkAccent = new THREE.MeshStandardMaterial({ color: 0xec4899, metalness: 0.4, roughness: 0.3 });
     const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
@@ -716,55 +806,55 @@
     const torsoGroup = new THREE.Group();
     robotRoot.add(torsoGroup);
 
-    const torsoGeo = new THREE.BoxGeometry(0.082, 0.074, 0.095);
+    const torsoGeo = new THREE.BoxGeometry(0.085, 0.076, 0.098);
     const torsoMesh = new THREE.Mesh(torsoGeo, matSilverRail);
     torsoMesh.castShadow = true;
     torsoGroup.add(torsoMesh);
 
     // Blue Anodized Bracket Side Plates
-    const plateGeo = new THREE.BoxGeometry(0.006, 0.065, 0.08);
+    const plateGeo = new THREE.BoxGeometry(0.006, 0.068, 0.084);
     const plateL = new THREE.Mesh(plateGeo, matBlueAnodized);
-    plateL.position.x = -0.043;
+    plateL.position.x = -0.045;
     torsoMesh.add(plateL);
     const plateR = new THREE.Mesh(plateGeo, matBlueAnodized);
-    plateR.position.x = 0.043;
+    plateR.position.x = 0.045;
     torsoMesh.add(plateR);
 
-    // Head Unit
+    // Head Unit (Duck Visor)
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.015, 0.078);
+    headGroup.position.set(0, 0.015, 0.080);
     torsoMesh.add(headGroup);
 
-    const headGeo = new THREE.SphereGeometry(0.044, 32, 32);
+    const headGeo = new THREE.SphereGeometry(0.046, 32, 32);
     const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
     headMesh.castShadow = true;
     headGroup.add(headMesh);
 
     // Duck Beak
-    const beakGeo = new THREE.CylinderGeometry(0.012, 0.026, 0.048, 20);
+    const beakGeo = new THREE.CylinderGeometry(0.012, 0.028, 0.050, 20);
     const beakMesh = new THREE.Mesh(beakGeo, matBeakOrange);
     beakMesh.rotation.x = Math.PI / 2;
-    beakMesh.position.set(0, 0.046, -0.006);
+    beakMesh.position.set(0, 0.048, -0.006);
     beakMesh.scale.set(1.3, 0.65, 1);
     headGroup.add(beakMesh);
 
     // Eyes
     const eyeGeo = new THREE.SphereGeometry(0.0065, 16, 16);
     const eyeL = new THREE.Mesh(eyeGeo, matEye);
-    eyeL.position.set(-0.022, 0.030, 0.014);
+    eyeL.position.set(-0.022, 0.032, 0.014);
     headGroup.add(eyeL);
     const eyeR = new THREE.Mesh(eyeGeo, matEye);
-    eyeR.position.set(0.022, 0.030, 0.014);
+    eyeR.position.set(0.022, 0.032, 0.014);
     headGroup.add(eyeR);
 
     // 6-DoF Legs with Anodized Hinges
     function createCADLeg(isLeft) {
       const legRoot = new THREE.Group();
       const sign = isLeft ? -1 : 1;
-      legRoot.position.set(sign * 0.038, 0, -0.048);
+      legRoot.position.set(sign * 0.039, 0, -0.049);
 
       // Anodized Hip Pivot
-      const hipGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.024, 16);
+      const hipGeo = new THREE.CylinderGeometry(0.013, 0.013, 0.026, 16);
       const hipMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
       hipMesh.rotation.z = Math.PI / 2;
       legRoot.add(hipMesh);
@@ -772,22 +862,22 @@
       // Thigh Extrusion
       const thighGroup = new THREE.Group();
       legRoot.add(thighGroup);
-      const thighGeo = new THREE.BoxGeometry(0.018, 0.022, 0.068);
+      const thighGeo = new THREE.BoxGeometry(0.018, 0.024, 0.070);
       const thighMesh = new THREE.Mesh(thighGeo, matSilverRail);
-      thighMesh.position.set(0, 0, -0.034);
+      thighMesh.position.set(0, 0, -0.035);
       thighMesh.castShadow = true;
       thighGroup.add(thighMesh);
 
       // Knee Joint with Pink Pin (from ORDIVA design)
       const kneeGroup = new THREE.Group();
-      kneeGroup.position.set(0, 0, -0.068);
+      kneeGroup.position.set(0, 0, -0.070);
       thighGroup.add(kneeGroup);
 
       const kneeMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
       kneeMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(kneeMesh);
 
-      const pinGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.028, 12);
+      const pinGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.030, 12);
       const pinMesh = new THREE.Mesh(pinGeo, matPinkAccent);
       pinMesh.rotation.z = Math.PI / 2;
       kneeGroup.add(pinMesh);
@@ -795,20 +885,20 @@
       // Lower Shin
       const shinGroup = new THREE.Group();
       kneeGroup.add(shinGroup);
-      const shinGeo = new THREE.BoxGeometry(0.016, 0.020, 0.068);
+      const shinGeo = new THREE.BoxGeometry(0.016, 0.022, 0.070);
       const shinMesh = new THREE.Mesh(shinGeo, matSilverRail);
-      shinMesh.position.set(0, 0, -0.034);
+      shinMesh.position.set(0, 0, -0.035);
       shinMesh.castShadow = true;
       shinGroup.add(shinMesh);
 
       // Ankle & Boot
       const ankleGroup = new THREE.Group();
-      ankleGroup.position.set(0, 0, -0.068);
+      ankleGroup.position.set(0, 0, -0.070);
       shinGroup.add(ankleGroup);
 
-      const bootGeo = new THREE.BoxGeometry(0.042, 0.082, 0.014);
+      const bootGeo = new THREE.BoxGeometry(0.044, 0.084, 0.015);
       const bootMesh = new THREE.Mesh(bootGeo, matBlueAnodized);
-      bootMesh.position.set(0, 0.016, -0.007);
+      bootMesh.position.set(0, 0.018, -0.0075);
       bootMesh.castShadow = true;
       ankleGroup.add(bootMesh);
 
@@ -828,6 +918,39 @@
     torsoMesh.add(legRight.root);
 
     robotRoot.position.set(0, 0, 0.22);
+    updateCameraView();
+
+    // -------------------------------------------------------------------------
+    // Mouse Drag-to-Orbit & Wheel Zoom
+    // -------------------------------------------------------------------------
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+
+    container.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouseX;
+      const dy = e.clientY - prevMouseY;
+      spherical.theta -= dx * 0.008;
+      spherical.phi = Math.max(0.2, Math.min(Math.PI / 2 - 0.05, spherical.phi - dy * 0.008));
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+      updateCameraView();
+    });
+
+    container.addEventListener('wheel', (e) => {
+      spherical.radius = Math.max(0.45, Math.min(2.2, spherical.radius + e.deltaY * 0.001));
+      updateCameraView();
+      e.preventDefault();
+    }, { passive: false });
 
     // -------------------------------------------------------------------------
     // Foot Trajectory Ribbon (Traces foot arc in 3D for Slo-Mo learning)
@@ -860,7 +983,7 @@
     scene.add(ballMesh);
 
     const ball = {
-      pos: new THREE.Vector3(0.40, 0.0, ballRadius),
+      pos: new THREE.Vector3(0.35, 0.0, ballRadius),
       vel: new THREE.Vector3(0, 0, 0),
       friction: 0.97
     };
@@ -1061,9 +1184,8 @@
       updateCalloutPin(legRight.knee, 'pinKnee', 'txtKnee', `KNEE: ${(legRight.knee.rotation.x * 180 / Math.PI).toFixed(1)}°`);
       updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.abs(cmdVx) * 12 + 3.2).toFixed(1)} N`);
 
-      // Camera follow
-      camera.lookAt(robotRoot.position.x, robotRoot.position.y, robotRoot.position.z + 0.05);
-
+      // Update Camera & Render
+      updateCameraView();
       renderer.render(scene, camera);
     }
     renderLoop();
