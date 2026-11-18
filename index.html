@@ -260,13 +260,12 @@
       position: absolute;
       top: 24px;
       left: 36px;
-      bottom: 20px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      gap: 8px;
       z-index: 10;
       pointer-events: none;
-      max-width: 340px;
+      max-width: 330px;
     }
 
     .hero-title {
@@ -301,23 +300,7 @@
       color: var(--text-subtle);
     }
 
-    /* Right Architectural Typography */
-    .typo-right {
-      position: absolute;
-      top: 24px;
-      right: 36px;
-      text-align: right;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .word-robotics {
-      font-size: 3.8rem;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      color: var(--text-dark);
-      line-height: 1;
-    }
+    /* Right background typo removed to prevent overlap with telemetry graphs */
 
     /* Right Sidebar Meta Indicator List */
     .sidebar-meta {
@@ -517,31 +500,80 @@
       color: var(--accent-blue);
     }
 
-    /* ── Floating Omnidirectional Virtual Keypad / Controller Overlay ── */
-    .teleop-overlay {
+    /* ── Left Basic Keys & Controller Dock ── */
+    .keys-control-card {
       position: absolute;
       bottom: 124px;
       left: 36px;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(10px);
+      width: 335px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--card-border);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-      border-radius: 18px;
-      padding: 12px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+      border-radius: 14px;
+      padding: 12px 14px;
       z-index: 25;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .teleop-header {
-      font-size: 0.65rem;
+    .keys-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 6px;
+    }
+
+    .keys-tag {
+      font-size: 0.72rem;
       font-family: var(--font-mono);
-      font-weight: 700;
+      font-weight: 800;
+      color: var(--text-dark);
       letter-spacing: 0.5px;
-      color: var(--text-muted);
       text-transform: uppercase;
+    }
+
+    .keys-sub {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: var(--text-pink);
+      font-weight: 700;
+    }
+
+    .keys-interactive-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .keys-legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .key-legend-item {
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .key-legend-item kbd {
+      background: var(--card-subtle);
+      border: 1px solid var(--card-border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
     }
 
     .dpad-grid {
@@ -1501,10 +1533,7 @@
           <div class="hero-step-num">01 / 04 · GAIT CYCLE PHASES</div>
         </div>
 
-        <!-- Right Architectural Typo (Subtle Watermark) -->
-        <div class="typo-right">
-          <div class="word-robotics">MICRODUCK.</div>
-        </div>
+
 
         <!-- Frosted Glass Live Kinematics & Joint Torques Panel -->
         <div class="kinematics-glass-panel">
@@ -1654,35 +1683,51 @@
           <div class="pin-line"></div>
         </div>
 
-        <!-- Floating Omnidirectional Virtual Keypad / Controller Overlay -->
-        <div class="teleop-overlay">
-          <div class="teleop-header">Omnidirectional Drive</div>
-          <div class="dpad-grid">
-            <button class="dpad-btn" id="key_q" onmousedown="setTurn(1)" onmouseup="setTurn(0)" title="Turn Left (Q)">
-              <span>↺</span><span class="sub">Q</span>
-            </button>
-            <button class="dpad-btn" id="key_w" onmousedown="setDrive(0.25)" onmouseup="setDrive(0)" title="Walk Forward (W)">
-              <span>▲</span><span class="sub">W</span>
-            </button>
-            <button class="dpad-btn" id="key_e" onmousedown="setTurn(-1)" onmouseup="setTurn(0)" title="Turn Right (E)">
-              <span>↻</span><span class="sub">E</span>
-            </button>
+        <!-- Left Basic Keys & Controller Dock -->
+        <div class="keys-control-card">
+          <div class="keys-header">
+            <span class="keys-tag">🎮 BASIC CONTROLS</span>
+            <span class="keys-sub">OMNIDIRECTIONAL</span>
+          </div>
 
-            <button class="dpad-btn" id="key_a" onmousedown="setStrafe(-0.20)" onmouseup="setStrafe(0)" title="Strafe Left (A)">
-              <span>◄</span><span class="sub">A</span>
-            </button>
-            <button class="dpad-btn" onclick="triggerReset()" title="Stop / Center Pose">
-              <span>●</span><span class="sub">STOP</span>
-            </button>
-            <button class="dpad-btn" id="key_d" onmousedown="setStrafe(0.20)" onmouseup="setStrafe(0)" title="Strafe Right (D)">
-              <span>►</span><span class="sub">D</span>
-            </button>
+          <div class="keys-interactive-row">
+            <!-- Compact D-Pad Controller -->
+            <div class="dpad-grid">
+              <button class="dpad-btn" id="key_q" onmousedown="setTurn(1)" onmouseup="setTurn(0)" title="Turn Left (Q)">
+                <span>↺</span><span class="sub">Q</span>
+              </button>
+              <button class="dpad-btn" id="key_w" onmousedown="setDrive(0.25)" onmouseup="setDrive(0)" title="Walk Forward (W)">
+                <span>▲</span><span class="sub">W</span>
+              </button>
+              <button class="dpad-btn" id="key_e" onmousedown="setTurn(-1)" onmouseup="setTurn(0)" title="Turn Right (E)">
+                <span>↻</span><span class="sub">E</span>
+              </button>
 
-            <div></div>
-            <button class="dpad-btn" id="key_s" onmousedown="setDrive(-0.18)" onmouseup="setDrive(0)" title="Walk Backward (S)">
-              <span>▼</span><span class="sub">S</span>
-            </button>
-            <div></div>
+              <button class="dpad-btn" id="key_a" onmousedown="setStrafe(-0.20)" onmouseup="setStrafe(0)" title="Strafe Left (A)">
+                <span>◄</span><span class="sub">A</span>
+              </button>
+              <button class="dpad-btn" onclick="triggerReset()" title="Stop / Center Pose">
+                <span>●</span><span class="sub">STOP</span>
+              </button>
+              <button class="dpad-btn" id="key_d" onmousedown="setStrafe(0.20)" onmouseup="setStrafe(0)" title="Strafe Right (D)">
+                <span>►</span><span class="sub">D</span>
+              </button>
+
+              <div></div>
+              <button class="dpad-btn" id="key_s" onmousedown="setDrive(-0.18)" onmouseup="setDrive(0)" title="Walk Backward (S)">
+                <span>▼</span><span class="sub">S</span>
+              </button>
+              <div></div>
+            </div>
+
+            <!-- Key Instructions Legend List -->
+            <div class="keys-legend-list">
+              <div class="key-legend-item"><kbd>W</kbd>/<kbd>S</kbd> <span>Forward / Back</span></div>
+              <div class="key-legend-item"><kbd>A</kbd>/<kbd>D</kbd> <span>Strafe Left / Right</span></div>
+              <div class="key-legend-item"><kbd>Q</kbd>/<kbd>E</kbd> <span>Turn Left / Right</span></div>
+              <div class="key-legend-item"><kbd>Space</kbd> <span>Lateral Push</span></div>
+              <div class="key-legend-item"><kbd>F</kbd> <span>VelStand Fall</span></div>
+            </div>
           </div>
         </div>
 
@@ -2161,110 +2206,274 @@
     grid.position.z = -0.001;
     scene.add(grid);
 
-    // 3D Robot CAD Model
+    // =========================================================================
+    // AUTHENTIC ROBOTIC MICRODUCK 14-DOF CAD MODEL
+    // Modeled faithfully to Pollen Robotics / Hugging Face Microduck Hardware
+    // =========================================================================
     const robotRoot = new THREE.Group();
     window.robotRoot = robotRoot;
     scene.add(robotRoot);
 
+    // Authentic Hardware Materials
+    const matServoBlack = new THREE.MeshStandardMaterial({ color: 0x18181b, metalness: 0.5, roughness: 0.35 });
+    const matServoSpline = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.2 });
+    const matCarbonChassis = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.6, roughness: 0.4 });
+    const matAnodizedBlue = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.8, roughness: 0.25 });
+    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.25, roughness: 0.3 });
+    const matBeakOrange = new THREE.MeshStandardMaterial({ color: 0xea580c, metalness: 0.2, roughness: 0.35 });
+    const matLensBezel = new THREE.MeshStandardMaterial({ color: 0x27272a, metalness: 0.8, roughness: 0.2 });
+    const matLensCyan = new THREE.MeshStandardMaterial({ color: 0x06b6d4, metalness: 0.9, roughness: 0.1 });
+    const matRubberSole = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.1, roughness: 0.85 });
+    const matBatteryRibs = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.4, roughness: 0.45 });
+    const matLedGreen = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+    const matPinAccent = new THREE.MeshStandardMaterial({ color: 0xbe185d, metalness: 0.5, roughness: 0.3 });
     const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
-    const matBlueAnodized = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.80, roughness: 0.22 });
-    const matDuckYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.25, roughness: 0.25 });
-    const matBeakOrange = new THREE.MeshStandardMaterial({ color: 0xff6600, metalness: 0.2, roughness: 0.3 });
-    const matPinkAccent = new THREE.MeshStandardMaterial({ color: 0xec4899, metalness: 0.4, roughness: 0.3 });
-    const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+    const matBlueAnodized = matAnodizedBlue; // Alias for wireframe toggle
 
-    const torsoGroup = new THREE.Group();
-    robotRoot.add(torsoGroup);
-    const torsoGeo = new THREE.BoxGeometry(0.085, 0.076, 0.098);
-    const torsoMesh = new THREE.Mesh(torsoGeo, matSilverRail);
-    torsoMesh.castShadow = true;
-    torsoGroup.add(torsoMesh);
+    // Helper: Create a realistic Dynamixel XL-330 Actuator Unit
+    function createXL330Mesh() {
+      const sGroup = new THREE.Group();
+      
+      // Main rectangular black housing
+      const bodyGeo = new THREE.BoxGeometry(0.024, 0.034, 0.024);
+      const bodyMesh = new THREE.Mesh(bodyGeo, matServoBlack);
+      bodyMesh.castShadow = true;
+      sGroup.add(bodyMesh);
 
-    const plateGeo = new THREE.BoxGeometry(0.006, 0.068, 0.084);
-    const plateL = new THREE.Mesh(plateGeo, matBlueAnodized);
-    plateL.position.x = -0.045;
-    torsoMesh.add(plateL);
-    const plateR = new THREE.Mesh(plateGeo, matBlueAnodized);
-    plateR.position.x = 0.045;
-    torsoMesh.add(plateR);
+      // Metallic circular output spline horn
+      const hornGeo = new THREE.CylinderGeometry(0.010, 0.010, 0.005, 18);
+      const hornMesh = new THREE.Mesh(hornGeo, matServoSpline);
+      hornMesh.rotation.z = Math.PI / 2;
+      hornMesh.position.set(0.0125, 0.006, 0);
+      sGroup.add(hornMesh);
 
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.015, 0.080);
-    torsoMesh.add(headGroup);
-    const headGeo = new THREE.SphereGeometry(0.046, 32, 32);
-    const headMesh = new THREE.Mesh(headGeo, matDuckYellow);
-    headMesh.castShadow = true;
-    headGroup.add(headMesh);
+      // Center spline screw
+      const screwGeo = new THREE.CylinderGeometry(0.003, 0.003, 0.006, 12);
+      const screwMesh = new THREE.Mesh(screwGeo, matCarbonChassis);
+      screwMesh.rotation.z = Math.PI / 2;
+      screwMesh.position.set(0.013, 0.006, 0);
+      sGroup.add(screwMesh);
 
-    const beakGeo = new THREE.CylinderGeometry(0.012, 0.028, 0.050, 20);
-    const beakMesh = new THREE.Mesh(beakGeo, matBeakOrange);
-    beakMesh.rotation.x = Math.PI / 2;
-    beakMesh.position.set(0, 0.048, -0.006);
-    beakMesh.scale.set(1.3, 0.65, 1);
-    headGroup.add(beakMesh);
-
-    const eyeGeo = new THREE.SphereGeometry(0.0065, 16, 16);
-    const eyeL = new THREE.Mesh(eyeGeo, matEye);
-    eyeL.position.set(-0.022, 0.032, 0.014);
-    headGroup.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGeo, matEye);
-    eyeR.position.set(0.022, 0.032, 0.014);
-    headGroup.add(eyeR);
-
-    function createCADLeg(isLeft) {
-      const legRoot = new THREE.Group();
-      const sign = isLeft ? -1 : 1;
-      legRoot.position.set(sign * 0.039, 0, -0.049);
-
-      const hipGeo = new THREE.CylinderGeometry(0.013, 0.013, 0.026, 16);
-      const hipMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
-      hipMesh.rotation.z = Math.PI / 2;
-      legRoot.add(hipMesh);
-
-      const thighGroup = new THREE.Group();
-      legRoot.add(thighGroup);
-      const thighGeo = new THREE.BoxGeometry(0.018, 0.024, 0.070);
-      const thighMesh = new THREE.Mesh(thighGeo, matSilverRail);
-      thighMesh.position.set(0, 0, -0.035);
-      thighMesh.castShadow = true;
-      thighGroup.add(thighMesh);
-
-      const kneeGroup = new THREE.Group();
-      kneeGroup.position.set(0, 0, -0.070);
-      thighGroup.add(kneeGroup);
-      const kneeMesh = new THREE.Mesh(hipGeo, matBlueAnodized);
-      kneeMesh.rotation.z = Math.PI / 2;
-      kneeGroup.add(kneeMesh);
-
-      const pinGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.030, 12);
-      const pinMesh = new THREE.Mesh(pinGeo, matPinkAccent);
-      pinMesh.rotation.z = Math.PI / 2;
-      kneeGroup.add(pinMesh);
-
-      const shinGroup = new THREE.Group();
-      kneeGroup.add(shinGroup);
-      const shinGeo = new THREE.BoxGeometry(0.016, 0.022, 0.070);
-      const shinMesh = new THREE.Mesh(shinGeo, matSilverRail);
-      shinMesh.position.set(0, 0, -0.035);
-      shinMesh.castShadow = true;
-      shinGroup.add(shinMesh);
-
-      const ankleGroup = new THREE.Group();
-      ankleGroup.position.set(0, 0, -0.070);
-      shinGroup.add(ankleGroup);
-      const bootGeo = new THREE.BoxGeometry(0.044, 0.084, 0.015);
-      const bootMesh = new THREE.Mesh(bootGeo, matBlueAnodized);
-      bootMesh.position.set(0, 0.018, -0.0075);
-      bootMesh.castShadow = true;
-      ankleGroup.add(bootMesh);
-
-      return { root: legRoot, thigh: thighGroup, knee: kneeGroup, shin: shinGroup, ankle: ankleGroup, foot: bootMesh };
+      return sGroup;
     }
 
-    const legLeft = createCADLeg(true);
-    const legRight = createCADLeg(false);
-    torsoMesh.add(legLeft.root);
-    torsoMesh.add(legRight.root);
+    // 1. Torso & Trunk Base
+    const torsoGroup = new THREE.Group();
+    robotRoot.add(torsoGroup);
+
+    // Carbon fiber central spine block
+    const trunkGeo = new THREE.BoxGeometry(0.076, 0.068, 0.088);
+    const trunkMesh = new THREE.Mesh(trunkGeo, matCarbonChassis);
+    trunkMesh.castShadow = true;
+    torsoGroup.add(trunkMesh);
+    const torsoMesh = trunkMesh; // Alias
+
+    // Left & Right CNC Anodized Blue Shell Brackets with weight cutouts
+    const bracketGeo = new THREE.BoxGeometry(0.005, 0.064, 0.082);
+    const bracketL = new THREE.Mesh(bracketGeo, matAnodizedBlue);
+    bracketL.position.x = -0.040;
+    trunkMesh.add(bracketL);
+    const bracketR = new THREE.Mesh(bracketGeo, matAnodizedBlue);
+    bracketR.position.x = 0.040;
+    trunkMesh.add(bracketR);
+
+    // Rear NP-F970 Battery Pack
+    const batGeo = new THREE.BoxGeometry(0.052, 0.024, 0.068);
+    const batMesh = new THREE.Mesh(batGeo, matBatteryRibs);
+    batMesh.position.set(0, -0.044, 0.004);
+    batMesh.castShadow = true;
+    trunkMesh.add(batMesh);
+
+    // Green Battery Status LED
+    const ledGeo = new THREE.SphereGeometry(0.0025, 10, 10);
+    const ledMesh = new THREE.Mesh(ledGeo, matLedGreen);
+    ledMesh.position.set(0.018, -0.057, 0.028);
+    trunkMesh.add(ledMesh);
+
+    // 2. Active 2-DoF Neck Gimbal & Robotic Duck Head
+    const neckBase = new THREE.Group();
+    neckBase.position.set(0, 0.010, 0.065);
+    trunkMesh.add(neckBase);
+
+    // Neck Pitch Servo
+    const neckServo = createXL330Mesh();
+    neckServo.scale.set(0.75, 0.75, 0.75);
+    neckServo.rotation.x = Math.PI / 2;
+    neckBase.add(neckServo);
+
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.016, 0.025);
+    neckBase.add(headGroup);
+
+    // Robotic Duck Helmet Shell
+    const helmetGeo = new THREE.SphereGeometry(0.044, 32, 32);
+    const helmetMesh = new THREE.Mesh(helmetGeo, matDuckYellow);
+    helmetMesh.scale.set(1.0, 1.15, 0.95);
+    helmetMesh.castShadow = true;
+    headGroup.add(helmetMesh);
+
+    // Central Forehead Camera Eye (M12 Lens Barrel)
+    const lensBarrelGeo = new THREE.CylinderGeometry(0.009, 0.011, 0.018, 20);
+    const lensBarrel = new THREE.Mesh(lensBarrelGeo, matLensBezel);
+    lensBarrel.rotation.x = Math.PI / 2;
+    lensBarrel.position.set(0, 0.042, 0.012);
+    headGroup.add(lensBarrel);
+
+    // Optical Cyan Glass Sensor Element
+    const lensGlassGeo = new THREE.CylinderGeometry(0.0065, 0.0065, 0.004, 18);
+    const lensGlass = new THREE.Mesh(lensGlassGeo, matLensCyan);
+    lensGlass.rotation.x = Math.PI / 2;
+    lensGlass.position.set(0, 0.051, 0.012);
+    headGroup.add(lensGlass);
+
+    // Dual Stereo Vision Sensors (Left & Right Eyes)
+    const eyeRingGeo = new THREE.CylinderGeometry(0.0075, 0.0075, 0.004, 16);
+    const eyeR_Ring = new THREE.Mesh(eyeRingGeo, matCarbonChassis);
+    eyeR_Ring.rotation.x = Math.PI / 2;
+    eyeR_Ring.position.set(0.022, 0.034, 0.018);
+    headGroup.add(eyeR_Ring);
+    const eyeL_Ring = new THREE.Mesh(eyeRingGeo, matCarbonChassis);
+    eyeL_Ring.rotation.x = Math.PI / 2;
+    eyeL_Ring.position.set(-0.022, 0.034, 0.018);
+    headGroup.add(eyeL_Ring);
+
+    // Eye Pupil elements
+    const pupilGeo = new THREE.SphereGeometry(0.0045, 12, 12);
+    const pupilR = new THREE.Mesh(pupilGeo, matServoBlack);
+    pupilR.position.set(0.022, 0.037, 0.018);
+    headGroup.add(pupilR);
+    const pupilL = new THREE.Mesh(pupilGeo, matServoBlack);
+    pupilL.position.set(-0.022, 0.037, 0.018);
+    headGroup.add(pupilL);
+
+    // Articulated Duck Bill: Upper Beak + Lower Soft Jaw
+    const upperBeakGeo = new THREE.CylinderGeometry(0.012, 0.026, 0.046, 20);
+    const upperBeakMesh = new THREE.Mesh(upperBeakGeo, matBeakOrange);
+    upperBeakMesh.rotation.x = Math.PI / 2;
+    upperBeakMesh.scale.set(1.4, 0.55, 1.0);
+    upperBeakMesh.position.set(0, 0.048, -0.010);
+    upperBeakMesh.castShadow = true;
+    headGroup.add(upperBeakMesh);
+
+    // Lower Beak Jaw Bracket
+    const lowerJawGeo = new THREE.CylinderGeometry(0.010, 0.022, 0.036, 18);
+    const lowerJawMesh = new THREE.Mesh(lowerJawGeo, matCarbonChassis);
+    lowerJawMesh.rotation.x = Math.PI / 2;
+    lowerJawMesh.scale.set(1.2, 0.40, 1.0);
+    lowerJawMesh.position.set(0, 0.044, -0.022);
+    headGroup.add(lowerJawMesh);
+
+    // 3. Robotic 14-DoF Legs with Dynamixel XL-330 Actuators & Webbed Flipper Feet
+    function createRoboticLeg(isLeft) {
+      const sign = isLeft ? -1 : 1;
+      const legRoot = new THREE.Group();
+      legRoot.position.set(sign * 0.038, 0, -0.046);
+
+      // Hip Yaw / Roll Servo Mount
+      const hipYawServo = createXL330Mesh();
+      hipYawServo.rotation.y = Math.PI / 2;
+      hipYawServo.position.set(0, 0, 0);
+      legRoot.add(hipYawServo);
+
+      // Thigh Pitch Group
+      const thighGroup = new THREE.Group();
+      thighGroup.position.set(0, 0, -0.018);
+      legRoot.add(thighGroup);
+
+      // Hip Pitch Actuator
+      const hipPitchServo = createXL330Mesh();
+      hipPitchServo.position.set(0, 0, -0.016);
+      thighGroup.add(hipPitchServo);
+
+      // Dual CNC Aluminum Thigh Rails
+      const railGeo = new THREE.BoxGeometry(0.004, 0.022, 0.054);
+      const railInner = new THREE.Mesh(railGeo, matAnodizedBlue);
+      railInner.position.set(-sign * 0.012, 0, -0.038);
+      railInner.castShadow = true;
+      thighGroup.add(railInner);
+      const railOuter = new THREE.Mesh(railGeo, matAnodizedBlue);
+      railOuter.position.set(sign * 0.012, 0, -0.038);
+      railOuter.castShadow = true;
+      thighGroup.add(railOuter);
+
+      // Knee Joint Group (Contacts Floor during VelStand!)
+      const kneeGroup = new THREE.Group();
+      kneeGroup.position.set(0, 0, -0.068);
+      thighGroup.add(kneeGroup);
+
+      // Exposed XL-330 Knee Servo
+      const kneeServo = createXL330Mesh();
+      kneeGroup.add(kneeServo);
+
+      // Anodized Aluminum Knee Lever Bracket (Ground Lever Push Point!)
+      const leverBracketGeo = new THREE.BoxGeometry(0.026, 0.018, 0.012);
+      const leverBracket = new THREE.Mesh(leverBracketGeo, matAnodizedBlue);
+      leverBracket.position.set(0, -0.012, 0);
+      kneeGroup.add(leverBracket);
+
+      // Shin Lower Leg Group
+      const shinGroup = new THREE.Group();
+      shinGroup.position.set(0, 0, -0.016);
+      kneeGroup.add(shinGroup);
+
+      const shinRailGeo = new THREE.BoxGeometry(0.012, 0.018, 0.052);
+      const shinRail = new THREE.Mesh(shinRailGeo, matCarbonChassis);
+      shinRail.position.set(0, 0, -0.026);
+      shinRail.castShadow = true;
+      shinGroup.add(shinRail);
+
+      // Ankle Actuator Group
+      const ankleGroup = new THREE.Group();
+      ankleGroup.position.set(0, 0, -0.056);
+      shinGroup.add(ankleGroup);
+
+      const ankleServo = createXL330Mesh();
+      ankleServo.scale.set(0.85, 0.85, 0.85);
+      ankleGroup.add(ankleServo);
+
+      // Webbed Duck Flipper Boot with Rubber Tread Sole
+      const footGroup = new THREE.Group();
+      footGroup.position.set(0, 0.016, -0.014);
+      ankleGroup.add(footGroup);
+
+      // Main webbed duck foot flipper body (sculpted wider at the toes)
+      const footGeo = new THREE.BoxGeometry(0.048, 0.088, 0.008);
+      const footMesh = new THREE.Mesh(footGeo, matAnodizedBlue);
+      footMesh.castShadow = true;
+      footGroup.add(footMesh);
+
+      // Three sculpted webbed duck toes
+      for (let toe = -1; toe <= 1; toe++) {
+        const toeGeo = new THREE.CylinderGeometry(0.006, 0.009, 0.018, 12);
+        const toeMesh = new THREE.Mesh(toeGeo, matDuckYellow);
+        toeMesh.rotation.x = Math.PI / 2;
+        toeMesh.position.set(toe * 0.016, 0.048, 0);
+        toeMesh.castShadow = true;
+        footGroup.add(toeMesh);
+      }
+
+      // High-grip rubber sole tread pad on underside
+      const soleGeo = new THREE.BoxGeometry(0.046, 0.086, 0.004);
+      const soleMesh = new THREE.Mesh(soleGeo, matRubberSole);
+      soleMesh.position.set(0, 0, -0.005);
+      soleMesh.receiveShadow = true;
+      footGroup.add(soleMesh);
+
+      return {
+        root: legRoot,
+        thigh: thighGroup,
+        knee: kneeGroup,
+        shin: shinGroup,
+        ankle: ankleGroup,
+        foot: footMesh,
+        leverBracket: leverBracket
+      };
+    }
+
+    const legLeft = createRoboticLeg(true);
+    const legRight = createRoboticLeg(false);
+    trunkMesh.add(legLeft.root);
+    trunkMesh.add(legRight.root);
     robotRoot.position.set(0, 0, 0.22);
     updateCameraView();
 
@@ -2681,76 +2890,113 @@
           robotPitch *= 0.94;
         }
 
-        // 2. Slow-Motion Fall & VelStand 5-Phase Contact Recovery Dynamics
+        // 2. High-Fidelity Robotic Fall & VelStand Contact Recovery Dynamics
         if (isFallActive) {
-          fallSimulationPhase += effectiveDt * 0.42; // ~2.4s sequence (slowed by slomoScale!)
+          fallSimulationPhase += effectiveDt * 0.40; // ~2.5s sequence (slowed by slomoScale!)
 
-          if (fallSimulationPhase < 0.5) {
-            // STAGE 1: Tumble Arrest & Impact Dissipation (0.0 - 0.5)
-            const t = fallSimulationPhase / 0.5;
+          if (fallSimulationPhase < 0.45) {
+            // STAGE 1: Mechanical Impact & Servo Splay (0.0 - 0.45s)
+            // Robot topples to floor, neck pivots to protect camera, hips splay out
+            const t = fallSimulationPhase / 0.45;
             robotPitch = fallTargetPitch * t;
             robotRoll = fallTargetRoll * t;
             robotZ = 0.22 - t * (0.22 - 0.075);
-            liveKneeLeft = t * 45; liveKneeRight = t * 45;
+            
+            // Protective servo splay to prevent gear stripping
+            legLeft.root.rotation.y = -0.32 * t;
+            legRight.root.rotation.y = 0.32 * t;
+            headGroup.rotation.x = -0.30 * t; // Protect camera lens
+
+            liveKneeLeft = t * 32; liveKneeRight = t * 32;
             liveTorqueLeft = 0.25; liveTorqueRight = 0.25;
             liveFnLeft = 2.0; liveFnRight = 2.0;
             liveStability = Math.max(0, Math.round(100 - t * 100));
-            updateKgpStatus('🔄 VELSTAND 1: TUMBLE ARREST', 'velstand');
-          } else if (fallSimulationPhase < 0.9) {
-            // STAGE 2: Leg Tuck (0.5 - 0.9)
-            const t = (fallSimulationPhase - 0.5) / 0.4;
-            robotPitch = fallTargetPitch * (1.0 - 0.3 * t);
-            robotRoll = fallTargetRoll * (1.0 - 0.4 * t);
+            updateKgpStatus('⚠️ MECHANICAL IMPACT & SPLAY', 'alert');
+          } else if (fallSimulationPhase < 0.95) {
+            // STAGE 2: High-Speed Robotic Servo Tuck (0.45 - 0.95s)
+            // Servos snap into tight crouch under CoM, pulling flipper boots under trunk
+            const rawS = (fallSimulationPhase - 0.45) / 0.50;
+            const s = rawS * rawS * (3 - 2 * rawS); // S-curve servo speed profile
+            
+            robotPitch = fallTargetPitch * (1.0 - 0.35 * s);
+            robotRoll = fallTargetRoll * (1.0 - 0.50 * s);
             robotZ = 0.075;
-            liveKneeLeft = 45 + t * 50; // Reaches 95° tuck!
-            liveKneeRight = 45 + t * 50;
-            liveHipLeft = -t * 35; liveHipRight = -t * 35;
-            liveTorqueLeft = 0.45; liveTorqueRight = 0.45;
-            liveFnLeft = 5.5; liveFnRight = 5.5;
+
+            // Retract leg abduction back into parallel stance
+            legLeft.root.rotation.y = -0.32 * (1.0 - s);
+            legRight.root.rotation.y = 0.32 * (1.0 - s);
+
+            liveKneeLeft = 32 + s * 73; // Snaps to 105° tight tuck!
+            liveKneeRight = 32 + s * 73;
+            liveHipLeft = -s * 52; liveHipRight = -s * 52;
+            liveAnkleLeft = s * 35; liveAnkleRight = s * 35; // Flipper toes pulled up
+            liveTorqueLeft = 0.48; liveTorqueRight = 0.48;
+            liveFnLeft = 5.8; liveFnRight = 5.8;
             liveStability = 15;
-            updateKgpStatus('🔄 VELSTAND 2: LEG TUCK (95°)', 'velstand');
-          } else if (fallSimulationPhase < 1.4) {
-            // STAGE 3: Knee Lever Push (Peak Normal Force Fn = 18.4N!) (0.9 - 1.4)
-            const t = (fallSimulationPhase - 0.9) / 0.5;
-            robotPitch = fallTargetPitch * 0.7 * (1.0 - t);
-            robotRoll = fallTargetRoll * 0.6 * (1.0 - t);
-            robotZ = 0.075 + t * 0.065; // Torso levers off ground!
-            liveKneeLeft = 95 - t * 40; liveKneeRight = 95 - t * 40;
-            liveHipLeft = -35 + t * 20; liveHipRight = -35 + t * 20;
-            liveTorqueLeft = 0.88; liveTorqueRight = 0.88; // PEAK LEVER TORQUE!
-            liveFnLeft = 18.4; liveFnRight = 18.4;
-            liveStability = Math.round(25 + t * 35);
-            updateKgpStatus('💥 VELSTAND 3: KNEE LEVER PUSH', 'peak-lever');
-          } else if (fallSimulationPhase < 1.9) {
-            // STAGE 4: Ankle Boot Plant (1.4 - 1.9)
-            const t = (fallSimulationPhase - 1.4) / 0.5;
-            robotPitch = fallTargetPitch * 0.2 * (1.0 - t);
-            robotRoll = fallTargetRoll * 0.2 * (1.0 - t);
-            robotZ = 0.14 + t * 0.055;
-            liveKneeLeft = 55 - t * 35; liveKneeRight = 55 - t * 35;
-            liveAnkleLeft = t * 14; liveAnkleRight = t * 14;
+            updateKgpStatus('🔄 VELSTAND 2: SERVO TUCK (105°)', 'velstand');
+          } else if (fallSimulationPhase < 1.45) {
+            // STAGE 3: Knee Lever Ground Thrust (Robotic Kick!) (0.95 - 1.45s)
+            // Knee brackets press into floor, XL-330 fires maximum torque pulse (0.88 N·m)
+            const rawS = (fallSimulationPhase - 0.95) / 0.50;
+            // Snappy impulse acceleration curve
+            const s = Math.sin(rawS * Math.PI / 2);
+            
+            robotPitch = fallTargetPitch * 0.65 * (1.0 - s);
+            robotRoll = fallTargetRoll * 0.50 * (1.0 - s);
+            // Sudden mechanical lift of trunk as knees push down!
+            robotZ = 0.075 + s * 0.070; // 0.075m -> 0.145m
+
+            liveKneeLeft = 105 - s * 45; liveKneeRight = 105 - s * 45;
+            liveHipLeft = -52 + s * 34; liveHipRight = -52 + s * 34;
+            liveAnkleLeft = 35 - s * 20; liveAnkleRight = 35 - s * 20;
+            liveTorqueLeft = 0.88; liveTorqueRight = 0.88; // PEAK LEVER TORQUE
+            liveFnLeft = 18.4; liveFnRight = 18.4; // Ground reaction force
+            liveStability = Math.round(25 + s * 35);
+            updateKgpStatus('💥 VELSTAND 3: KNEE LEVER PUSH (18.4N)', 'peak-lever');
+          } else if (fallSimulationPhase < 1.85) {
+            // STAGE 4: Flipper Sole Stance Plant (1.45 - 1.85s)
+            // Ankle servos snap downward, slapping webbed duck feet flat to ground!
+            const rawS = (fallSimulationPhase - 1.45) / 0.40;
+            const s = rawS * rawS * (3 - 2 * rawS);
+
+            robotPitch = fallTargetPitch * 0.20 * (1.0 - s);
+            robotRoll = fallTargetRoll * 0.20 * (1.0 - s);
+            robotZ = 0.145 + s * 0.045; // 0.145m -> 0.190m
+
+            liveKneeLeft = 60 - s * 40; liveKneeRight = 60 - s * 40;
+            liveHipLeft = -18 + s * 14; liveHipRight = -18 + s * 14;
+            liveAnkleLeft = 15 - s * 18; liveAnkleRight = 15 - s * 18; // Sole plants flat
             liveTorqueLeft = 0.42; liveTorqueRight = 0.42;
-            liveFnLeft = 24.8; liveFnRight = 24.8;
-            liveStability = Math.round(60 + t * 30);
-            updateKgpStatus('🔄 VELSTAND 4: BOOT PLANT', 'velstand');
-          } else if (fallSimulationPhase < 2.3) {
-            // STAGE 5: Vertical Quad Extension (1.9 - 2.3)
-            const t = (fallSimulationPhase - 1.9) / 0.4;
-            robotPitch = 0; robotRoll = 0;
-            robotZ = 0.195 + t * 0.025;
-            liveKneeLeft = 20 * (1.0 - t); liveKneeRight = 20 * (1.0 - t);
-            liveAnkleLeft = 14 * (1.0 - t); liveAnkleRight = 14 * (1.0 - t);
+            liveFnLeft = 24.8; liveFnRight = 24.8; // Peak stance plant load
+            liveStability = Math.round(60 + s * 30);
+            updateKgpStatus('🔄 VELSTAND 4: SOLE STANCE PLANT', 'velstand');
+          } else if (fallSimulationPhase < 2.30) {
+            // STAGE 5: Robotic Quad Extension & Head Reset (1.85 - 2.30s)
+            // Quadriceps straighten upright, head tilts forward to track horizon
+            const rawS = (fallSimulationPhase - 1.85) / 0.45;
+            const s = rawS * rawS * (3 - 2 * rawS);
+
+            robotPitch = 0.0; robotRoll = 0.0;
+            robotZ = 0.190 + s * 0.030; // Return to 0.22m standing height
+            headGroup.rotation.x = -0.30 * (1.0 - s); // Camera looks forward
+
+            liveKneeLeft = 20 * (1.0 - s); liveKneeRight = 20 * (1.0 - s);
+            liveHipLeft = -4 * (1.0 - s); liveHipRight = -4 * (1.0 - s);
+            liveAnkleLeft = -3 * (1.0 - s); liveAnkleRight = -3 * (1.0 - s);
             liveTorqueLeft = 0.15; liveTorqueRight = 0.15;
             liveFnLeft = 6.1; liveFnRight = 6.1;
-            liveStability = Math.round(90 + t * 6);
+            liveStability = Math.round(90 + s * 6);
             updateKgpStatus('🟢 VELSTAND 5: STAND RECOVERED', 'stable');
           } else {
-            // Autonomous recovery complete!
+            // Complete! Back to active 50Hz walking equilibrium
             isFallActive = false;
             fallSimulationPhase = 0.0;
             robotZ = 0.22;
             robotPitch = 0.0;
             robotRoll = 0.0;
+            legLeft.root.rotation.y = 0;
+            legRight.root.rotation.y = 0;
+            headGroup.rotation.x = 0;
             updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
           }
 
