@@ -620,6 +620,58 @@
       color: #e0e7ff;
     }
 
+    .keys-actions-strip {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .motory-action-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-subtle);
+      color: var(--text-dark);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .motory-action-btn:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .motory-action-btn.standup {
+      background: #fdf2f8;
+      border-color: #fbcfe8;
+      color: #be185d;
+    }
+
+    .motory-action-btn.standup:hover {
+      background: #fce7f3;
+      border-color: #f472b6;
+    }
+
+    .motory-action-btn.active {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+    }
+
     /* ── Bottom Educational Gait Phase Strip ── */
     .gait-process-strip {
       height: 110px;
@@ -1727,7 +1779,18 @@
               <div class="key-legend-item"><kbd>Q</kbd>/<kbd>E</kbd> <span>Turn Left / Right</span></div>
               <div class="key-legend-item"><kbd>Space</kbd> <span>Lateral Push</span></div>
               <div class="key-legend-item"><kbd>F</kbd> <span>VelStand Fall</span></div>
+              <div class="key-legend-item"><kbd>R</kbd> <span>Stand-Up Recovery</span></div>
             </div>
+          </div>
+
+          <!-- Motory Action Controls -->
+          <div class="keys-actions-strip">
+            <button class="motory-action-btn standup" onclick="triggerStandUpRecovery()" title="Trigger VelStand Autonomous Recovery (Key R)">
+              <span>⚡</span> Stand-Up (R)
+            </button>
+            <button class="motory-action-btn audio" id="btnServoAudio" onclick="toggleAudio()" title="Toggle Dynamixel XL-330 PWM Motor Sound">
+              <span>🔊</span> Motor Audio
+            </button>
           </div>
         </div>
 
@@ -1769,6 +1832,9 @@
             <button class="btn-ordiva" id="btnPush" onclick="triggerLateralPush()">
               <span>⚡</span> Push (<span id="btnPushVal">16N</span>)
             </button>
+            <button class="btn-ordiva" onclick="triggerStandUpRecovery()" title="Trigger VelStand autonomous self-righting recovery">
+              <span>⚡</span> Stand-Up (R)
+            </button>
             <button class="btn-ordiva pink" onclick="triggerHardFall()">
               <span>⚠️</span> Random Fall
             </button>
@@ -1788,7 +1854,7 @@
             </button>
           </div>
           <div class="keyboard-hint">
-            <span>W</span><span>A</span><span>S</span><span>D</span> Strafe | <span>Q</span><span>E</span> Turn | <span>Space</span> Push | <span>F</span> Fall | Click Ball to Fling
+            <span>W</span><span>A</span><span>S</span><span>D</span> Strafe | <span>Q</span><span>E</span> Turn | <span>Space</span> Push | <span>F</span> Fall | <span>R</span> Stand-Up | Click Ball to Fling
           </div>
         </div>
       </div>
@@ -2230,8 +2296,117 @@
     const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
     const matBlueAnodized = matAnodizedBlue; // Alias for wireframe toggle
 
+    // =========================================================================
+    // DYNAMIXEL XL-330 MOTOR SOUND SYNTHESIS (WEB AUDIO API)
+    // =========================================================================
+    let audioCtx = null;
+    let servoPwmOsc = null;
+    let servoGearOsc = null;
+    let servoGain = null;
+    let isAudioEnabled = false;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtx();
+        
+        // High-frequency PWM switching carrier (~2.2kHz)
+        servoPwmOsc = audioCtx.createOscillator();
+        servoPwmOsc.type = 'triangle';
+        servoPwmOsc.frequency.setValueAtTime(2200, audioCtx.currentTime);
+
+        // Planetary gear whine (~220-400Hz)
+        servoGearOsc = audioCtx.createOscillator();
+        servoGearOsc.type = 'sawtooth';
+        servoGearOsc.frequency.setValueAtTime(240, audioCtx.currentTime);
+
+        // Bandpass filter shaping authentic servo motor acoustic cavity
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1600, audioCtx.currentTime);
+        filter.Q.setValueAtTime(1.8, audioCtx.currentTime);
+
+        servoGain = audioCtx.createGain();
+        servoGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+
+        servoPwmOsc.connect(filter);
+        servoGearOsc.connect(filter);
+        filter.connect(servoGain);
+        servoGain.connect(audioCtx.destination);
+
+        servoPwmOsc.start();
+        servoGearOsc.start();
+      } catch (e) {
+        console.warn('Web Audio synthesis not supported or blocked', e);
+      }
+    }
+
+    function toggleAudio() {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      isAudioEnabled = !isAudioEnabled;
+      const btn = document.getElementById('btnServoAudio');
+      if (btn) {
+        btn.innerHTML = isAudioEnabled ? '<span>🔊</span> Motor Audio: <b>ON</b>' : '<span>🔇</span> Motor Audio: <b>OFF</b>';
+        btn.classList.toggle('active', isAudioEnabled);
+      }
+    }
+
+    let lastImpactSoundTime = 0;
+    function playImpactSound(intensity = 1.0) {
+      if (!isAudioEnabled || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      if (now - lastImpactSoundTime < 0.10) return;
+      lastImpactSoundTime = now;
+      try {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.08);
+        g.gain.setValueAtTime(0.28 * intensity, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(now + 0.10);
+      } catch(e) {}
+    }
+
+    function updateMotorAudio(speedFactor, torqueFactor) {
+      if (!isAudioEnabled || !audioCtx || !servoGain) return;
+      const now = audioCtx.currentTime;
+      if (speedFactor > 0.04 || torqueFactor > 0.25) {
+        const targetGain = Math.min(0.20, speedFactor * 0.09 + (torqueFactor > 0.6 ? 0.14 : 0.03));
+        servoGain.gain.setTargetAtTime(targetGain, now, 0.04);
+        const pwmPitch = 1900 + speedFactor * 850 + torqueFactor * 450;
+        const gearPitch = 180 + speedFactor * 240 + torqueFactor * 90;
+        servoPwmOsc.frequency.setTargetAtTime(pwmPitch, now, 0.05);
+        servoGearOsc.frequency.setTargetAtTime(gearPitch, now, 0.05);
+      } else {
+        servoGain.gain.setTargetAtTime(0.0001, now, 0.08);
+      }
+    }
+
+    // Diagnostic LED tracker for Dynamixel XL-330 Servos
+    const servoLeds = [];
+    function updateServoLeds(isOverload, isMoving) {
+      for (const s of servoLeds) {
+        if (isOverload && s.isKneeOrHip) {
+          s.mat.color.setHex(0xef4444); // High-torque stall red!
+        } else if (isMoving) {
+          s.mat.color.setHex(0x38bdf8); // Active motor cyan
+        } else {
+          s.mat.color.setHex(0x0284c7); // Idle dark cyan
+        }
+      }
+    }
+
     // Helper: Create a realistic Dynamixel XL-330 Actuator Unit
-    function createXL330Mesh() {
+    function createXL330Mesh(isKneeOrHip = false) {
       const sGroup = new THREE.Group();
       
       // Main rectangular black housing
@@ -2253,6 +2428,14 @@
       screwMesh.rotation.z = Math.PI / 2;
       screwMesh.position.set(0.013, 0.006, 0);
       sGroup.add(screwMesh);
+
+      // Miniature status LED on XL-330 casing (Diagnostic load indicator)
+      const ledGeo = new THREE.BoxGeometry(0.002, 0.003, 0.002);
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+      const ledMesh = new THREE.Mesh(ledGeo, ledMat);
+      ledMesh.position.set(-0.0125, -0.010, 0.006);
+      sGroup.add(ledMesh);
+      servoLeds.push({ mesh: ledMesh, mat: ledMat, isKneeOrHip });
 
       return sGroup;
     }
@@ -2370,7 +2553,7 @@
       legRoot.position.set(sign * 0.038, 0, -0.046);
 
       // Hip Yaw / Roll Servo Mount
-      const hipYawServo = createXL330Mesh();
+      const hipYawServo = createXL330Mesh(false);
       hipYawServo.rotation.y = Math.PI / 2;
       hipYawServo.position.set(0, 0, 0);
       legRoot.add(hipYawServo);
@@ -2380,8 +2563,8 @@
       thighGroup.position.set(0, 0, -0.018);
       legRoot.add(thighGroup);
 
-      // Hip Pitch Actuator
-      const hipPitchServo = createXL330Mesh();
+      // Hip Pitch Actuator (High-Torque Joint)
+      const hipPitchServo = createXL330Mesh(true);
       hipPitchServo.position.set(0, 0, -0.016);
       thighGroup.add(hipPitchServo);
 
@@ -2401,8 +2584,8 @@
       kneeGroup.position.set(0, 0, -0.068);
       thighGroup.add(kneeGroup);
 
-      // Exposed XL-330 Knee Servo
-      const kneeServo = createXL330Mesh();
+      // Exposed XL-330 Knee Servo (High-Torque Lever Push Actuator)
+      const kneeServo = createXL330Mesh(true);
       kneeGroup.add(kneeServo);
 
       // Anodized Aluminum Knee Lever Bracket (Ground Lever Push Point!)
@@ -2427,7 +2610,7 @@
       ankleGroup.position.set(0, 0, -0.056);
       shinGroup.add(ankleGroup);
 
-      const ankleServo = createXL330Mesh();
+      const ankleServo = createXL330Mesh(false);
       ankleServo.scale.set(0.85, 0.85, 0.85);
       ankleGroup.add(ankleServo);
 
@@ -2727,6 +2910,24 @@
       if (window.location.protocol.startsWith('http')) { try { fetch('/api/fall', { method: 'POST' }).catch(()=>{}); } catch(e){} }
     }
 
+    function triggerStandUpRecovery() {
+      if (isFallActive) {
+        // Accelerate to tuck & kick immediately
+        if (fallSimulationPhase < 0.45) {
+          fallSimulationPhase = 0.45;
+        }
+        return;
+      }
+      // If standing, drop forward into prone and immediately execute the 5-phase VelStand recovery!
+      isFallActive = true;
+      fallSimulationPhase = 0.35; // Skip right to floor impact
+      fallTargetPitch = -72.0;
+      fallTargetRoll = 0.0;
+      activeFallType = 'AUTONOMIC GET-UP DEMO';
+      updateKgpStatus('🔄 INITIATING VELSTAND RECOVERY', 'velstand');
+      playImpactSound(1.0);
+    }
+
     function triggerObstacleTrip(obs) {
       if (isFallActive) return;
       isFallActive = true;
@@ -2809,7 +3010,7 @@
 
       if (activeKeys[' ']) triggerLateralPush();
       if (activeKeys['f']) triggerHardFall();
-      if (activeKeys['r']) triggerReset();
+      if (activeKeys['r']) triggerStandUpRecovery();
 
       // Reflect on virtual D-Pad buttons
       highlightKey('key_w', cmdVForward > 0);
@@ -2902,6 +3103,9 @@
             robotRoll = fallTargetRoll * t;
             robotZ = 0.22 - t * (0.22 - 0.075);
             
+            // Floor contact impact thud
+            if (t > 0.80 && t < 0.94) playImpactSound(1.1);
+
             // Protective servo splay to prevent gear stripping
             legLeft.root.rotation.y = -0.32 * t;
             legRight.root.rotation.y = 0.32 * t;
@@ -2912,6 +3116,8 @@
             liveFnLeft = 2.0; liveFnRight = 2.0;
             liveStability = Math.max(0, Math.round(100 - t * 100));
             updateKgpStatus('⚠️ MECHANICAL IMPACT & SPLAY', 'alert');
+            updateServoLeds(false, true);
+            updateMotorAudio(0.35, 0.25);
           } else if (fallSimulationPhase < 0.95) {
             // STAGE 2: High-Speed Robotic Servo Tuck (0.45 - 0.95s)
             // Servos snap into tight crouch under CoM, pulling flipper boots under trunk
@@ -2930,38 +3136,48 @@
             liveKneeRight = 32 + s * 73;
             liveHipLeft = -s * 52; liveHipRight = -s * 52;
             liveAnkleLeft = s * 35; liveAnkleRight = s * 35; // Flipper toes pulled up
-            liveTorqueLeft = 0.48; liveTorqueRight = 0.48;
+            liveTorqueLeft = 0.52; liveTorqueRight = 0.52;
             liveFnLeft = 5.8; liveFnRight = 5.8;
             liveStability = 15;
             updateKgpStatus('🔄 VELSTAND 2: SERVO TUCK (105°)', 'velstand');
+            updateServoLeds(false, true);
+            updateMotorAudio(0.85, 0.52);
           } else if (fallSimulationPhase < 1.45) {
             // STAGE 3: Knee Lever Ground Thrust (Robotic Kick!) (0.95 - 1.45s)
             // Knee brackets press into floor, XL-330 fires maximum torque pulse (0.88 N·m)
             const rawS = (fallSimulationPhase - 0.95) / 0.50;
-            // Snappy impulse acceleration curve
             const s = Math.sin(rawS * Math.PI / 2);
             
-            robotPitch = fallTargetPitch * 0.65 * (1.0 - s);
+            // Authentic high-torque motor strain shudder
+            const motorStrain = Math.sin(simTime * 85.0) * 0.0032;
+
+            robotPitch = fallTargetPitch * 0.65 * (1.0 - s) + motorStrain * 22.0;
             robotRoll = fallTargetRoll * 0.50 * (1.0 - s);
             // Sudden mechanical lift of trunk as knees push down!
-            robotZ = 0.075 + s * 0.070; // 0.075m -> 0.145m
+            robotZ = 0.075 + s * 0.070 + motorStrain; // 0.075m -> 0.145m
 
             liveKneeLeft = 105 - s * 45; liveKneeRight = 105 - s * 45;
             liveHipLeft = -52 + s * 34; liveHipRight = -52 + s * 34;
             liveAnkleLeft = 35 - s * 20; liveAnkleRight = 35 - s * 20;
-            liveTorqueLeft = 0.88; liveTorqueRight = 0.88; // PEAK LEVER TORQUE
+            liveTorqueLeft = 0.88; liveTorqueRight = 0.88; // PEAK STALL TORQUE
             liveFnLeft = 18.4; liveFnRight = 18.4; // Ground reaction force
             liveStability = Math.round(25 + s * 35);
             updateKgpStatus('💥 VELSTAND 3: KNEE LEVER PUSH (18.4N)', 'peak-lever');
+            updateServoLeds(true, true); // Red torque overload flare!
+            updateMotorAudio(1.0, 1.0); // Maximum high-torque whine
           } else if (fallSimulationPhase < 1.85) {
             // STAGE 4: Flipper Sole Stance Plant (1.45 - 1.85s)
             // Ankle servos snap downward, slapping webbed duck feet flat to ground!
             const rawS = (fallSimulationPhase - 1.45) / 0.40;
             const s = rawS * rawS * (3 - 2 * rawS);
 
+            // Rubber sole impact slap sound & damped rebound bounce
+            if (rawS > 0.40 && rawS < 0.55) playImpactSound(0.95);
+            const plantBounce = Math.sin(rawS * Math.PI * 2.5) * Math.exp(-rawS * 3.5) * 0.004;
+
             robotPitch = fallTargetPitch * 0.20 * (1.0 - s);
             robotRoll = fallTargetRoll * 0.20 * (1.0 - s);
-            robotZ = 0.145 + s * 0.045; // 0.145m -> 0.190m
+            robotZ = 0.145 + s * 0.045 + plantBounce; // 0.145m -> 0.190m
 
             liveKneeLeft = 60 - s * 40; liveKneeRight = 60 - s * 40;
             liveHipLeft = -18 + s * 14; liveHipRight = -18 + s * 14;
@@ -2970,23 +3186,30 @@
             liveFnLeft = 24.8; liveFnRight = 24.8; // Peak stance plant load
             liveStability = Math.round(60 + s * 30);
             updateKgpStatus('🔄 VELSTAND 4: SOLE STANCE PLANT', 'velstand');
+            updateServoLeds(false, true);
+            updateMotorAudio(0.55, 0.42);
           } else if (fallSimulationPhase < 2.30) {
             // STAGE 5: Robotic Quad Extension & Head Reset (1.85 - 2.30s)
             // Quadriceps straighten upright, head tilts forward to track horizon
             const rawS = (fallSimulationPhase - 1.85) / 0.45;
             const s = rawS * rawS * (3 - 2 * rawS);
 
+            // Underdamped PD settling oscillation (12Hz)
+            const pdSettling = Math.sin(rawS * Math.PI * 4.0) * Math.exp(-rawS * 4.5) * 0.0025;
+
             robotPitch = 0.0; robotRoll = 0.0;
-            robotZ = 0.190 + s * 0.030; // Return to 0.22m standing height
+            robotZ = 0.190 + s * 0.030 + pdSettling; // Return to 0.22m standing height
             headGroup.rotation.x = -0.30 * (1.0 - s); // Camera looks forward
 
             liveKneeLeft = 20 * (1.0 - s); liveKneeRight = 20 * (1.0 - s);
             liveHipLeft = -4 * (1.0 - s); liveHipRight = -4 * (1.0 - s);
             liveAnkleLeft = -3 * (1.0 - s); liveAnkleRight = -3 * (1.0 - s);
-            liveTorqueLeft = 0.15; liveTorqueRight = 0.15;
+            liveTorqueLeft = 0.18; liveTorqueRight = 0.18;
             liveFnLeft = 6.1; liveFnRight = 6.1;
             liveStability = Math.round(90 + s * 6);
             updateKgpStatus('🟢 VELSTAND 5: STAND RECOVERED', 'stable');
+            updateServoLeds(false, false);
+            updateMotorAudio(0.20, 0.18);
           } else {
             // Complete! Back to active 50Hz walking equilibrium
             isFallActive = false;
@@ -2998,6 +3221,8 @@
             legRight.root.rotation.y = 0;
             headGroup.rotation.x = 0;
             updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
+            updateServoLeds(false, false);
+            updateMotorAudio(0.0, 0.0);
           }
 
           // Apply recovery joint angles directly to CAD model
@@ -3022,14 +3247,30 @@
           else el.classList.remove('active');
         });
 
-        // Bipedal oscillations with Pelvis Roll Counter-Sway
-        const lSwing = isWalking ? Math.sin(omega * simTime) : 0;
-        const rSwing = isWalking ? Math.sin(omega * simTime + Math.PI) : 0;
+        // 50Hz Quantized Motor Stepping & BAM Backlash Micro-Jitter
+        const servoJitter = isWalking ? (Math.sin(simTime * 70.0) * 0.45 + Math.cos(simTime * 115.0) * 0.25) : 0.0;
 
-        // Enhanced Realism: Pelvis lateral sway keeps CoM over support foot
-        if (isWalking && !isFallActive) {
-          const pelvisRollSway = Math.sin(omega * simTime) * 3.5;
-          robotRoll += (pelvisRollSway - robotRoll) * 0.15;
+        // Authentic Bipedal Waddle: Lateral Pelvis Roll shifts CoM over support foot
+        const pelvisRollSway = isWalking ? Math.sin(omega * simTime) * 5.2 : 0.0;
+        robotRoll += (pelvisRollSway - robotRoll) * 0.22;
+
+        // Inverted Pendulum Double-Frequency Z-Bobbing (Torso drops at double-support, peaks at single stance)
+        const zBob = isWalking ? (Math.cos(2.0 * omega * simTime) * 0.0035) : 0.0;
+        if (!isFallActive) {
+          robotZ = 0.22 + zBob;
+        }
+
+        // Torso Walking Pitch: Dynamic forward lean and rocking
+        const walkingPitch = isWalking ? (-cmdVForward * 8.0 + Math.sin(omega * simTime * 2.0) * 1.2) : 0.0;
+        if (!isFallActive) {
+          robotPitch += (walkingPitch - robotPitch) * 0.18;
+        }
+
+        // Active Duck-Head Gaze Stabilization & Stride Pecking:
+        // Neck counter-rolls to keep stereo camera level, and bobs forward in cadence
+        if (!isFallActive) {
+          neckBase.rotation.x = isWalking ? (Math.sin(omega * simTime * 2.0) * 0.055 - 0.02) : 0.0;
+          headGroup.rotation.z = -robotRoll * (Math.PI / 180) * 0.68; // Active gyro roll compensation
         }
 
         // Omnidirectional coordinate integration (Heading + Strafe)
@@ -3085,22 +3326,37 @@
               updateKgpStatus('🟢 STABLE WALK 50Hz', 'stable');
             }
           } else {
-            liveHipLeft = lSwing * 22;
-            liveHipRight = rSwing * 22;
-            liveKneeLeft = Math.max(0, -lSwing) * 38;
-            liveKneeRight = Math.max(0, -rSwing) * 38;
-            liveAnkleLeft = -liveHipLeft * 0.7;
-            liveAnkleRight = -liveHipRight * 0.7;
+            // Asymmetric Swing/Stance Trajectory
+            const rawL = Math.sin(omega * simTime);
+            const rawR = Math.sin(omega * simTime + Math.PI);
 
-            // Stance Phase Ground Reaction Forces
-            if (lSwing < 0) {
-              liveFnLeft = 11.8; liveFnRight = 0.4;
+            const lSwing = rawL > 0 ? Math.pow(rawL, 0.85) : -Math.pow(-rawL, 1.15);
+            const rSwing = rawR > 0 ? Math.pow(rawR, 0.85) : -Math.pow(-rawR, 1.15);
+
+            liveHipLeft = (isWalking ? lSwing * 24.0 : 0.0) + servoJitter;
+            liveHipRight = (isWalking ? rSwing * 24.0 : 0.0) - servoJitter;
+
+            // Crisp Knee Flexion in forward swing, straight leg in stance
+            liveKneeLeft = (isWalking && lSwing > 0 ? Math.sin(lSwing * Math.PI) * 44.0 : 0.0) + Math.abs(servoJitter);
+            liveKneeRight = (isWalking && rSwing > 0 ? Math.sin(rSwing * Math.PI) * 44.0 : 0.0) + Math.abs(servoJitter);
+
+            // Ankle Pitch: Compensates hip to hold foot parallel to ground with slight toe clearance
+            liveAnkleLeft = -liveHipLeft * 0.68 + (isWalking && lSwing > 0 ? 5.0 : -2.5);
+            liveAnkleRight = -liveHipRight * 0.68 + (isWalking && rSwing > 0 ? 5.0 : -2.5);
+
+            // Ground Reaction Force & Foot Strike Acoustics
+            if (rawL < -0.1) {
+              liveFnLeft = 12.2 + Math.abs(rawL) * 2.8; liveFnRight = 0.2;
+              if (rawL < -0.85) playImpactSound(0.35);
+            } else if (rawR < -0.1) {
+              liveFnLeft = 0.2; liveFnRight = 12.2 + Math.abs(rawR) * 2.8;
+              if (rawR < -0.85) playImpactSound(0.35);
             } else {
-              liveFnLeft = 0.4; liveFnRight = 11.8;
+              liveFnLeft = 6.2; liveFnRight = 6.2;
             }
 
-            liveTorqueLeft = 0.15 + (liveKneeLeft / 38.0) * 0.28;
-            liveTorqueRight = 0.15 + (liveKneeRight / 38.0) * 0.28;
+            liveTorqueLeft = 0.15 + (liveKneeLeft / 44.0) * 0.32;
+            liveTorqueRight = 0.15 + (liveKneeRight / 44.0) * 0.32;
 
             legLeft.thigh.rotation.x = liveHipLeft * Math.PI / 180;
             legLeft.knee.rotation.x = -liveKneeLeft * Math.PI / 180;
@@ -3109,6 +3365,9 @@
             legRight.thigh.rotation.x = liveHipRight * Math.PI / 180;
             legRight.knee.rotation.x = -liveKneeRight * Math.PI / 180;
             legRight.ankle.rotation.x = liveAnkleRight * Math.PI / 180;
+
+            updateServoLeds(false, isWalking);
+            updateMotorAudio(isWalking ? 0.65 : 0.0, Math.max(liveTorqueLeft, liveTorqueRight));
           }
         }
 
@@ -3493,54 +3752,222 @@
 
       // Draw Floor line
       cCtx.beginPath();
-      cCtx.moveTo(w * 0.08, floorY);
-      cCtx.lineTo(w * 0.92, floorY);
-      cCtx.strokeStyle = '#cbd5e1';
+      cCtx.moveTo(w * 0.06, floorY);
+      cCtx.lineTo(w * 0.94, floorY);
+      cCtx.strokeStyle = '#94a3b8';
       cCtx.lineWidth = 3;
       cCtx.stroke();
 
       // Ground hatching
       cCtx.strokeStyle = '#e2e8f0';
-      cCtx.lineWidth = 1;
-      for (let x = w * 0.10; x < w * 0.90; x += 16) {
+      cCtx.lineWidth = 1.5;
+      for (let x = w * 0.08; x < w * 0.92; x += 18) {
         cCtx.beginPath();
         cCtx.moveTo(x, floorY);
-        cCtx.lineTo(x - 8, floorY + 12);
+        cCtx.lineTo(x - 10, floorY + 14);
         cCtx.stroke();
       }
 
-      // Robot Center of Mass and Contact Geometry based on Scrub Percentage
+      // Kinematics calculations for the 5 VelStand Stages
       const progress = pct / 100.0;
-      const torsoAngle = -Math.PI / 2.5 * (1.0 - progress);
-      const torsoY = (floorY - 30) - progress * 110;
-      const torsoX = w * 0.45;
+      
+      let torsoPitch = 0;
+      let hipAngle = 0;
+      let kneeAngle = 0;
+      let ankleAngle = 0;
+      let trunkY = floorY - 45;
+      let trunkX = w * 0.48;
 
-      // Torso Box
+      if (progress < 0.25) {
+        const s = progress / 0.25;
+        torsoPitch = -78 + s * 13;
+        hipAngle = -20 - s * 32;
+        kneeAngle = 35 + s * 70; // 35° -> 105°
+        ankleAngle = 10 + s * 25;
+        trunkY = floorY - 42;
+      } else if (progress < 0.50) {
+        const s = (progress - 0.25) / 0.25;
+        torsoPitch = -65 + s * 25; // -65° -> -40°
+        hipAngle = -52 + s * 20;
+        kneeAngle = 105 - s * 25; // 105° -> 80°
+        ankleAngle = 35 - s * 15;
+        trunkY = floorY - 42 - s * 55; // Starts rising!
+      } else if (progress < 0.75) {
+        const s = (progress - 0.50) / 0.25;
+        torsoPitch = -40 + s * 25; // -40° -> -15°
+        hipAngle = -32 + s * 20;
+        kneeAngle = 80 - s * 45; // 80° -> 35°
+        ankleAngle = 20 - s * 20;
+        trunkY = floorY - 97 - s * 50;
+      } else {
+        const s = (progress - 0.75) / 0.25;
+        torsoPitch = -15 + s * 15; // -15° -> 0°
+        hipAngle = -12 + s * 12;
+        kneeAngle = 35 - s * 30; // 35° -> 5°
+        ankleAngle = 0;
+        trunkY = floorY - 147 - s * 35;
+      }
+
+      // Draw Ground Contact Rings
+      if (progress < 0.60) {
+        const pivotX = trunkX + 58;
+        drawContactRings(pivotX, floorY, '#ec4899');
+      }
+      if (progress > 0.45) {
+        const soleX = trunkX - 10;
+        drawContactRings(soleX, floorY, '#06b6d4');
+      }
+
+      // Draw Authentic Microduck 2D Profile
       cCtx.save();
-      cCtx.translate(torsoX, torsoY);
-      cCtx.rotate(torsoAngle);
-      cCtx.fillStyle = '#2563eb';
-      cCtx.fillRect(-22, -35, 44, 70);
-      // Head
+      cCtx.translate(trunkX, trunkY);
+      cCtx.rotate(torsoPitch * Math.PI / 180);
+
+      // 1. Rear Battery Pack (Sony NP-F970)
+      cCtx.fillStyle = '#1e293b';
+      cCtx.fillRect(-48, -26, 20, 52);
+      cCtx.fillStyle = '#22c55e'; // Green Power LED
       cCtx.beginPath();
-      cCtx.arc(0, -48, 16, 0, Math.PI * 2);
-      cCtx.fillStyle = '#ffcc00';
+      cCtx.arc(-38, -14, 3, 0, Math.PI * 2);
+      cCtx.fill();
+
+      // 2. Carbon Fiber Trunk Spine Block
+      cCtx.fillStyle = '#0f172a';
+      cCtx.fillRect(-26, -38, 52, 76);
+
+      // 3. CNC Anodized Blue Chassis Sideplate
+      cCtx.fillStyle = '#2563eb';
+      cCtx.fillRect(-24, -36, 48, 72);
+      cCtx.fillStyle = '#0f172a';
+      cCtx.fillRect(-14, -20, 12, 18);
+      cCtx.fillRect(4, -20, 12, 18);
+
+      // 4. Duck Head & Vision Sensors
+      cCtx.save();
+      cCtx.translate(16, -58);
+      cCtx.beginPath();
+      cCtx.ellipse(0, 0, 26, 24, 0, 0, Math.PI * 2);
+      cCtx.fillStyle = '#f59e0b';
+      cCtx.fill();
+      cCtx.strokeStyle = '#d97706';
+      cCtx.lineWidth = 2.5;
+      cCtx.stroke();
+
+      // Forehead M12 Optical Camera Lens
+      cCtx.fillStyle = '#27272a';
+      cCtx.fillRect(18, -7, 10, 14);
+      cCtx.fillStyle = '#06b6d4'; // Cyan optical glass
+      cCtx.fillRect(26, -5, 5, 10);
+
+      // Eye pupil
+      cCtx.beginPath();
+      cCtx.arc(10, -5, 6, 0, Math.PI * 2);
+      cCtx.fillStyle = '#0f172a';
+      cCtx.fill();
+      cCtx.beginPath();
+      cCtx.arc(12, -6, 2.5, 0, Math.PI * 2);
+      cCtx.fillStyle = '#38bdf8';
+      cCtx.fill();
+
+      // Articulated Duck Bill Beak
+      cCtx.beginPath();
+      cCtx.moveTo(16, 2);
+      cCtx.lineTo(44, 7);
+      cCtx.lineTo(40, 18);
+      cCtx.lineTo(14, 15);
+      cCtx.closePath();
+      cCtx.fillStyle = '#ea580c';
       cCtx.fill();
       cCtx.restore();
 
-      // Contact Normal Force Vectors (Arrows pointing up from ground)
-      const kneeX = torsoX + 28;
-      const footX = torsoX - 18;
+      // 5. Hip Joint / Dynamixel XL-330 Actuator Hub
+      cCtx.save();
+      cCtx.translate(0, 30);
+      drawServoHub(0, 0, progress > 0.40 && progress < 0.65);
 
-      if (pct < 60) {
-        // Torso / Knee Contact Point (Red/Pink arrow spaced cleanly)
-        drawForceVector(torsoX - 35, floorY, 18.4 * (1.0 - progress), 'Fn = 18.4 N (Torso Skid)');
-        drawForceVector(kneeX + 35, floorY, 14.2 * (1.0 - progress), 'Fn = 14.2 N (Knee Lever)');
+      // Thigh Link (CNC Blue Aluminum Rail)
+      cCtx.rotate(hipAngle * Math.PI / 180);
+      cCtx.strokeStyle = '#2563eb';
+      cCtx.lineWidth = 12;
+      cCtx.lineCap = 'round';
+      cCtx.beginPath();
+      cCtx.moveTo(0, 0);
+      cCtx.lineTo(0, 60);
+      cCtx.stroke();
+
+      // Knee Joint & Exposed XL-330 Actuator with Lever Bracket
+      cCtx.translate(0, 60);
+      drawServoHub(0, 0, progress >= 0.40 && progress <= 0.65);
+
+      // Anodized Blue Knee Lever Bracket (Floor Pivot Point)
+      cCtx.fillStyle = progress >= 0.40 && progress <= 0.65 ? '#ec4899' : '#1d4ed8';
+      cCtx.fillRect(-12, -5, 24, 12);
+
+      // Shin Link (Carbon Lower Leg)
+      cCtx.rotate(kneeAngle * Math.PI / 180);
+      cCtx.strokeStyle = '#334155';
+      cCtx.lineWidth = 10;
+      cCtx.lineCap = 'round';
+      cCtx.beginPath();
+      cCtx.moveTo(0, 0);
+      cCtx.lineTo(0, 60);
+      cCtx.stroke();
+
+      // Ankle Joint & Flipper Boot
+      cCtx.translate(0, 60);
+      drawServoHub(0, 0, false);
+
+      cCtx.rotate(ankleAngle * Math.PI / 180);
+      // Webbed Duck Flipper Foot Sole
+      cCtx.fillStyle = '#f59e0b';
+      cCtx.beginPath();
+      cCtx.roundRect(-16, 0, 56, 14, [2, 8, 8, 2]);
+      cCtx.fill();
+      // Rubber Sole Tread on bottom
+      cCtx.fillStyle = '#0f172a';
+      cCtx.fillRect(-16, 12, 56, 5);
+
+      cCtx.restore(); // Restore leg
+      cCtx.restore(); // Restore torso
+
+      // 6. Draw Normal Reaction Force Vectors (Fn)
+      if (progress < 0.60) {
+        const kneeForce = progress < 0.25 ? 5.8 : (18.4 * (1.0 - Math.abs(progress - 0.45) * 1.8));
+        drawForceVector(trunkX + 60, floorY, Math.max(8, kneeForce), `Fn = ${kneeForce.toFixed(1)} N (Knee Lever Push)`);
+        drawForceVector(trunkX - 50, floorY, Math.max(4, 12.0 * (1.0 - progress)), `Torso Skid Drag`);
       } else {
-        // Boot Sole Contact (Blue arrow spaced cleanly)
-        drawForceVector(footX - 25, floorY, 24.5 * progress, 'Fn = 24.5 N (Left Boot)');
-        drawForceVector(footX + 45, floorY, 24.5 * progress, 'Fn = 24.5 N (Right Boot)');
+        const soleForce = progress < 0.85 ? 24.8 : (6.1 + (1.0 - progress) * 10);
+        drawForceVector(trunkX - 52, floorY, soleForce, `Fn = ${soleForce.toFixed(1)} N (Left Sole)`);
+        drawForceVector(trunkX + 58, floorY, soleForce, `Fn = ${soleForce.toFixed(1)} N (Right Sole)`);
       }
+    }
+
+    function drawServoHub(x, y, isOverload = false) {
+      cCtx.save();
+      cCtx.translate(x, y);
+      cCtx.fillStyle = '#1e293b';
+      cCtx.fillRect(-9, -9, 18, 18);
+      cCtx.fillStyle = isOverload ? '#ef4444' : '#94a3b8';
+      cCtx.beginPath();
+      cCtx.arc(0, 0, 5.5, 0, Math.PI * 2);
+      cCtx.fill();
+      cCtx.fillStyle = isOverload ? '#ffffff' : '#0f172a';
+      cCtx.beginPath();
+      cCtx.arc(0, 0, 2, 0, Math.PI * 2);
+      cCtx.fill();
+      cCtx.restore();
+    }
+
+    function drawContactRings(x, y, color) {
+      cCtx.save();
+      cCtx.strokeStyle = color;
+      cCtx.lineWidth = 2;
+      for (let r = 8; r <= 22; r += 7) {
+        cCtx.beginPath();
+        cCtx.arc(x, y, r, Math.PI, Math.PI * 2);
+        cCtx.stroke();
+      }
+      cCtx.restore();
     }
 
     function drawForceVector(x, y, magN, label) {
