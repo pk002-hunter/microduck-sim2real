@@ -1180,13 +1180,13 @@
               <span>↻</span><span class="sub">E</span>
             </button>
 
-            <button class="dpad-btn" id="key_a" onmousedown="setStrafe(0.20)" onmouseup="setStrafe(0)" title="Strafe Left (A)">
+            <button class="dpad-btn" id="key_a" onmousedown="setStrafe(-0.20)" onmouseup="setStrafe(0)" title="Strafe Left (A)">
               <span>◄</span><span class="sub">A</span>
             </button>
             <button class="dpad-btn" onclick="triggerReset()" title="Stop / Center Pose">
               <span>●</span><span class="sub">STOP</span>
             </button>
-            <button class="dpad-btn" id="key_d" onmousedown="setStrafe(-0.20)" onmouseup="setStrafe(0)" title="Strafe Right (D)">
+            <button class="dpad-btn" id="key_d" onmousedown="setStrafe(0.20)" onmouseup="setStrafe(0)" title="Strafe Right (D)">
               <span>►</span><span class="sub">D</span>
             </button>
 
@@ -1512,6 +1512,7 @@
 
     // 3D Robot CAD Model
     const robotRoot = new THREE.Group();
+    window.robotRoot = robotRoot;
     scene.add(robotRoot);
 
     const matSilverRail = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.85, roughness: 0.2 });
@@ -1668,7 +1669,10 @@
     const ball = { pos: new THREE.Vector3(0.35, 0.0, ballRadius), vel: new THREE.Vector3(0, 0, 0), friction: 0.97 };
     ballMesh.position.copy(ball.pos);
     function resetBall() {
-      ball.pos.set(robotRoot.position.x + 0.35, robotRoot.position.y, ballRadius);
+      const dist = 0.35;
+      ball.pos.x = robotRoot.position.x - dist * Math.sin(robotYaw);
+      ball.pos.y = robotRoot.position.y + dist * Math.cos(robotYaw);
+      ball.pos.z = ballRadius;
       ball.vel.set(0, 0, 0);
       ballMesh.position.copy(ball.pos);
     }
@@ -1701,11 +1705,11 @@
       matDuckYellow.wireframe = !isWire;
     }
 
-    // Kinematics & Omnidirectional Variables
+    // Kinematics & Omnidirectional Body-Relative Variables
     let simTime = 0.0;
-    let cmdVx = 0.0;
-    let cmdVy = 0.0;
-    let cmdWz = 0.0;
+    let cmdVForward = 0.0; // Positive = Forward (+Y nose), Negative = Back
+    let cmdVStrafe = 0.0;  // Positive = Strafe Right (+X plate), Negative = Left
+    let cmdWz = 0.0;       // Positive = Turn Left (CCW), Negative = Turn Right
     let robotX = 0.0, robotY = 0.0, robotZ = 0.22;
     let robotYaw = 0.0, robotRoll = 0.0, robotPitch = 0.0;
 
@@ -1732,14 +1736,14 @@
       pushDisturbanceTime = 0.0;
       robotX = 0; robotY = 0; robotZ = 0.22;
       robotYaw = 0; robotRoll = 0; robotPitch = 0;
-      cmdVx = 0; cmdVy = 0; cmdWz = 0;
+      cmdVForward = 0; cmdVStrafe = 0; cmdWz = 0;
       resetBall();
       try { fetch('/api/reset', { method: 'POST' }); } catch(e){}
     }
 
     // Omnidirectional Direct Teleop Functions
-    function setDrive(val) { cmdVx = val; syncBackendCmd(); }
-    function setStrafe(val) { cmdVy = val; syncBackendCmd(); }
+    function setDrive(val) { cmdVForward = val; syncBackendCmd(); }
+    function setStrafe(val) { cmdVStrafe = val; syncBackendCmd(); }
     function setTurn(val) { cmdWz = val * 0.9; syncBackendCmd(); }
 
     function syncBackendCmd() {
@@ -1747,7 +1751,7 @@
         fetch('/api/cmd_vel', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vx: cmdVx, vy: cmdVy, wz: cmdWz })
+          body: JSON.stringify({ vx: cmdVForward, vy: cmdVStrafe, wz: cmdWz })
         });
       } catch(e){}
     }
@@ -1767,15 +1771,15 @@
     });
 
     function updateKeyStates() {
-      // Forward / Back
-      if (activeKeys['w'] || activeKeys['arrowup']) cmdVx = 0.25;
-      else if (activeKeys['s'] || activeKeys['arrowdown']) cmdVx = -0.18;
-      else cmdVx = 0.0;
+      // Forward / Back (Moves in direction of beak/nose regardless of facing angle)
+      if (activeKeys['w'] || activeKeys['arrowup']) cmdVForward = 0.25;
+      else if (activeKeys['s'] || activeKeys['arrowdown']) cmdVForward = -0.18;
+      else cmdVForward = 0.0;
 
       // Strafe Left / Right
-      if (activeKeys['a']) cmdVy = 0.20;
-      else if (activeKeys['d']) cmdVy = -0.20;
-      else cmdVy = 0.0;
+      if (activeKeys['a']) cmdVStrafe = -0.20; // Strafe Left
+      else if (activeKeys['d']) cmdVStrafe = 0.20;  // Strafe Right
+      else cmdVStrafe = 0.0;
 
       // Rotate Left / Right
       if (activeKeys['q'] || activeKeys['arrowleft']) cmdWz = 0.90;
@@ -1787,10 +1791,10 @@
       if (activeKeys['r']) triggerReset();
 
       // Reflect on virtual D-Pad buttons
-      highlightKey('key_w', cmdVx > 0);
-      highlightKey('key_s', cmdVx < 0);
-      highlightKey('key_a', cmdVy > 0);
-      highlightKey('key_d', cmdVy < 0);
+      highlightKey('key_w', cmdVForward > 0);
+      highlightKey('key_s', cmdVForward < 0);
+      highlightKey('key_a', cmdVStrafe < 0);
+      highlightKey('key_d', cmdVStrafe > 0);
       highlightKey('key_q', cmdWz > 0);
       highlightKey('key_e', cmdWz < 0);
     }
@@ -1873,7 +1877,7 @@
         }
 
         // 3. Omnidirectional Kinematics & Walking
-        const isWalking = (Math.hypot(cmdVx, cmdVy) > 0.02 || Math.abs(cmdWz) > 0.05);
+        const isWalking = (Math.hypot(cmdVForward, cmdVStrafe) > 0.02 || Math.abs(cmdWz) > 0.05);
         const omega = 2.0 * Math.PI * 1.5;
         const gaitPhase = isWalking ? (simTime * 1.5) % 1.0 : 0.0;
 
@@ -1891,8 +1895,16 @@
         // Omnidirectional coordinate integration (Heading + Strafe)
         robotYaw += cmdWz * effectiveDt;
         const radYaw = robotYaw;
-        robotX += (cmdVx * Math.cos(radYaw) - cmdVy * Math.sin(radYaw)) * effectiveDt;
-        robotY += (cmdVx * Math.sin(radYaw) + cmdVy * Math.cos(radYaw)) * effectiveDt;
+
+        // In robot coordinate frame: beak/nose points at (-sin(radYaw), cos(radYaw))
+        // Right side points at (cos(radYaw), sin(radYaw))
+        // W/S drives forward/backward along the beak direction!
+        // A/D strafes left/right perpendicular to the beak direction!
+        const dx = (-cmdVForward * Math.sin(radYaw) + cmdVStrafe * Math.cos(radYaw)) * effectiveDt;
+        const dy = ( cmdVForward * Math.cos(radYaw) + cmdVStrafe * Math.sin(radYaw)) * effectiveDt;
+
+        robotX += dx;
+        robotY += dy;
 
         // Apply to 3D Robot
         robotRoot.position.set(robotX, robotY, robotZ);
@@ -1939,7 +1951,7 @@
       // Update Callout Pins
       updateCalloutPin(legLeft.thigh, 'pinHip', 'txtHip', `HIP: ${(legLeft.thigh.rotation.x * 180 / Math.PI).toFixed(1)}°`);
       updateCalloutPin(legRight.knee, 'pinKnee', 'txtKnee', `KNEE: ${(legRight.knee.rotation.x * 180 / Math.PI).toFixed(1)}°`);
-      updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.hypot(cmdVx, cmdVy) * 12 + 3.2).toFixed(1)} N`);
+      updateCalloutPin(legRight.foot, 'pinFoot', 'txtFoot', `GRF: ${(Math.hypot(cmdVForward, cmdVStrafe) * 12 + 3.2).toFixed(1)} N`);
 
       // Update Camera & Render
       updateCameraView();
