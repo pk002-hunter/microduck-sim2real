@@ -170,6 +170,14 @@ docker compose up -d
 
 ---
 
+## 🎓 Industrial Training & Certification (SCS-701)
+* **Training Program:** [Hugging Face Deep Reinforcement Learning Course](https://huggingface.co/learn/deep-rl-course/unit0/introduction) (Completed by Piyush Karnatak, Instructor: Thomas Simonini)
+* **Official Certificate:** [Certificate of Completion](docs/presentation/certificate.png)
+* **Seminar Presentation:** [`docs/presentation/Piyush_Industrial_Training_Final.pptx`](docs/presentation/Piyush_Industrial_Training_Final.pptx) — 15-slide comprehensive evaluation presentation built on Canva Modern Burgundy/Gold design principles.
+* **Formal Word Report:** [`docs/presentation/Piyush_Industrial_Training_Report_SCS701.docx`](docs/presentation/Piyush_Industrial_Training_Report_SCS701.docx) — Formal 7th Semester training report compliant with Graphic Era Hill University guidelines.
+
+---
+
 ## 📚 References & Academic Details
 * **Pollen Robotics:** [microduck](https://github.com/pollen-robotics/microduck) & [microduck_rl](https://github.com/pollen-robotics/microduck_rl)
 * **Hugging Face Hub:** [pollen-robotics/microduck-policies](https://huggingface.co/pollen-robotics/microduck-policies)
